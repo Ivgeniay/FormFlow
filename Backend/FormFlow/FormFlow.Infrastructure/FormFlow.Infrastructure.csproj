@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\FormFlow.Application\FormFlow.Application.csproj" />
+    <ProjectReference Include="..\FormFlow.Persistence\FormFlow.Persistence.csproj" />
   </ItemGroup>
 
 </Project>

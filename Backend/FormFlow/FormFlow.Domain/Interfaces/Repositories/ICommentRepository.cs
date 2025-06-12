@@ -18,8 +18,5 @@ namespace FormFlow.Domain.Interfaces.Repositories
 
         Task<int> GetCountByTemplateAsync(Guid templateId);
         Task<int> GetCountByUserAsync(Guid userId);
-
-        Task<bool> CanUserDeleteAsync(Guid commentId, Guid userId);
-        Task<DateTime?> GetLastCommentTimeAsync(Guid templateId);
     }
 }

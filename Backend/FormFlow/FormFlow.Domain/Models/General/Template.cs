@@ -29,8 +29,9 @@
         public List<Form> Forms { get; set; } = new List<Form>();
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Like> Likes { get; set; } = new List<Like>();
-        public List<Tag> Tags { get; set; } = new List<Tag>();
-        public List<User> AllowedUsers { get; set; } = new List<User>();
+        public List<TemplateTag> Tags { get; set; } = new List<TemplateTag>();
+        //public List<User> AllowedUsers { get; set; } = new List<User>();
+        public List<TemplateAllowedUser> AllowedUsers { get; set; } = new List<TemplateAllowedUser>();
     }
 
     public enum TemplateAccess

@@ -16,6 +16,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
 
         Task<PagedResult<Form>> GetFormsByTemplatePagedAsync(Guid templateId, int page, int pageSize);
         Task<PagedResult<Form>> GetFormsByUserPagedAsync(Guid userId, int page, int pageSize);
+        Task<List<Form>> GetUserFormsForAllVersionsAsync(Guid baseTemplateId, Guid userId);
 
         Task<bool> HasUserSubmittedAsync(Guid templateId, Guid userId);
         Task<bool> CanUserEditAsync(Guid formId, Guid userId);

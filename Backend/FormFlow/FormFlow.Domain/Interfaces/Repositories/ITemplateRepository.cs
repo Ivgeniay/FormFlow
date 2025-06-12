@@ -43,5 +43,11 @@ namespace FormFlow.Domain.Interfaces.Repositories
 
         Task<int> GetLatestVersionNumberAsync(Guid baseTemplateId);
         Task SetCurrentVersionAsync(Guid baseTemplateId, int version);
+
+        Task AddTagToTemplateAsync(Guid templateId, Guid tagId);
+        Task AddTagsToTemplateAsync(Guid templateId, List<Guid> tagIds);
+        Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId);
+        Task RemoveAllTagsFromTemplateAsync(Guid templateId);
+        Task<List<TemplateTag>> GetTemplateTagsAsync(Guid templateId);
     }
 }

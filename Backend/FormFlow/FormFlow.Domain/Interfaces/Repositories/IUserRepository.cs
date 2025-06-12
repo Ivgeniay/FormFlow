@@ -15,10 +15,14 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task DeleteAsync(Guid id);
 
         Task<PagedResult<User>> GetUsersPagedAsync(int page, int pageSize);
+        Task<PagedResult<User>> GetUsersWithContactsPagedAsync(int page, int pageSize);
         Task<List<User>> SearchByNameOrEmailAsync(string query, int limit = 10);
+        Task<List<User>> GetUsersForSearchAsync(string query, int limit = 10);
 
         Task<User?> GetWithContactsAsync(Guid id);
         Task<User?> GetWithAuthMethodsAsync(Guid id);
         Task<User?> GetForAuthenticationAsync(string email);
+
+        Task<User> CreateUserWithAuthAsync(User user);
     }
 }

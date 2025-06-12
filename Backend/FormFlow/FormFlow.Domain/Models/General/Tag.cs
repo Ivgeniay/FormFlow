@@ -8,6 +8,6 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-        public List<Template> Templates { get; set; } = new List<Template>();
+        public List<TemplateTag> Templates { get; set; } = new List<TemplateTag>();
     }
 }

@@ -13,7 +13,6 @@ namespace FormFlow.Application.Interfaces
 
         Task<PagedResult<FormDto>> GetFormsByTemplatePagedAsync(Guid templateId, int page, int pageSize, Guid userId);
         Task<PagedResult<FormDto>> GetFormsByUserPagedAsync(Guid userId, int page, int pageSize);
-        Task<List<FormListItemDto>> GetRecentFormsByUserAsync(Guid userId, int count = 10);
         Task<List<FormDto>> GetUserFormsForAllVersionsAsync(Guid baseTemplateId, Guid userId);
 
         Task<FormDto?> GetUserFormForTemplateAsync(Guid templateId, Guid userId);

@@ -11,7 +11,6 @@ namespace FormFlow.Application.Interfaces
         Task<TagDto> GetTagByNameAsync(string name);
         Task<bool> TagExistsAsync(string name);
 
-        Task<List<TagDto>> GetAllTagsAsync();
         Task<PagedResult<TagDto>> GetTagsPagedAsync(int page, int pageSize);
         Task<List<TagDto>> GetMostPopularTagsAsync(int count = 50);
         Task<List<TagDto>> SearchTagsAsync(string query, int limit = 10);
