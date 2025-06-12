@@ -10,7 +10,15 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="9.0.5" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\FormFlow.Application\FormFlow.Application.csproj" />
+    <ProjectReference Include="..\FormFlow.Domain\FormFlow.Domain.csproj" />
+    <ProjectReference Include="..\FormFlow.Infrastructure\FormFlow.Infrastructure.csproj" />
+    <ProjectReference Include="..\FormFlow.Persistence\FormFlow.Persistence.csproj" />
   </ItemGroup>
 
 </Project>
