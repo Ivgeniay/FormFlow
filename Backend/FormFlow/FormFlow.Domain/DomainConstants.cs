@@ -38,18 +38,18 @@
     {
         public static class TableNames
         {
-            public const string Users = "users";
-            public const string Templates = "templates";
-            public const string Questions = "questions";
-            public const string Forms = "forms";
-            public const string Comments = "comments";
-            public const string Likes = "likes";
-            public const string Tags = "tags";
-            public const string UserContacts = "user_contacts";
-            public const string EmailPasswordAuths = "email_password_auths";
-            public const string GoogleAuths = "google_auths";
-            public const string TemplateTags = "template_tags";
-            public const string TemplateAllowedUsers = "template_allowed_users";
+            public const string Users = nameof(Users);
+            public const string Templates = nameof(Templates);
+            public const string Questions = nameof(Questions);
+            public const string Forms = nameof(Forms);
+            public const string Comments = nameof(Comments);
+            public const string Likes = nameof(Likes);
+            public const string Tags = nameof(Tags);
+            public const string UserContacts = nameof(UserContacts);
+            public const string EmailPasswordAuths = nameof(EmailPasswordAuths);
+            public const string GoogleAuths = nameof(GoogleAuths);
+            public const string TemplateTags = nameof(TemplateTags);
+            public const string TemplateAllowedUsers = nameof(TemplateAllowedUsers);
         }
 
         public static class ColumnTypes
@@ -141,7 +141,6 @@
             public const string LikesTemplateIndex = "idx_likes_template";
 
             public const string TagsNameIndex = "idx_tags_name";
-            public const string TagsUsageCountIndex = "idx_tags_usage_count";
 
             public const string FormsTemplateIndex = "idx_forms_template";
             public const string FormsUserIndex = "idx_forms_user";
@@ -151,7 +150,6 @@
             public const string QuestionsTemplateOrderIndex = "idx_questions_template_order";
 
             public const string CommentsTemplateIndex = "idx_comments_template";
-            public const string CommentsUserIndex = "idx_comments_user";
 
             public const string TemplateTagsTemplateTagIndex = "idx_template_tags_template_tag";
             public const string TemplateTagsTagIndex = "idx_template_tags_tag";

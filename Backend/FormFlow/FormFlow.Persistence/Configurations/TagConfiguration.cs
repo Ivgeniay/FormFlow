@@ -35,9 +35,6 @@ namespace FormFlow.Persistence.Configurations
             builder.HasIndex(t => t.Name)
                 .IsUnique()
                 .HasDatabaseName(DomainConstants.Database.IndexNames.TagsNameIndex);
-
-            builder.HasIndex(t => t.UsageCount)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TagsUsageCountIndex);
         }
     }
 }

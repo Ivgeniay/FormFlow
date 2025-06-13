@@ -43,9 +43,6 @@ namespace FormFlow.Persistence.Configurations
             builder.HasIndex(c => c.TemplateId)
                 .HasDatabaseName(DomainConstants.Database.IndexNames.CommentsTemplateIndex);
 
-            builder.HasIndex(c => c.UserId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.CommentsUserIndex);
-
             builder.HasOne(c => c.Template)
                 .WithMany(t => t.Comments)
                 .HasForeignKey(c => c.TemplateId)

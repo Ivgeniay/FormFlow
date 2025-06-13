@@ -2,7 +2,10 @@
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
+using FormFlow.Domain.Models.SearchService;
+using System.Text.Json;
 
 namespace FormFlow.Application.Services
 {
@@ -11,15 +14,18 @@ namespace FormFlow.Application.Services
         private readonly ICommentRepository _commentRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ISearchService _searchService;
 
         public CommentService(
             ICommentRepository commentRepository,
             ITemplateRepository templateRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            ISearchService searchService)
         {
             _commentRepository = commentRepository;
             _templateRepository = templateRepository;
             _userRepository = userRepository;
+            _searchService = searchService;
         }
 
         public async Task<CommentDto> AddCommentAsync(Guid userId, AddCommentRequest request)
@@ -46,6 +52,9 @@ namespace FormFlow.Application.Services
             };
 
             var createdComment = await _commentRepository.CreateAsync(comment);
+
+            await UpdateTemplateSearchIndexAsync(request.TemplateId);
+
             return await MapToCommentDtoAsync(createdComment, userId);
         }
 
@@ -58,7 +67,11 @@ namespace FormFlow.Application.Services
             if (!await CanDeleteCommentAsync(commentId, userId))
                 throw new UnauthorizedAccessException("User cannot delete this comment");
 
+            var templateId = comment.TemplateId;
+
             await _commentRepository.DeleteAsync(commentId);
+
+            await UpdateTemplateSearchIndexAsync(templateId);
         }
 
         public async Task<CommentDto> GetCommentByIdAsync(Guid commentId)
@@ -154,6 +167,72 @@ namespace FormFlow.Application.Services
                 CreatedAt = comment.CreatedAt,
                 CanDelete = canDelete,
                 IsAuthor = isAuthor
+            };
+        }
+
+        private async Task UpdateTemplateSearchIndexAsync(Guid templateId)
+        {
+            try
+            {
+                var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
+                if (template == null)
+                {
+                    await _searchService.RemoveTemplateFromIndexAsync(templateId);
+                    return;
+                }
+
+                var searchDocument = await BuildTemplateSearchDocumentAsync(template);
+                await _searchService.UpdateTemplateIndexAsync(searchDocument);
+            }
+            catch
+            {
+            }
+        }
+
+        private async Task<TemplateSearchDocument> BuildTemplateSearchDocumentAsync(Template template)
+        {
+            var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
+
+            var questionsText = template.Questions?
+                .Where(q => !q.IsDeleted)
+                .Select(q =>
+                {
+                    try
+                    {
+                        var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(q.Data);
+                        return $"{questionDetails?.Title} {questionDetails?.Description}";
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                })
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+                .Aggregate("", (current, text) => current + " " + text).Trim() ?? "";
+
+            var commentsText = template.Comments?
+                .Where(c => !c.IsDeleted)
+                .Select(c => c.Content)
+                .Where(content => !string.IsNullOrWhiteSpace(content))
+                .Aggregate("", (current, content) => current + " " + content).Trim() ?? "";
+
+            return new TemplateSearchDocument
+            {
+                Id = template.Id,
+                Title = template.Title,
+                Description = template.Description,
+                QuestionsText = questionsText,
+                CommentsText = commentsText,
+                AuthorName = template.Author?.UserName ?? "",
+                Tags = templateTags.Select(tt => tt.Tag.Name).ToList(),
+                CreatedAt = template.CreatedAt,
+                UpdatedAt = template.UpdatedAt,
+                FormsCount = template.FormsCount,
+                LikesCount = template.LikesCount,
+                CommentsCount = template.CommentsCount,
+                IsArchived = template.IsArchived,
+                IsPublished = template.IsPublished,
+                IsDeleted = template.IsDeleted
             };
         }
     }

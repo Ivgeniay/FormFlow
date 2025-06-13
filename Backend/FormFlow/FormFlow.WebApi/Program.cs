@@ -1,10 +1,13 @@
 using FormFlow.Application.Interfaces;
 using FormFlow.Application.Services;
 using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Interfaces.Services;
+using FormFlow.Infrastructure.Services;
 using FormFlow.Persistence;
 using FormFlow.Persistence.Repositories;
 using FormFlow.WebApi.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Nest;
 
 namespace FormFlow.WebApi
 {
@@ -32,6 +35,15 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ITagService, TagService>();
+
+            builder.Services.AddSingleton<IElasticClient>(provider =>
+            {
+                var uri = builder.Configuration.GetSection("ElasticSearch:Uri").Value;
+                var settings = new ConnectionSettings(new Uri(uri))
+                    .DefaultIndex("templates");
+                return new ElasticClient(settings);
+            });
+            builder.Services.AddScoped<ISearchService, ElasticSearchService>();
 
             var app = builder.Build();
 

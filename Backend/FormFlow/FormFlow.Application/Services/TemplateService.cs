@@ -3,7 +3,11 @@ using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
+using FormFlow.Domain.Models.SearchService;
+using System;
+using System.Text.Json;
 
 namespace FormFlow.Application.Services
 {
@@ -12,15 +16,18 @@ namespace FormFlow.Application.Services
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
         private readonly ITagRepository _tagRepository;
+        private readonly ISearchService _searchService;
 
         public TemplateService(
             ITemplateRepository templateRepository,
             IUserRepository userRepository,
-            ITagRepository tagRepository)
+            ITagRepository tagRepository,
+            ISearchService searchService)
         {
             _templateRepository = templateRepository;
             _userRepository = userRepository;
             _tagRepository = tagRepository;
+            _searchService = searchService;
         }
 
         public async Task<TemplateDto> CreateTemplateAsync(CreateTemplateRequest request, Guid authorId)
@@ -58,6 +65,8 @@ namespace FormFlow.Application.Services
                     await _templateRepository.AddAllowedUserAsync(createdTemplate.Id, userId);
                 }
             }
+
+            await IndexTemplateAsync(createdTemplate.Id);
 
             return await MapToTemplateDtoAsync(createdTemplate, authorId);
         }
@@ -113,6 +122,8 @@ namespace FormFlow.Application.Services
                 }
             }
 
+            await IndexTemplateAsync(createdVersion.Id);
+
             return await MapToTemplateDtoAsync(createdVersion, userId);
         }
 
@@ -166,6 +177,9 @@ namespace FormFlow.Application.Services
             }
 
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
+
+            await IndexTemplateAsync(updatedTemplate.Id);
+
             return await MapToTemplateDtoAsync(updatedTemplate, userId);
         }
 
@@ -180,6 +194,8 @@ namespace FormFlow.Application.Services
 
             template.IsPublished = true;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
+
+            await IndexTemplateAsync(updatedTemplate.Id);
 
             return await MapToTemplateDtoAsync(updatedTemplate, userId);
         }
@@ -196,6 +212,8 @@ namespace FormFlow.Application.Services
             template.IsArchived = true;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
 
+            await IndexTemplateAsync(updatedTemplate.Id);
+
             return await MapToTemplateDtoAsync(updatedTemplate, userId);
         }
 
@@ -209,6 +227,8 @@ namespace FormFlow.Application.Services
                 throw new UnauthorizedAccessException("User cannot delete this template");
 
             await _templateRepository.DeleteAsync(templateId);
+
+            await IndexTemplateAsync(templateId);
         }
 
         public async Task DeleteAllVersionsAsync(Guid baseTemplateId, Guid userId)
@@ -219,7 +239,14 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can delete all versions");
 
+            var versions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+
             await _templateRepository.DeleteAllVersionsAsync(baseTemplateId);
+
+            foreach (var version in versions)
+            {
+                await IndexTemplateAsync(version.Id);
+            }
         }
 
         public async Task<TemplateDto> GetTemplateByIdAsync(Guid id, Guid? userId = null)
@@ -549,5 +576,74 @@ namespace FormFlow.Application.Services
 
             return dto;
         }
+
+        private async Task IndexTemplateAsync(Guid templateId)
+        {
+            try
+            {
+                var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
+                if (template == null)
+                {
+                    await _searchService.RemoveTemplateFromIndexAsync(templateId);
+                    return;
+                }
+
+                var searchDocument = await BuildTemplateSearchDocumentAsync(template);
+                await _searchService.UpdateTemplateIndexAsync(searchDocument);
+            }
+            catch
+            {
+            }
+        }
+
+        private async Task<TemplateSearchDocument> BuildTemplateSearchDocumentAsync(Template template)
+        {
+            var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
+
+            var questionsText = template.Questions?
+                .Where(q => !q.IsDeleted)
+                .Select(q =>
+                {
+                    try
+                    {
+                        var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(q.Data);
+                        return $"{questionDetails?.Title} {questionDetails?.Description}";
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                })
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+                .Aggregate("", (current, text) => current + " " + text)
+                .Trim() ?? "";
+
+            var commentsText = template.Comments?
+                .Where(c => !c.IsDeleted)
+                .Select(c => c.Content)
+                .Where(content => !string.IsNullOrWhiteSpace(content))
+                .Aggregate("", (current, content) => current + " " + content)
+                .Trim() ?? "";
+
+            return new TemplateSearchDocument
+            {
+                Id = template.Id,
+                Title = template.Title,
+                Description = template.Description,
+                QuestionsText = questionsText,
+                CommentsText = commentsText,
+                AuthorName = template.Author?.UserName ?? "",
+                Tags = templateTags.Select(tt => tt.Tag.Name).ToList(),
+                CreatedAt = template.CreatedAt,
+                UpdatedAt = template.UpdatedAt,
+                FormsCount = template.FormsCount,
+                LikesCount = template.LikesCount,
+                CommentsCount = template.CommentsCount,
+                IsArchived = template.IsArchived,
+                IsPublished = template.IsPublished,
+                IsDeleted = template.IsDeleted
+            };
+        }
     }
+
 }
