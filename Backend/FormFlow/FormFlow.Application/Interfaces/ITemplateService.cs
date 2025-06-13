@@ -30,6 +30,8 @@ namespace FormFlow.Application.Interfaces
         Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId, Guid userId);
         Task<TemplateDto> UpdateTemplateTagsAsync(Guid templateId, UpdateTemplateTagsRequest request, Guid userId);
 
+        Task<bool> UpdateTemplateImageAsync(Guid templateId, string imageUrl, Guid userId);
+
         Task AddAllowedUserToTemplateAsync(Guid templateId, Guid allowedUserId, Guid ownerId);
         Task RemoveAllowedUserFromTemplateAsync(Guid templateId, Guid allowedUserId, Guid ownerId);
         Task<List<UserSearchDto>> GetTemplateAllowedUsersAsync(Guid templateId, Guid userId);

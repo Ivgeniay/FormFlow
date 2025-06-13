@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using FormFlow.WebApi.Common.Extensions;
 using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Application.Services;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-using FormFlow.WebApi.Common.Extensions;
 
 namespace FormFlow.WebApi.Controllers
 {

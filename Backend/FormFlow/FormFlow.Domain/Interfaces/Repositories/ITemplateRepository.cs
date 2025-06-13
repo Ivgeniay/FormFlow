@@ -21,6 +21,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<PagedResult<Template>> GetUserAccessibleTemplatesPagedAsync(Guid userId, int page, int pageSize);
         Task<List<Template>> GetLatestTemplatesAsync(int count = 10);
 
+        Task<bool> UpdateTemplateImageAsync(Guid templateId, string imageUrl, Guid userId);
+
         Task<Template?> GetWithQuestionsAsync(Guid id);
         Task<Template?> GetWithFormsAsync(Guid id);
         Task<Template?> GetWithCommentsAsync(Guid id);

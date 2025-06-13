@@ -53,6 +53,8 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ITagService, TagService>();
 
+            builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
+
 
             builder.Services.AddSingleton<IElasticClient>(provider => 
             new ElasticClient(
@@ -122,4 +124,6 @@ namespace FormFlow.WebApi
             app.Run();
         }
     }
+
+    
 }

@@ -74,6 +74,19 @@ namespace FormFlow.Persistence.Repositories
             return template;
         }
 
+        public async Task<bool> UpdateTemplateImageAsync(Guid templateId, string imageUrl, Guid userId)
+        {
+            var template = await _context.Templates.FirstOrDefaultAsync(t => t.Id == templateId);
+            if (template == null)
+            {
+                return false;
+            }
+            template.ImageUrl = imageUrl;
+            template.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
         public async Task<bool> ExistsAsync(Guid id)
         {
             return await _context.Templates

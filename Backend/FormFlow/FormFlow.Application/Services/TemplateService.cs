@@ -301,6 +301,9 @@ namespace FormFlow.Application.Services
             return templateDtos;
         }
 
+        public Task<bool> UpdateTemplateImageAsync(Guid templateId, string imageUrl, Guid userId) =>
+            _templateRepository.UpdateTemplateImage(templateId, imageUrl, userId);
+
         public async Task<bool> TemplateExistsAsync(Guid id)
         {
             return await _templateRepository.ExistsAsync(id);
