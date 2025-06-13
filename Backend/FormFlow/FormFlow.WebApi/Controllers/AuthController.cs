@@ -4,6 +4,7 @@ using FormFlow.Application.Interfaces;
 using FormFlow.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using FormFlow.WebApi.Common.Extensions;
 
 namespace FormFlow.WebApi.Controllers
 {
@@ -108,7 +109,7 @@ namespace FormFlow.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetCurrentUserId();
             if (userId == null)
                 return Unauthorized(new { message = "Invalid user context" });
 
@@ -145,7 +146,7 @@ namespace FormFlow.WebApi.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var promotingUserId = GetCurrentUserId();
+            var promotingUserId = this.GetCurrentUserId();
             if (promotingUserId == null)
                 return Unauthorized(new { message = "Invalid user context" });
 
@@ -169,7 +170,7 @@ namespace FormFlow.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> GetCurrentUser()
         {
-            var userId = GetCurrentUserId();
+            var userId = this.GetCurrentUserId();
             if (userId == null)
                 return Unauthorized(new { message = "Invalid user context" });
 
@@ -202,14 +203,6 @@ namespace FormFlow.WebApi.Controllers
 
             var exists = await _userService.UserNameExistsAsync(request.UserName);
             return Ok(new { exists });
-        }
-
-        private Guid? GetCurrentUserId()
-        {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("sub");
-            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out var userId))
-                return userId;
-            return null;
         }
     }
 

@@ -5,10 +5,10 @@ using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Infrastructure.Services;
 using FormFlow.Persistence;
 using FormFlow.Persistence.Repositories;
-using FormFlow.WebApi.Extensions;
+using FormFlow.WebApi.Common.Extensions;
+using FormFlow.WebApi.Middlewares;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Nest;
 using Scalar.AspNetCore;
@@ -23,6 +23,17 @@ namespace FormFlow.WebApi
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(policy =>
+                {
+                    policy.AllowAnyOrigin()
+                            .AllowAnyMethod()
+                            .AllowAnyHeader();
+                });
+            });
+            builder.Services.AddSignalR();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -64,14 +75,28 @@ namespace FormFlow.WebApi
                 o.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new ArgumentNullException("SecretKey"))),
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"])),
                     ValidateIssuer = true,
-                    ValidIssuer = jwtSettings["Issuer"] ?? throw new ArgumentNullException("Issuer"),
+                    ValidIssuer = jwtSettings["Issuer"],
                     ValidateAudience = true,
-                    ValidAudience = jwtSettings["Audience"] ?? throw new ArgumentNullException("Audience"),
+                    ValidAudience = jwtSettings["Audience"],
                     ValidateLifetime = true,
                     ClockSkew = TimeSpan.FromMinutes(5),
                     RequireExpirationTime = true
+                };
+
+                o.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        var accessToken = context.Request.Query["access_token"];
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                        {
+                            context.Token = accessToken;
+                        }
+                        return Task.CompletedTask;
+                    }
                 };
             });
             builder.Services.AddAuthorization();
@@ -83,13 +108,16 @@ namespace FormFlow.WebApi
             app.MapScalarApiReference();
 #endif
             app.EnsureDB();
+            app.UseCors();
 
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
+            app.UseMiddleware<UserContextMiddleware>();
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<TemplateActivityHub>("/hubs/template-activity");
 
             app.Run();
         }

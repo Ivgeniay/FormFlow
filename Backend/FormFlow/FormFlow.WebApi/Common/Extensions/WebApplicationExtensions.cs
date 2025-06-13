@@ -1,6 +1,6 @@
 ﻿using FormFlow.Persistence;
 
-namespace FormFlow.WebApi.Extensions
+namespace FormFlow.WebApi.Common.Extensions
 {
     public static class WebApplicationExtensions
     {
