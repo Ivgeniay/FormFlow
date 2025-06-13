@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,30 +9,30 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<TemplateAllowedUser> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.TemplateAllowedUsers);
+            builder.ToTable(TableNames.TemplateAllowedUsers);
 
             builder.HasKey(tau => tau.Id);
             builder.Property(tau => tau.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateAllowedUserId);
+                .HasColumnName(ColumnNames.TemplateAllowedUserId);
 
             builder.Property(tau => tau.TemplateId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(tau => tau.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(tau => tau.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.HasIndex(tau => new { tau.TemplateId, tau.UserId })
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplateAllowedUsersTemplateUserIndex);
+                .HasDatabaseName(IndexNames.TemplateAllowedUsersTemplateUserIndex);
 
             builder.HasIndex(tau => tau.TemplateId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplateAllowedUsersTemplateIndex);
+                .HasDatabaseName(IndexNames.TemplateAllowedUsersTemplateIndex);
 
             builder.HasOne(tau => tau.Template)
                 .WithMany(t => t.AllowedUsers)

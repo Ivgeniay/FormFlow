@@ -1,6 +1,7 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,51 +9,51 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Form> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Forms);
+            builder.ToTable(TableNames.Forms);
 
             builder.HasKey(f => f.Id);
             builder.Property(f => f.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.FormId);
+                .HasColumnName(ColumnNames.FormId);
 
             builder.Property(f => f.TemplateId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(f => f.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(f => f.AnswersData)
                 .IsRequired()
-                .HasColumnType(DomainConstants.Database.ColumnTypes.JsonColumnType)
-                .HasColumnName(DomainConstants.Database.ColumnNames.AnswersData);
+                .HasColumnType(ColumnTypes.JsonColumnType)
+                .HasColumnName(ColumnNames.AnswersData);
 
             builder.Property(f => f.SubmittedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.SubmittedAt);
+                .HasColumnName(ColumnNames.SubmittedAt);
 
             builder.Property(f => f.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.Property(f => f.IsDeleted)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsDeleted)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsDeletedDefault);
+                .HasColumnName(ColumnNames.IsDeleted)
+                .HasDefaultValue(DefaultValues.IsDeletedDefault);
 
             builder.Property(f => f.TemplateVersion)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateVersion);
+                .HasColumnName(ColumnNames.TemplateVersion);
 
             builder.HasIndex(f => f.TemplateId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.FormsTemplateIndex);
+                .HasDatabaseName(IndexNames.FormsTemplateIndex);
 
             builder.HasIndex(f => f.UserId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.FormsUserIndex);
+                .HasDatabaseName(IndexNames.FormsUserIndex);
 
             builder.HasIndex(f => new { f.TemplateId, f.UserId })
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.FormsTemplateUserIndex);
+                .HasDatabaseName(IndexNames.FormsTemplateUserIndex);
 
             builder.HasOne(f => f.Template)
                 .WithMany(t => t.Forms)

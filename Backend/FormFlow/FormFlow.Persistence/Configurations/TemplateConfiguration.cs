@@ -1,6 +1,8 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,87 +10,87 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Template> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Templates);
+            builder.ToTable(TableNames.Templates);
 
             builder.HasKey(t => t.Id);
             builder.Property(t => t.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(t => t.AuthorId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.AuthorId);
+                .HasColumnName(ColumnNames.AuthorId);
 
             builder.Property(t => t.Title)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.TemplateNameMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateTitle);
+                .HasMaxLength(Validation.TemplateNameMaxLength)
+                .HasColumnName(ColumnNames.TemplateTitle);
 
             builder.Property(t => t.Description)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.TemplateDescriptionMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateDescription);
+                .HasMaxLength(Validation.TemplateDescriptionMaxLength)
+                .HasColumnName(ColumnNames.TemplateDescription);
 
             builder.Property(t => t.ImageUrl)
-                .HasMaxLength(DomainConstants.Validation.ImageUrlMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.ImageUrl);
+                .HasMaxLength(Validation.ImageUrlMaxLength)
+                .HasColumnName(ColumnNames.ImageUrl);
 
             builder.Property(t => t.AccessType)
                 .IsRequired()
                 .HasConversion<int>()
-                .HasColumnName(DomainConstants.Database.ColumnNames.AccessType);
+                .HasColumnName(ColumnNames.AccessType);
 
             builder.Property(t => t.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(t => t.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.Property(t => t.IsDeleted)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsDeleted)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsDeletedDefault);
+                .HasColumnName(ColumnNames.IsDeleted)
+                .HasDefaultValue(DefaultValues.IsDeletedDefault);
 
             builder.Property(t => t.IsArchived)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsArchived)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsArchivedDefault);
+                .HasColumnName(ColumnNames.IsArchived)
+                .HasDefaultValue(DefaultValues.IsArchivedDefault);
 
             builder.Property(t => t.IsPublished)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsPublished)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsPublishedDefault);
+                .HasColumnName(ColumnNames.IsPublished)
+                .HasDefaultValue(DefaultValues.IsPublishedDefault);
 
             builder.Property(t => t.Version)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.Version)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.VersionDefault);
+                .HasColumnName(ColumnNames.Version)
+                .HasDefaultValue(DefaultValues.VersionDefault);
 
             builder.Property(t => t.IsCurrentVersion)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsCurrentVersion)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsCurrentVersionDefault);
+                .HasColumnName(ColumnNames.IsCurrentVersion)
+                .HasDefaultValue(DefaultValues.IsCurrentVersionDefault);
 
             builder.Property(t => t.BaseTemplateId)
-                .HasColumnName(DomainConstants.Database.ColumnNames.BaseTemplateId);
+                .HasColumnName(ColumnNames.BaseTemplateId);
 
             builder.Property(t => t.PreviousVersionId)
-                .HasColumnName(DomainConstants.Database.ColumnNames.PreviousVersionId);
+                .HasColumnName(ColumnNames.PreviousVersionId);
 
             builder.Ignore(t => t.LikesCount);
             builder.Ignore(t => t.FormsCount);
             builder.Ignore(t => t.CommentsCount);
 
             builder.HasIndex(t => t.AuthorId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplatesAuthorIndex);
+                .HasDatabaseName(IndexNames.TemplatesAuthorIndex);
 
             builder.HasIndex(t => t.BaseTemplateId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplatesBaseTemplateIndex);
+                .HasDatabaseName(IndexNames.TemplatesBaseTemplateIndex);
 
             builder.HasIndex(t => new { t.BaseTemplateId, t.Version })
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplatesBaseVersionIndex);
+                .HasDatabaseName(IndexNames.TemplatesBaseVersionIndex);
 
             builder.HasOne(t => t.Author)
                 .WithMany(u => u.Templates)

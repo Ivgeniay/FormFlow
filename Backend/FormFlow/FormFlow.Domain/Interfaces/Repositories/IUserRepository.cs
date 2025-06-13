@@ -19,6 +19,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<List<User>> SearchByNameOrEmailAsync(string query, int limit = 10);
         Task<List<User>> GetUsersForSearchAsync(string query, int limit = 10);
 
+        Task<User?> GetUserByRefreshTokenAsync(string refreshToken);
         Task<User?> GetWithContactsAsync(Guid id);
         Task<User?> GetWithAuthMethodsAsync(Guid id);
         Task<User?> GetForAuthenticationAsync(string email);

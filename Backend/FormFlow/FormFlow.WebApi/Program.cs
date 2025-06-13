@@ -6,8 +6,13 @@ using FormFlow.Infrastructure.Services;
 using FormFlow.Persistence;
 using FormFlow.Persistence.Repositories;
 using FormFlow.WebApi.Extensions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
 using Nest;
+using Scalar.AspNetCore;
+using System.Text;
 
 namespace FormFlow.WebApi
 {
@@ -29,6 +34,7 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<ITagRepository, TagRepository>();
 
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ITemplateService, TemplateService>();
             builder.Services.AddScoped<IFormService, FormService>();
@@ -36,28 +42,52 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ITagService, TagService>();
 
-            builder.Services.AddSingleton<IElasticClient>(provider =>
-            {
-                var uri = builder.Configuration.GetSection("ElasticSearch:Uri").Value;
-                var settings = new ConnectionSettings(new Uri(uri))
-                    .DefaultIndex("templates");
-                return new ElasticClient(settings);
-            });
+
+            builder.Services.AddSingleton<IElasticClient>(provider => 
+            new ElasticClient(
+                new ConnectionSettings(
+                    new Uri(builder.Configuration.GetSection("ElasticSearch:Uri").Value))
+                    .DefaultIndex("templates")));
+
             builder.Services.AddScoped<ISearchService, ElasticSearchService>();
+
+
+            builder.Services.AddScoped<IJwtService, JwtService>();
+            var jwtSettings = builder.Configuration.GetSection("Jwt");
+            builder.Services.AddAuthentication(o =>
+            {
+                o.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                o.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(o =>
+            {
+                o.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["SecretKey"] ?? throw new ArgumentNullException("SecretKey"))),
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtSettings["Issuer"] ?? throw new ArgumentNullException("Issuer"),
+                    ValidateAudience = true,
+                    ValidAudience = jwtSettings["Audience"] ?? throw new ArgumentNullException("Audience"),
+                    ValidateLifetime = true,
+                    ClockSkew = TimeSpan.FromMinutes(5),
+                    RequireExpirationTime = true
+                };
+            });
+            builder.Services.AddAuthorization();
 
             var app = builder.Build();
 
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
-
+#if DEBUG
+            app.MapOpenApi();
+            app.MapScalarApiReference();
+#endif
             app.EnsureDB();
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

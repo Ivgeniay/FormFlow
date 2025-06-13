@@ -1,6 +1,7 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,30 +9,30 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<TemplateTag> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.TemplateTags);
+            builder.ToTable(TableNames.TemplateTags);
 
             builder.HasKey(tt => tt.Id);
             builder.Property(tt => tt.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateTagId);
+                .HasColumnName(ColumnNames.TemplateTagId);
 
             builder.Property(tt => tt.TemplateId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(tt => tt.TagId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TagId);
+                .HasColumnName(ColumnNames.TagId);
 
             builder.Property(tt => tt.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.HasIndex(tt => new { tt.TemplateId, tt.TagId })
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplateTagsTemplateTagIndex);
+                .HasDatabaseName(IndexNames.TemplateTagsTemplateTagIndex);
 
             builder.HasIndex(tt => tt.TagId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TemplateTagsTagIndex);
+                .HasDatabaseName(IndexNames.TemplateTagsTagIndex);
 
             builder.HasOne(tt => tt.Template)
                 .WithMany(t => t.Tags)

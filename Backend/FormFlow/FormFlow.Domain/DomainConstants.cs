@@ -78,6 +78,8 @@
             public const string Email = "email";
             public const string PasswordHash = "password_hash";
             public const string RefreshToken = "refresh_token";
+            public const string RefreshTokenExpiresAt = "refresh_token_expires_at";
+            public const string RefreshTokenRevokedAt = "refresh_token_revoked_at";
             public const string TokenExpiry = "token_expiry";
 
             public const string CreatedAt = "created_at";
@@ -159,9 +161,11 @@
 
             public const string EmailPasswordAuthsEmailIndex = "idx_email_password_auths_email";
             public const string EmailPasswordAuthsUserIndex = "idx_email_password_auths_user";
+            public const string EmailPasswordRefreshTokenIndex = "idx_email_password_auths_refresh_token";
 
             public const string GoogleAuthsGoogleIdIndex = "idx_google_auths_google_id";
             public const string GoogleAuthsUserIndex = "idx_google_auths_user";
+            public const string GoogleAuthsRefreshTokenIndex = "idx_google_auths_refresh_token";
 
             public const string TemplateAllowedUsersTemplateUserIndex = "idx_template_allowed_users_template_user";
             public const string TemplateAllowedUsersTemplateIndex = "idx_template_allowed_users_template";

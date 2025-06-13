@@ -137,6 +137,17 @@ namespace FormFlow.Persistence.Repositories
                 .ToListAsync();
         }
 
+        public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken)
+        {
+            return await _context.Users
+                .Include(u => u.EmailAuth)
+                .Include(u => u.GoogleAuth)
+                .FirstOrDefaultAsync((u) => !u.IsDeleted &&
+                    (u.EmailAuth != null && u.EmailAuth.RefreshToken == refreshToken) ||
+                    (u.GoogleAuth != null && u.GoogleAuth.RefreshToken == refreshToken)
+                );
+        }
+
         public async Task<User?> GetWithContactsAsync(Guid id)
         {
             return await _context.Users

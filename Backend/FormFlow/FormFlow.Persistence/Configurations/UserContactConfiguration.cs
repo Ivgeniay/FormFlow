@@ -1,6 +1,8 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,44 +10,44 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<UserContact> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.UserContacts);
+            builder.ToTable(TableNames.UserContacts);
 
             builder.HasKey(uc => uc.Id);
             builder.Property(uc => uc.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserContactId);
+                .HasColumnName(ColumnNames.UserContactId);
 
             builder.Property(uc => uc.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(uc => uc.Type)
                 .IsRequired()
                 .HasConversion<int>()
-                .HasColumnName(DomainConstants.Database.ColumnNames.ContactType);
+                .HasColumnName(ColumnNames.ContactType);
 
             builder.Property(uc => uc.Value)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.ContactValueMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.ContactValue);
+                .HasMaxLength(Validation.ContactValueMaxLength)
+                .HasColumnName(ColumnNames.ContactValue);
 
             builder.Property(uc => uc.IsPrimary)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsPrimary)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsPrimaryDefault);
+                .HasColumnName(ColumnNames.IsPrimary)
+                .HasDefaultValue(DefaultValues.IsPrimaryDefault);
 
             builder.Property(uc => uc.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(uc => uc.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.HasIndex(uc => uc.UserId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.UserContactsUserIndex);
+                .HasDatabaseName(IndexNames.UserContactsUserIndex);
 
             builder.HasIndex(uc => new { uc.UserId, uc.Type, uc.IsPrimary })
-                .HasDatabaseName(DomainConstants.Database.IndexNames.UserContactsUserTypePrimaryIndex);
+                .HasDatabaseName(IndexNames.UserContactsUserTypePrimaryIndex);
 
             builder.HasOne(uc => uc.User)
                 .WithMany(u => u.Contacts)

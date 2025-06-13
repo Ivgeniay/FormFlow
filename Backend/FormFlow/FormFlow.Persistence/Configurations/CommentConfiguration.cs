@@ -1,6 +1,8 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,40 +10,40 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Comment> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Comments);
+            builder.ToTable(TableNames.Comments);
 
             builder.HasKey(c => c.Id);
             builder.Property(c => c.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.CommentId);
+                .HasColumnName(ColumnNames.CommentId);
 
             builder.Property(c => c.TemplateId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(c => c.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(c => c.Content)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.CommentMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.CommentContent);
+                .HasMaxLength(Validation.CommentMaxLength)
+                .HasColumnName(ColumnNames.CommentContent);
 
             builder.Property(c => c.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(c => c.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.Property(c => c.IsDeleted)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsDeleted)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsDeletedDefault);
+                .HasColumnName(ColumnNames.IsDeleted)
+                .HasDefaultValue(DefaultValues.IsDeletedDefault);
 
             builder.HasIndex(c => c.TemplateId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.CommentsTemplateIndex);
+                .HasDatabaseName(IndexNames.CommentsTemplateIndex);
 
             builder.HasOne(c => c.Template)
                 .WithMany(t => t.Comments)

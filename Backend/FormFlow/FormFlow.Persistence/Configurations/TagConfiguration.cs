@@ -1,6 +1,8 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,33 +10,33 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Tag> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Tags);
+            builder.ToTable(TableNames.Tags);
 
             builder.HasKey(t => t.Id);
             builder.Property(t => t.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TagId);
+                .HasColumnName(ColumnNames.TagId);
 
             builder.Property(t => t.Name)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.TagNameMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.TagName);
+                .HasMaxLength(Validation.TagNameMaxLength)
+                .HasColumnName(ColumnNames.TagName);
 
             builder.Property(t => t.UsageCount)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UsageCount)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.UsageCountDefault);
+                .HasColumnName(ColumnNames.UsageCount)
+                .HasDefaultValue(DefaultValues.UsageCountDefault);
 
             builder.Property(t => t.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(t => t.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.HasIndex(t => t.Name)
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.TagsNameIndex);
+                .HasDatabaseName(IndexNames.TagsNameIndex);
         }
     }
 }

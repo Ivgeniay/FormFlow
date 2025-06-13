@@ -1,6 +1,7 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,35 +9,35 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Like> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Likes);
+            builder.ToTable(TableNames.Likes);
 
             builder.HasKey(l => l.Id);
             builder.Property(l => l.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.LikeId);
+                .HasColumnName(ColumnNames.LikeId);
 
             builder.Property(l => l.TemplateId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TemplateId);
+                .HasColumnName(ColumnNames.TemplateId);
 
             builder.Property(l => l.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(l => l.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(l => l.IsDeleted)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsDeleted)
-                .HasDefaultValue(DomainConstants.Database.DefaultValues.IsDeletedDefault);
+                .HasColumnName(ColumnNames.IsDeleted)
+                .HasDefaultValue(DefaultValues.IsDeletedDefault);
 
             builder.HasIndex(l => new { l.TemplateId, l.UserId })
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.LikesTemplateUserIndex);
+                .HasDatabaseName(IndexNames.LikesTemplateUserIndex);
 
             builder.HasIndex(l => l.TemplateId)
-                .HasDatabaseName(DomainConstants.Database.IndexNames.LikesTemplateIndex);
+                .HasDatabaseName(IndexNames.LikesTemplateIndex);
 
             builder.HasOne(l => l.Template)
                 .WithMany(t => t.Likes)

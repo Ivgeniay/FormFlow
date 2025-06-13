@@ -3,6 +3,8 @@ using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Interfaces.Services;
+using FormFlow.Domain.Models.Auth;
 using FormFlow.Domain.Models.General;
 
 namespace FormFlow.Application.Services
@@ -10,69 +12,216 @@ namespace FormFlow.Application.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
+        private readonly IJwtService _jwtService;
 
-        public UserService(IUserRepository userRepository)
+        public UserService(IUserRepository userRepository, IJwtService jwtService)
         {
             _userRepository = userRepository;
+            _jwtService = jwtService;
         }
 
-        public async Task<UserDto> RegisterUserAsync(RegisterUserRequest request)
+        public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
         {
-            if (await _userRepository.EmailExistsAsync(request.Email))
-                throw new EmailAlreadyExistsException(request.Email);
-
-            if (await _userRepository.UserNameExistsAsync(request.UserName))
-                throw new UserNameAlreadyExistsException(request.UserName);
-
-            var user = new User
+            try
             {
-                UserName = request.UserName,
-                Role = UserRole.User
-            };
+                if (await _userRepository.EmailExistsAsync(request.Email))
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Email already exists" };
 
-            var emailAuth = new EmailPasswordAuth
+                if (await _userRepository.UserNameExistsAsync(request.UserName))
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Username already exists" };
+
+                var user = new User
+                {
+                    UserName = request.UserName,
+                    Role = UserRole.User
+                };
+
+                var emailAuth = new EmailPasswordAuth
+                {
+                    UserId = user.Id,
+                    Email = request.Email,
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                };
+
+                user.EmailAuth = emailAuth;
+
+                var primaryContact = new UserContact
+                {
+                    UserId = user.Id,
+                    Type = ContactType.Email,
+                    Value = request.Email,
+                    IsPrimary = true
+                };
+
+                user.Contacts.Add(primaryContact);
+
+                await _userRepository.CreateUserWithAuthAsync(user);
+
+                var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
+
+                return new AuthenticationResult
+                {
+                    User = DTOMapper.MapToUserDto(user),
+                    AccessToken = tokenResult.AccessToken,
+                    RefreshToken = tokenResult.RefreshToken,
+                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    AuthType = AuthType.Internal,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
             {
-                UserId = user.Id,
-                Email = request.Email,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-            };
-
-            user.EmailAuth = emailAuth;
-
-            var primaryContact = new UserContact
-            {
-                UserId = user.Id,
-                Type = ContactType.Email,
-                Value = request.Email,
-                IsPrimary = true
-            };
-
-            user.Contacts.Add(primaryContact);
-
-            await _userRepository.CreateUserWithAuthAsync(user);
-
-            return DTOMapper.MapToUserDto(user);
+                return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
         }
 
-        public async Task<UserDto> AuthenticateWithEmailAsync(EmailLoginRequest request)
+        public async Task<AuthenticationResult> AuthenticateWithEmailAsync(EmailLoginRequest request)
         {
-            var user = await _userRepository.GetForAuthenticationAsync(request.Email);
+            try
+            {
+                var user = await _userRepository.GetForAuthenticationAsync(request.Email);
 
-            if (user == null || user.EmailAuth == null)
-                throw new UserNotFoundException(request.Email);
+                if (user == null || user.EmailAuth == null)
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Invalid email or password" };
 
-            if (user.IsBlocked)
-                throw new UserBlockedException(user.Id);
+                if (user.IsBlocked)
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User account is blocked" };
 
-            if (!BCrypt.Net.BCrypt.Verify(request.Password, user.EmailAuth.PasswordHash))
-                throw new UserNotFoundException(request.Email);
+                if (!BCrypt.Net.BCrypt.Verify(request.Password, user.EmailAuth.PasswordHash))
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Invalid email or password" };
 
-            return DTOMapper.MapToUserDto(user);
+                var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
+
+                return new AuthenticationResult
+                {
+                    User = DTOMapper.MapToUserDto(user),
+                    AccessToken = tokenResult.AccessToken,
+                    RefreshToken = tokenResult.RefreshToken,
+                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    AuthType = AuthType.Internal,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
         }
 
-        public async Task<UserDto> AuthenticateWithGoogleAsync(GoogleLoginRequest request)
+        public async Task<AuthenticationResult> AuthenticateWithGoogleAsync(GoogleLoginRequest request)
         {
-            throw new NotImplementedException("Google authentication not implemented yet");
+            try
+            {
+                throw new NotImplementedException("Google authentication not implemented yet");
+            }
+            catch (Exception ex)
+            {
+                return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
+        }
+
+        public async Task<RefreshTokenResult> RefreshTokenAsync(RefreshTokenRequest request)
+        {
+            try
+            {
+                var tokenResult = await _jwtService.RefreshTokenAsync(request.RefreshToken);
+
+                return new RefreshTokenResult
+                {
+                    AccessToken = tokenResult.AccessToken,
+                    RefreshToken = tokenResult.RefreshToken,
+                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new RefreshTokenResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
+        }
+
+        public async Task<LogoutResult> LogoutAsync(Guid userId, LogoutRequest request)
+        {
+            try
+            {
+                if (request.LogoutFromAllDevices)
+                {
+                    await _jwtService.RevokeAllUserTokensAsync(userId);
+                }
+                else if (!string.IsNullOrEmpty(request.RefreshToken))
+                {
+                    await _jwtService.RevokeTokenAsync(request.RefreshToken);
+                }
+
+                return new LogoutResult { IsSuccess = true };
+            }
+            catch (Exception ex)
+            {
+                return new LogoutResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
+        }
+
+        public async Task<ValidateTokenResult> ValidateTokenAsync(ValidateTokenRequest request)
+        {
+            try
+            {
+                var isValid = await _jwtService.ValidateTokenAsync(request.Token);
+                if (!isValid)
+                    return new ValidateTokenResult { IsValid = false, ErrorMessage = "Invalid token" };
+
+                var claims = await _jwtService.GetClaimsFromTokenAsync(request.Token);
+
+                return new ValidateTokenResult
+                {
+                    IsValid = true,
+                    Claims = claims
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ValidateTokenResult { IsValid = false, ErrorMessage = ex.Message };
+            }
+        }
+
+        public async Task<ChangeRoleResult> ChangeUserRoleAsync(ChangeRoleRequest request, Guid promotingUserId)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(request.UserId);
+                if (user == null)
+                    return new ChangeRoleResult { IsSuccess = false, ErrorMessage = "User not found" };
+
+                var promotingUser = await _userRepository.GetByIdAsync(promotingUserId);
+                if (promotingUser == null)
+                    return new ChangeRoleResult { IsSuccess = false, ErrorMessage = "Promoting user not found" };
+
+                bool isSelfChange = request.UserId == promotingUserId;
+
+                if (!CanChangeUserRole(promotingUser.Role, user.Role, request.NewRole, isSelfChange))
+                    return new ChangeRoleResult { IsSuccess = false, ErrorMessage = "Insufficient permissions to change user role" };
+
+                user.Role = request.NewRole;
+                await _userRepository.UpdateAsync(user);
+
+                var tokenResult = await _jwtService.RegenerateTokenForRoleChangeAsync(request.UserId, request.AuthType);
+
+                return new ChangeRoleResult
+                {
+                    User = DTOMapper.MapToUserDto(user),
+                    AccessToken = tokenResult.AccessToken,
+                    RefreshToken = tokenResult.RefreshToken,
+                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ChangeRoleResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
         }
 
         public async Task<UserDto> GetUserByIdAsync(Guid id)
@@ -160,6 +309,8 @@ namespace FormFlow.Application.Services
 
             user.IsBlocked = true;
             await _userRepository.UpdateAsync(user);
+
+            await _jwtService.RevokeAllUserTokensAsync(userId);
         }
 
         public async Task UnblockUserAsync(Guid userId, Guid adminId)
@@ -173,25 +324,6 @@ namespace FormFlow.Application.Services
                 throw new UnauthorizedAccessException("Only admins can unblock users");
 
             user.IsBlocked = false;
-            await _userRepository.UpdateAsync(user);
-        }
-
-        public async Task SetUserRoleAsync(Guid userId, UserRole role, Guid promotingUserId)
-        {
-            var user = await _userRepository.GetByIdAsync(userId);
-            if (user == null)
-                throw new UserNotFoundException(userId);
-
-            var promotingUser = await _userRepository.GetByIdAsync(promotingUserId);
-            if (promotingUser == null)
-                throw new UserNotFoundException(promotingUserId);
-
-            bool isSelfChange = userId == promotingUserId;
-
-            if (!CanChangeUserRole(promotingUser.Role, user.Role, role, isSelfChange))
-                throw new UnauthorizedAccessException("Insufficient permissions to change user role");
-
-            user.Role = role;
             await _userRepository.UpdateAsync(user);
         }
 
@@ -300,6 +432,93 @@ namespace FormFlow.Application.Services
             contact.IsPrimary = true;
             await _userRepository.UpdateAsync(user);
         }
-
     }
+
+    public class AuthenticationResult
+    {
+        public UserDto User { get; set; } = new UserDto();
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime AccessTokenExpiry { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
+        public AuthType AuthType { get; set; }
+        public bool IsSuccess { get; set; } = true;
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class RefreshTokenRequest
+    {
+        public string RefreshToken { get; set; } = string.Empty;
+    }
+
+    public class RefreshTokenResult
+    {
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime AccessTokenExpiry { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
+        public bool IsSuccess { get; set; } = true;
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class LogoutRequest
+    {
+        public string? RefreshToken { get; set; }
+        public bool LogoutFromAllDevices { get; set; } = false;
+    }
+
+    public class LogoutResult
+    {
+        public bool IsSuccess { get; set; } = true;
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class ChangeRoleRequest
+    {
+        public Guid UserId { get; set; }
+        public UserRole NewRole { get; set; }
+        public AuthType AuthType { get; set; }
+    }
+
+    public class ChangeRoleResult
+    {
+        public UserDto User { get; set; } = new UserDto();
+        public string AccessToken { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
+        public DateTime AccessTokenExpiry { get; set; }
+        public DateTime RefreshTokenExpiry { get; set; }
+        public bool IsSuccess { get; set; } = true;
+        public string? ErrorMessage { get; set; }
+    }
+
+    public class ValidateTokenRequest
+    {
+        public string Token { get; set; } = string.Empty;
+    }
+
+    public class ValidateTokenResult
+    {
+        public bool IsValid { get; set; }
+        public JwtClaimsPrincipal? Claims { get; set; }
+        public string? ErrorMessage { get; set; }
+    }
+
+    //public class EmailLoginRequest
+    //{
+    //    public string Email { get; set; } = string.Empty;
+    //    public string Password { get; set; } = string.Empty;
+    //}
+
+    //public class GoogleLoginRequest
+    //{
+    //    public string GoogleToken { get; set; } = string.Empty;
+    //}
+
+    //public class RegisterUserRequest
+    //{
+    //    public string UserName { get; set; } = string.Empty;
+    //    public string Email { get; set; } = string.Empty;
+    //    public string Password { get; set; } = string.Empty;
+    //}
+
 }

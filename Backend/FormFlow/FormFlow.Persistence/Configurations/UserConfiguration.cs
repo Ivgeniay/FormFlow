@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,15 +10,15 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<User> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.Users);
+            builder.ToTable(TableNames.Users);
 
             builder.HasKey(u => u.Id);
             builder.Property(u => u.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(u => u.UserName)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.UserNameMaxLength);
+                .HasMaxLength(Validation.UserNameMaxLength);
 
             builder.Property(u => u.Role)
                 .IsRequired()
@@ -24,11 +26,11 @@ namespace FormFlow.Persistence.Configurations
 
             builder.Property(u => u.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(u => u.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.Property(u => u.IsBlocked)
                 .IsRequired()
@@ -36,12 +38,12 @@ namespace FormFlow.Persistence.Configurations
 
             builder.Property(u => u.IsDeleted)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.IsDeleted)
+                .HasColumnName(ColumnNames.IsDeleted)
                 .HasDefaultValue(false);
 
             builder.HasIndex(u => u.UserName)
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.UsersuserNameIndex);
+                .HasDatabaseName(IndexNames.UsersuserNameIndex);
 
             builder.HasOne(u => u.EmailAuth)
                 .WithOne(e => e.User)

@@ -1,13 +1,19 @@
 ﻿using FormFlow.Application.DTOs.Users;
+using FormFlow.Application.Services;
 using FormFlow.Domain.Models.General;
 
 namespace FormFlow.Application.Interfaces
 {
     public interface IUserService
     {
-        Task<UserDto> RegisterUserAsync(RegisterUserRequest request);
-        Task<UserDto> AuthenticateWithEmailAsync(EmailLoginRequest request);
-        Task<UserDto> AuthenticateWithGoogleAsync(GoogleLoginRequest request);
+        Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request);
+        Task<AuthenticationResult> AuthenticateWithEmailAsync(EmailLoginRequest request);
+        Task<AuthenticationResult> AuthenticateWithGoogleAsync(GoogleLoginRequest request);
+        Task<RefreshTokenResult> RefreshTokenAsync(RefreshTokenRequest request);
+        Task<LogoutResult> LogoutAsync(Guid userId, LogoutRequest request);
+        Task<ValidateTokenResult> ValidateTokenAsync(ValidateTokenRequest request);
+        Task<ChangeRoleResult> ChangeUserRoleAsync(ChangeRoleRequest request, Guid promotingUserId);
+
         Task<UserDto> GetUserByIdAsync(Guid id);
         Task<UserDto> GetUserByEmailAsync(string email);
         Task<UserDto> UpdateUserProfileAsync(UpdateUserProfileRequest request);
@@ -20,7 +26,6 @@ namespace FormFlow.Application.Interfaces
 
         Task BlockUserAsync(Guid userId, Guid adminId);
         Task UnblockUserAsync(Guid userId, Guid adminId);
-        Task SetUserRoleAsync(Guid userId, UserRole role, Guid promotingUserId);
         bool CanChangeUserRole(UserRole promotingUserRole, UserRole targetUserCurrentRole, UserRole targetUserNewRole, bool isSelfChange);
 
         Task<UserDto> AddUserContactAsync(Guid userId, AddContactRequest request);

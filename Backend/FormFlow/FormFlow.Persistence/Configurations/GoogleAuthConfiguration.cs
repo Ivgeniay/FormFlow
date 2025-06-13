@@ -1,6 +1,8 @@
 ﻿using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using static DomainConstants.Database;
+using static DomainConstants;
 
 namespace FormFlow.Persistence.Configurations
 {
@@ -8,50 +10,60 @@ namespace FormFlow.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<GoogleAuth> builder)
         {
-            builder.ToTable(DomainConstants.Database.TableNames.GoogleAuths);
+            builder.ToTable(TableNames.GoogleAuths);
 
             builder.HasKey(g => g.Id);
             builder.Property(g => g.Id)
-                .HasColumnName(DomainConstants.Database.ColumnNames.GoogleAuthId);
+                .HasColumnName(ColumnNames.GoogleAuthId);
 
             builder.Property(g => g.UserId)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UserId);
+                .HasColumnName(ColumnNames.UserId);
 
             builder.Property(g => g.GoogleId)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.GoogleIdMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.GoogleId);
+                .HasMaxLength(Validation.GoogleIdMaxLength)
+                .HasColumnName(ColumnNames.GoogleId);
 
             builder.Property(g => g.Email)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.EmailMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.Email);
+                .HasMaxLength(Validation.EmailMaxLength)
+                .HasColumnName(ColumnNames.Email);
 
             builder.Property(g => g.RefreshToken)
                 .IsRequired()
-                .HasMaxLength(DomainConstants.Validation.RefreshTokenMaxLength)
-                .HasColumnName(DomainConstants.Database.ColumnNames.RefreshToken);
+                .HasMaxLength(Validation.RefreshTokenMaxLength)
+                .HasColumnName(ColumnNames.RefreshToken);
 
             builder.Property(g => g.TokenExpiry)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.TokenExpiry);
+                .HasColumnName(ColumnNames.TokenExpiry);
+
+            builder.Property(g => g.RefreshTokenExpiresAt)
+                .IsRequired()
+                .HasColumnName(ColumnNames.RefreshTokenExpiresAt);
+
+            builder.Property(g => g.RefreshTokenRevokedAt)
+                .HasColumnName(ColumnNames.RefreshTokenRevokedAt);
 
             builder.Property(g => g.CreatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.CreatedAt);
+                .HasColumnName(ColumnNames.CreatedAt);
 
             builder.Property(g => g.UpdatedAt)
                 .IsRequired()
-                .HasColumnName(DomainConstants.Database.ColumnNames.UpdatedAt);
+                .HasColumnName(ColumnNames.UpdatedAt);
 
             builder.HasIndex(g => g.GoogleId)
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.GoogleAuthsGoogleIdIndex);
+                .HasDatabaseName(IndexNames.GoogleAuthsGoogleIdIndex);
 
             builder.HasIndex(g => g.UserId)
                 .IsUnique()
-                .HasDatabaseName(DomainConstants.Database.IndexNames.GoogleAuthsUserIndex);
+                .HasDatabaseName(IndexNames.GoogleAuthsUserIndex);
+
+            builder.HasIndex(g => g.RefreshToken)
+                .HasDatabaseName(IndexNames.GoogleAuthsRefreshTokenIndex);
 
             builder.HasOne(g => g.User)
                 .WithOne(u => u.GoogleAuth)
