@@ -30,7 +30,6 @@
         public List<Comment> Comments { get; set; } = new List<Comment>();
         public List<Like> Likes { get; set; } = new List<Like>();
         public List<TemplateTag> Tags { get; set; } = new List<TemplateTag>();
-        //public List<User> AllowedUsers { get; set; } = new List<User>();
         public List<TemplateAllowedUser> AllowedUsers { get; set; } = new List<TemplateAllowedUser>();
     }
 

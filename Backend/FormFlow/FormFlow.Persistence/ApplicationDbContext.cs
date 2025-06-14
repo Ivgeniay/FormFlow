@@ -10,6 +10,7 @@ namespace FormFlow.Persistence
         public DbSet<User> Users { get; set; }
         public DbSet<TemplateAllowedUser> TemplateAllowedUser { get; set; }
         public DbSet<EmailPasswordAuth> EmailPasswordAuths { get; set; }
+        public DbSet<FormSubscribe> FormSubscribes { get; set; }
         public DbSet<GoogleAuth> GoogleAuths { get; set; }
         public DbSet<UserContact> UserContacts { get; set; }
         public DbSet<TemplateTag> TemplateTags { get; set; }

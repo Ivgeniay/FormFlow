@@ -55,6 +55,7 @@ namespace FormFlow.WebApi
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 
+            builder.Services.AddScoped<IEmailService, GmailEmailService>();
 
             builder.Services.AddSingleton<IElasticClient>(provider => 
             new ElasticClient(
@@ -125,5 +126,5 @@ namespace FormFlow.WebApi
         }
     }
 
-    
+
 }
