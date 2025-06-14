@@ -562,7 +562,7 @@ namespace FormFlow.Application.Services
     {
         public Guid UserId { get; set; }
         public UserRole NewRole { get; set; }
-        public AuthType AuthType { get; set; }
+        public AuthType AuthType { get; set; } = AuthType.Internal;
     }
 
     public class ChangeRoleResult

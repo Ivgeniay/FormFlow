@@ -5,6 +5,7 @@ using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
+using FormFlow.Domain.Models.General.QuestionDetailsModels;
 using FormFlow.Domain.Models.SearchService;
 using System;
 using System.Text.Json;
