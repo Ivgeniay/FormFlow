@@ -16,6 +16,11 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task DeleteAsync(Guid id);
         Task DeleteAllVersionsAsync(Guid baseTemplateId);
 
+
+
+        Task<PagedResult<Template>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize);
+        Task<PagedResult<Template>> GetPopularTemplatesAsync(int page, int pageSize);
+
         Task<PagedResult<Template>> GetPublicTemplatesPagedAsync(int page, int pageSize);
         Task<PagedResult<Template>> GetTemplatesByAuthorPagedAsync(Guid authorId, int page, int pageSize);
         Task<PagedResult<Template>> GetUserAccessibleTemplatesPagedAsync(Guid userId, int page, int pageSize);

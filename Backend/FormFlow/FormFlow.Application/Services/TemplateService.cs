@@ -352,6 +352,30 @@ namespace FormFlow.Application.Services
 
             return new PagedResult<TemplateDto>(templateDtos, result.Pagination.TotalCount, page, pageSize);
         }
+        
+        public async Task<PagedResult<TemplateDto>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize)
+        {
+            var result = await _templateRepository.GetTemplatesByTagNameAsync(tagName, page, pageSize);
+            var templateDtos = new List<TemplateDto>();
+            foreach (var template in result.Data)
+            {
+                templateDtos.Add(await MapToTemplateDtoAsync(template, null));
+            }
+
+            return new PagedResult<TemplateDto>(templateDtos, result.Pagination.TotalCount, page, pageSize);
+        }
+
+        public async Task<PagedResult<TemplateDto>> GetPopularTemplatesAsync(int page, int pageSize)
+        {
+            var result = await _templateRepository.GetPopularTemplatesAsync(page, pageSize);
+            var templateDtos = new List<TemplateDto>();
+            foreach (var template in result.Data)
+            {
+                templateDtos.Add(await MapToTemplateDtoAsync(template, null));
+            }
+
+            return new PagedResult<TemplateDto>(templateDtos, result.Pagination.TotalCount, page, pageSize);
+        }
 
         public async Task<List<TemplateDto>> GetLatestTemplatesAsync(int count = 10)
         {
@@ -399,6 +423,7 @@ namespace FormFlow.Application.Services
             var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
             return await MapToTemplateDtoAsync(template!, userId);
         }
+
 
         public async Task AddAllowedUserToTemplateAsync(Guid templateId, Guid allowedUserId, Guid ownerId)
         {

@@ -119,6 +119,35 @@ namespace FormFlow.Persistence.Repositories
                     .SetProperty(x => x.UpdatedAt, DateTime.UtcNow));
         }
 
+        public async Task<PagedResult<Template>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize)
+        {
+            var query = _context.Templates
+                .Include(t => t.Author)
+                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion &&
+                    _context.TemplateTags.Any(tt => tt.TemplateId == t.Id && tt.Tag.Name.ToLower() == tagName.ToLower()))
+                .OrderByDescending(t => t.CreatedAt);
+            var totalCount = await query.CountAsync();
+            var templates = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<Template>(templates, totalCount, page, pageSize);
+        }
+
+        public async Task<PagedResult<Template>> GetPopularTemplatesAsync(int page, int pageSize)
+        {
+            var query = _context.Templates
+                .Include(t => t.Author)
+                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
+                .OrderByDescending(t => t.Likes.Count(l => !l.IsDeleted));
+            var totalCount = await query.CountAsync();
+            var templates = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+            return new PagedResult<Template>(templates, totalCount, page, pageSize);
+        }
+
         public async Task<PagedResult<Template>> GetPublicTemplatesPagedAsync(int page, int pageSize)
         {
             var query = _context.Templates

@@ -22,6 +22,8 @@ namespace FormFlow.Application.Interfaces
         Task<bool> BaseTemplateExistsAsync(Guid baseTemplateId);
 
         Task<PagedResult<TemplateDto>> GetPublicTemplatesPagedAsync(int page, int pageSize);
+        Task<PagedResult<TemplateDto>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize);
+        Task<PagedResult<TemplateDto>> GetPopularTemplatesAsync(int page, int pageSize);
         Task<PagedResult<TemplateDto>> GetTemplatesByAuthorPagedAsync(Guid authorId, int page, int pageSize);
         Task<PagedResult<TemplateDto>> GetUserAccessibleTemplatesPagedAsync(Guid userId, int page, int pageSize);
         Task<List<TemplateDto>> GetLatestTemplatesAsync(int count = 10);
