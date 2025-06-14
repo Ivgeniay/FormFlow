@@ -167,25 +167,6 @@ namespace FormFlow.Infrastructure.Services
             }
         }
 
-        public async Task RevokeAllUserTokensAsync(Guid userId)
-        {
-            var user = await _userRepository.GetWithAuthMethodsAsync(userId);
-            if (user == null) return;
-
-            if (user.EmailAuth != null)
-            {
-                user.EmailAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
-            }
-
-            if (user.GoogleAuth != null)
-            {
-                user.GoogleAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
-                user.GoogleAuth.UpdatedAt = DateTime.UtcNow;
-            }
-
-            await _userRepository.UpdateAsync(user);
-        }
-
         public async Task<JwtTokenResult> RegenerateTokenForRoleChangeAsync(Guid userId, AuthType authType)
         {
             var user = await _userRepository.GetWithAuthMethodsAsync(userId);
@@ -209,8 +190,6 @@ namespace FormFlow.Infrastructure.Services
             var user = await _userRepository.GetWithAuthMethodsAsync(userId);
             if (user?.GoogleAuth != null)
             {
-                user.GoogleAuth.RefreshToken = externalRefreshToken;
-                user.GoogleAuth.TokenExpiry = externalTokenExpiry;
                 user.GoogleAuth.UpdatedAt = DateTime.UtcNow;
                 await _userRepository.UpdateAsync(user);
             }
@@ -317,6 +296,25 @@ namespace FormFlow.Infrastructure.Services
                 user.EmailAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
             }
             else if (user.GoogleAuth?.RefreshToken == refreshToken)
+            {
+                user.GoogleAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
+                user.GoogleAuth.UpdatedAt = DateTime.UtcNow;
+            }
+
+            await _userRepository.UpdateAsync(user);
+        }
+
+        public async Task RevokeAllUserTokensAsync(Guid userId)
+        {
+            var user = await _userRepository.GetWithAuthMethodsAsync(userId);
+            if (user == null) return;
+
+            if (user.EmailAuth != null)
+            {
+                user.EmailAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
+            }
+
+            if (user.GoogleAuth != null)
             {
                 user.GoogleAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
                 user.GoogleAuth.UpdatedAt = DateTime.UtcNow;

@@ -43,7 +43,6 @@ namespace FormFlow.Application.DTOs
                     IsActive = true,
                     GoogleId = user.GoogleAuth.GoogleId,
                     Email = user.GoogleAuth.Email,
-                    TokenExpiry = user.GoogleAuth.TokenExpiry
                 });
             }
 

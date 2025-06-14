@@ -13,11 +13,15 @@ namespace FormFlow.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
+        private readonly IGoogleAuthService _googleAuthService;
 
-        public UserService(IUserRepository userRepository, IJwtService jwtService)
+        public UserService(IUserRepository userRepository, 
+            IJwtService jwtService, 
+            IGoogleAuthService googleAuthService)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
+            _googleAuthService = googleAuthService;
         }
 
         public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
@@ -114,7 +118,88 @@ namespace FormFlow.Application.Services
         {
             try
             {
-                throw new NotImplementedException("Google authentication not implemented yet");
+                var googleUserInfo = await _googleAuthService.GetUserInfoAsync(request.Code);
+
+                var existingUser = await _userRepository.GetByEmailAsync(googleUserInfo.Email);
+
+                if (existingUser != null)
+                {
+                    if (existingUser.IsBlocked)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User account is blocked" };
+
+                    if (existingUser.GoogleAuth == null)
+                    {
+                        existingUser.GoogleAuth = new GoogleAuth
+                        {
+                            UserId = existingUser.Id,
+                            GoogleId = googleUserInfo.GoogleId,
+                            Email = googleUserInfo.Email
+                        };
+                    }
+                    else
+                    {
+                        existingUser.GoogleAuth.GoogleId = googleUserInfo.GoogleId;
+                        existingUser.GoogleAuth.Email = googleUserInfo.Email;
+                        existingUser.GoogleAuth.UpdatedAt = DateTime.UtcNow;
+                    }
+
+                    await _userRepository.UpdateAsync(existingUser);
+
+                    var tokenResult = await _jwtService.GenerateTokenAsync(existingUser, AuthType.Google);
+
+                    return new AuthenticationResult
+                    {
+                        User = DTOMapper.MapToUserDto(existingUser),
+                        AccessToken = tokenResult.AccessToken,
+                        RefreshToken = tokenResult.RefreshToken,
+                        AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                        RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                        AuthType = AuthType.Google,
+                        IsSuccess = true
+                    };
+                }
+                else
+                {
+                    var newUser = new User
+                    {
+                        UserName = googleUserInfo.Name,
+                        Role = UserRole.User
+                    };
+
+                    var googleAuth = new GoogleAuth
+                    {
+                        UserId = newUser.Id,
+                        GoogleId = googleUserInfo.GoogleId,
+                        Email = googleUserInfo.Email
+                    };
+
+                    newUser.GoogleAuth = googleAuth;
+
+                    var primaryContact = new UserContact
+                    {
+                        UserId = newUser.Id,
+                        Type = ContactType.Email,
+                        Value = googleUserInfo.Email,
+                        IsPrimary = true
+                    };
+
+                    newUser.Contacts.Add(primaryContact);
+
+                    await _userRepository.CreateUserWithAuthAsync(newUser);
+
+                    var tokenResult = await _jwtService.GenerateTokenAsync(newUser, AuthType.Google);
+
+                    return new AuthenticationResult
+                    {
+                        User = DTOMapper.MapToUserDto(newUser),
+                        AccessToken = tokenResult.AccessToken,
+                        RefreshToken = tokenResult.RefreshToken,
+                        AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                        RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                        AuthType = AuthType.Google,
+                        IsSuccess = true
+                    };
+                }
             }
             catch (Exception ex)
             {

@@ -35,10 +35,6 @@ namespace FormFlow.Persistence.Configurations
                 .HasMaxLength(Validation.RefreshTokenMaxLength)
                 .HasColumnName(ColumnNames.RefreshToken);
 
-            builder.Property(g => g.TokenExpiry)
-                .IsRequired()
-                .HasColumnName(ColumnNames.TokenExpiry);
-
             builder.Property(g => g.RefreshTokenExpiresAt)
                 .IsRequired()
                 .HasColumnName(ColumnNames.RefreshTokenExpiresAt);
