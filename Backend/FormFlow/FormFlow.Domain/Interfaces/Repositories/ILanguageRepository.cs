@@ -17,5 +17,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid id);
         Task<bool> CodeExistsAsync(string code);
         Task<bool> NameExistsAsync(string name);
+        Task<Language> SetAsDefaultAsync(Guid id);
+        Task<int> GetCountAsync();
     }
 }

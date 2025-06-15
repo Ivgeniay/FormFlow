@@ -81,10 +81,10 @@ namespace FormFlow.Persistence.Repositories
             var defaultLanguage = await _context.Languages
                 .FirstOrDefaultAsync(l => l.IsDefault && l.IsActive);
 
-            if (defaultColorTheme == null)
-                throw new InvalidOperationException("No default color theme found");
-            if (defaultLanguage == null)
-                throw new InvalidOperationException("No default language found");
+            //if (defaultColorTheme == null)
+            //    throw new InvalidOperationException("No default color theme found");
+            //if (defaultLanguage == null)
+            //    throw new InvalidOperationException("No default language found");
 
             var userSettings = new UserSettings
             {

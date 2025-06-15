@@ -15,37 +15,33 @@ namespace FormFlow.Persistence.Repositories
 
         public async Task<Language?> GetByIdAsync(Guid id) =>
             await _context.Languages.FindAsync(id);
-        
 
         public async Task<Language?> GetByCodeAsync(string code) =>
-             await _context.Languages
+            await _context.Languages
                 .FirstOrDefaultAsync(l => l.Code == code);
 
         public async Task<Language?> GetByShortCodeAsync(string shortCode) =>
-             await _context.Languages
+            await _context.Languages
                 .FirstOrDefaultAsync(l => l.ShortCode == shortCode);
 
         public async Task<Language?> GetByNameAsync(string name) =>
-             await _context.Languages
+            await _context.Languages
                 .FirstOrDefaultAsync(l => l.Name == name);
-        
 
         public async Task<Language?> GetDefaultAsync() =>
-             await _context.Languages
+            await _context.Languages
                 .FirstOrDefaultAsync(l => l.IsDefault && l.IsActive);
 
         public async Task<List<Language>> GetAllAsync() =>
-             await _context.Languages
+            await _context.Languages
                 .OrderBy(l => l.Name)
                 .ToListAsync();
-        
 
         public async Task<List<Language>> GetActiveAsync() =>
-             await _context.Languages
+            await _context.Languages
                 .Where(l => l.IsActive)
                 .OrderBy(l => l.Name)
                 .ToListAsync();
-        
 
         public async Task<Language> CreateAsync(Language language)
         {
@@ -72,12 +68,41 @@ namespace FormFlow.Persistence.Repositories
         }
 
         public async Task<bool> ExistsAsync(Guid id) =>
-             await _context.Languages.AnyAsync(l => l.Id == id);
-        
+            await _context.Languages.AnyAsync(l => l.Id == id);
+
         public async Task<bool> CodeExistsAsync(string code) =>
-             await _context.Languages.AnyAsync(l => l.Code == code);
+            await _context.Languages.AnyAsync(l => l.Code == code);
 
         public async Task<bool> NameExistsAsync(string name) =>
-             await _context.Languages.AnyAsync(l => l.Name == name);
+            await _context.Languages.AnyAsync(l => l.Name == name);
+
+        public async Task<Language> SetAsDefaultAsync(Guid id)
+        {
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.Languages
+                    .Where(l => l.IsDefault)
+                    .ExecuteUpdateAsync(l => l.SetProperty(x => x.IsDefault, false));
+
+                var language = await _context.Languages.FindAsync(id);
+                if (language == null)
+                    throw new ArgumentException($"Language with ID '{id}' not found");
+
+                language.IsDefault = true;
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+                return language;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<int> GetCountAsync() =>
+            await _context.Languages.CountAsync();
     }
 }

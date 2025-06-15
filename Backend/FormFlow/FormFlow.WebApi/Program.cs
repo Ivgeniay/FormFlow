@@ -60,6 +60,9 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<IFormSubscribeService, FormSubscribeService>();
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<ITopicService, TopicService>();
+            builder.Services.AddScoped<IColorThemeService, ColorThemeService>();
+            builder.Services.AddScoped<ILanguageService, LanguageService>();
+            builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 
@@ -116,7 +119,10 @@ namespace FormFlow.WebApi
             app.MapOpenApi();
             app.MapScalarApiReference();
 #endif
-            app.EnsureDB();
+            app.EnsureDB()
+                .WithDefaultColorThemes()
+                .WithDefaultLanguages()
+                .WithDefaultTopics();
             app.UseCors();
 
             app.UseHttpsRedirection();

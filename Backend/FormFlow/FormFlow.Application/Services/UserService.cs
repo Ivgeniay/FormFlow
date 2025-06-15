@@ -14,14 +14,17 @@ namespace FormFlow.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IJwtService _jwtService;
         private readonly IGoogleAuthService _googleAuthService;
+        private readonly IUserSettingsRepository _userSettingsRepository;
 
         public UserService(IUserRepository userRepository, 
             IJwtService jwtService, 
-            IGoogleAuthService googleAuthService)
+            IGoogleAuthService googleAuthService,
+            IUserSettingsRepository userSettingsRepository)
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _googleAuthService = googleAuthService;
+            _userSettingsRepository = userSettingsRepository;
         }
 
         public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
@@ -59,7 +62,12 @@ namespace FormFlow.Application.Services
 
                 user.Contacts.Add(primaryContact);
 
-                await _userRepository.CreateUserWithAuthAsync(user);
+                User userInDb = await _userRepository.CreateUserWithAuthAsync(user);
+
+                if (await _userSettingsRepository.ExistsByUserIdAsync(userInDb.Id))
+                    throw new ArgumentException($"User settings for user '{userInDb.Id}' already exist");
+
+                await _userSettingsRepository.CreateDefaultForUserAsync(userInDb.Id);
 
                 var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
 
