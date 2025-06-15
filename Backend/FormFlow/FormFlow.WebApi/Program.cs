@@ -44,6 +44,8 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ICommentRepository, CommentRepository>();
             builder.Services.AddScoped<ILikeRepository, LikeRepository>();
             builder.Services.AddScoped<ITagRepository, TagRepository>();
+            builder.Services.AddScoped<IFormSubscribeRepository, FormSubscribeRepository>();
+            builder.Services.AddScoped<ITopicRepository, TopicRepository>();
 
 
             builder.Services.AddScoped<IUserService, UserService>();
@@ -52,17 +54,16 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ICommentService, CommentService>();
             builder.Services.AddScoped<ILikeService, LikeService>();
             builder.Services.AddScoped<ITagService, TagService>();
+            builder.Services.AddScoped<IFormSubscribeService, FormSubscribeService>();
+            builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 
             builder.Services.AddScoped<IEmailService, GmailEmailService>();
             builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 
-            builder.Services.AddSingleton<IElasticClient>(provider => 
-            new ElasticClient(
-                new ConnectionSettings(
-                    new Uri(builder.Configuration.GetSection("ElasticSearch:Uri").Value))
-                    .DefaultIndex("templates")));
+
+            builder.Services.AddSingleton<IElasticClient>(ElasticConfigurating(builder));
 
             builder.Services.AddScoped<ISearchService, ElasticSearchService>();
 
@@ -124,6 +125,15 @@ namespace FormFlow.WebApi
             app.MapHub<TemplateActivityHub>("/hubs/template-activity");
 
             app.Run();
+        }
+
+        private static Func<IServiceProvider, IElasticClient> ElasticConfigurating(WebApplicationBuilder builder)
+        {
+            return provider =>
+                        new ElasticClient(
+                            new ConnectionSettings(
+                                new Uri(builder.Configuration.GetSection("ElasticSearch:Uri").Value))
+                                .DefaultIndex("templates"));
         }
     }
 

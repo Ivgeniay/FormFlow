@@ -18,6 +18,7 @@ namespace FormFlow.Persistence
         public DbSet<Question> Questions { get; set; }
         public DbSet<Form> Forms { get; set; }
         public DbSet<Comment> Comments { get; set; }
+        public DbSet<Topic> Topics { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Tag> Tags { get; set; }
 

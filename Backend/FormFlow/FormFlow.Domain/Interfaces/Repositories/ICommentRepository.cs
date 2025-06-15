@@ -18,5 +18,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
 
         Task<int> GetCountByTemplateAsync(Guid templateId);
         Task<int> GetCountByUserAsync(Guid userId);
+        Task<Dictionary<Guid, int>> GetCommentsCountByTemplatesAsync(List<Guid> templateIds);
+        Task<int> GetTotalCommentsCountAsync();
+        Task<Dictionary<string, int>> GetCommentsCountByMonthAsync();
     }
 }

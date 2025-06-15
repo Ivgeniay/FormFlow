@@ -139,5 +139,27 @@ namespace FormFlow.Persistence.Repositories
 
             return lastComment?.CreatedAt;
         }
+
+        public async Task<Dictionary<Guid, int>> GetCommentsCountByTemplatesAsync(List<Guid> templateIds)
+        {
+            return await _context.Comments
+                .Where(c => templateIds.Contains(c.TemplateId) && !c.IsDeleted)
+                .GroupBy(c => c.TemplateId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<int> GetTotalCommentsCountAsync()
+        {
+            return await _context.Comments
+                .CountAsync(c => !c.IsDeleted);
+        }
+
+        public async Task<Dictionary<string, int>> GetCommentsCountByMonthAsync()
+        {
+            return await _context.Comments
+                .Where(c => !c.IsDeleted)
+                .GroupBy(c => c.CreatedAt.ToString("yyyy-MM"))
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
     }
 }

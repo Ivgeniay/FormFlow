@@ -1,4 +1,5 @@
-﻿using FormFlow.Domain.Models.General;
+﻿using FormFlow.Domain.Models.Analytics;
+using FormFlow.Domain.Models.General;
 
 namespace FormFlow.Domain.Interfaces.Repositories
 {
@@ -25,5 +26,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<User?> GetForAuthenticationAsync(string email);
 
         Task<User> CreateUserWithAuthAsync(User user);
+        Task<Dictionary<string, int>> GetUsersCountByMonthAsync();
+        Task<List<UserAnalyticsStatsDto>> GetUserAnalyticsStatsAsync(List<Guid> userIds);
     }
 }

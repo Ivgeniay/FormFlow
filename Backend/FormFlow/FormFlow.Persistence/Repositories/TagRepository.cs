@@ -170,5 +170,31 @@ namespace FormFlow.Persistence.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<Dictionary<Guid, List<string>>> GetTagsByTemplatesAsync(List<Guid> templateIds)
+        {
+            var templateTags = await _context.TemplateTags
+                .Include(tt => tt.Tag)
+                .Where(tt => templateIds.Contains(tt.TemplateId))
+                .Select(tt => new { tt.TemplateId, tt.Tag.Name })
+                .ToListAsync();
+
+            return templateTags
+                .GroupBy(tt => tt.TemplateId)
+                .ToDictionary(g => g.Key, g => g.Select(x => x.Name).ToList());
+        }
+
+        public async Task<List<string>> GetMostUsedTagsByUserAsync(Guid userId)
+        {
+            return await _context.TemplateTags
+                .Include(tt => tt.Tag)
+                .Include(tt => tt.Template)
+                .Where(tt => tt.Template.AuthorId == userId && !tt.Template.IsDeleted)
+                .GroupBy(tt => tt.Tag.Name)
+                .OrderByDescending(g => g.Count())
+                .Take(10)
+                .Select(g => g.Key)
+                .ToListAsync();
+        }
     }
 }

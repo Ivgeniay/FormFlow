@@ -188,5 +188,38 @@ namespace FormFlow.Persistence.Repositories
                 .OrderByDescending(f => f.SubmittedAt)
                 .ToListAsync();
         }
+
+        public async Task<Dictionary<Guid, int>> GetFormsCountByTemplatesAsync(List<Guid> templateIds)
+        {
+            return await _context.Forms
+                .Where(f => templateIds.Contains(f.TemplateId) && !f.IsDeleted)
+                .GroupBy(f => f.TemplateId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<int> GetTotalFormsCountAsync()
+        {
+            return await _context.Forms
+                .CountAsync(f => !f.IsDeleted);
+        }
+
+        public async Task<Dictionary<string, int>> GetFormsCountByMonthAsync()
+        {
+            return await _context.Forms
+                .Where(f => !f.IsDeleted)
+                .GroupBy(f => f.SubmittedAt.ToString("yyyy-MM"))
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<List<Guid>> GetMostActiveUsersAsync(int count)
+        {
+            return await _context.Forms
+                .Where(f => !f.IsDeleted)
+                .GroupBy(f => f.UserId)
+                .OrderByDescending(g => g.Count())
+                .Take(count)
+                .Select(g => g.Key)
+                .ToListAsync();
+        }
     }
 }

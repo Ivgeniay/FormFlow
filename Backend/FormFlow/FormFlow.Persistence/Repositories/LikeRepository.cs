@@ -161,5 +161,27 @@ namespace FormFlow.Persistence.Repositories
                 .Where(t => templateIds.Contains(t.Id) && !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
                 .ToListAsync();
         }
+
+        public async Task<Dictionary<Guid, int>> GetLikesCountByTemplatesAsync(List<Guid> templateIds)
+        {
+            return await _context.Likes
+                .Where(l => templateIds.Contains(l.TemplateId) && !l.IsDeleted)
+                .GroupBy(l => l.TemplateId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<int> GetTotalLikesCountAsync()
+        {
+            return await _context.Likes
+                .CountAsync(l => !l.IsDeleted);
+        }
+
+        public async Task<Dictionary<string, int>> GetLikesCountByMonthAsync()
+        {
+            return await _context.Likes
+                .Where(l => !l.IsDeleted)
+                .GroupBy(l => l.CreatedAt.ToString("yyyy-MM"))
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
     }
 }

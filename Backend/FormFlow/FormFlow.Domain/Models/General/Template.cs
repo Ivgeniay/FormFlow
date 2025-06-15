@@ -6,6 +6,7 @@
         public Guid AuthorId { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public Guid TopicId { get; set; }
         public string? ImageUrl { get; set; }
         public TemplateAccess AccessType { get; set; } = TemplateAccess.Public;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

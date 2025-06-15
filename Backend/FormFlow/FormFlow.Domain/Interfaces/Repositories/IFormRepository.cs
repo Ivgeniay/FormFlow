@@ -26,5 +26,9 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<int> GetCountByUserAsync(Guid userId);
 
         Task<Form?> GetUserFormForTemplateAsync(Guid templateId, Guid userId);
+        Task<Dictionary<Guid, int>> GetFormsCountByTemplatesAsync(List<Guid> templateIds);
+        Task<int> GetTotalFormsCountAsync();
+        Task<Dictionary<string, int>> GetFormsCountByMonthAsync();
+        Task<List<Guid>> GetMostActiveUsersAsync(int count);
     }
 }

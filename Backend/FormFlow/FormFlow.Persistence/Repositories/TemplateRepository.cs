@@ -458,6 +458,22 @@ namespace FormFlow.Persistence.Repositories
                 .Where(tt => tt.TemplateId == templateId)
                 .ToListAsync();
         }
+
+        public async Task<Dictionary<Guid, int>> GetTemplatesCountByTopicsAsync()
+        {
+            return await _context.Templates
+                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
+                .GroupBy(t => t.TopicId)
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<Dictionary<string, int>> GetTemplatesCountByMonthAsync()
+        {
+            return await _context.Templates
+                .Where(t => !t.IsDeleted && t.IsCurrentVersion)
+                .GroupBy(t => t.CreatedAt.ToString("yyyy-MM"))
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
     }
 
 }

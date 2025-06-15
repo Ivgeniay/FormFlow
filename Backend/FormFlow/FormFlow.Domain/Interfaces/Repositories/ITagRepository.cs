@@ -23,5 +23,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task DecrementUsageCountAsync(Guid tagId);
         Task RecalculateUsageCountAsync(Guid tagId);
         Task CleanupUnusedTagsAsync();
+
+        Task<Dictionary<Guid, List<string>>> GetTagsByTemplatesAsync(List<Guid> templateIds);
+        Task<List<string>> GetMostUsedTagsByUserAsync(Guid userId);
     }
 }

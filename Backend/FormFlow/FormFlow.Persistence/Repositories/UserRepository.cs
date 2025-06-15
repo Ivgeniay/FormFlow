@@ -1,4 +1,5 @@
 ﻿using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Models.Analytics;
 using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore;
 
@@ -187,6 +188,31 @@ namespace FormFlow.Persistence.Repositories
                 await transaction.RollbackAsync();
                 throw;
             }
+        }
+        public async Task<Dictionary<string, int>> GetUsersCountByMonthAsync()
+        {
+            return await _context.Users
+                .Where(u => !u.IsDeleted)
+                .GroupBy(u => u.CreatedAt.ToString("yyyy-MM"))
+                .ToDictionaryAsync(g => g.Key, g => g.Count());
+        }
+
+        public async Task<List<UserAnalyticsStatsDto>> GetUserAnalyticsStatsAsync(List<Guid> userIds)
+        {
+            var users = await _context.Users
+                .Where(u => userIds.Contains(u.Id) && !u.IsDeleted)
+                .Select(u => new UserAnalyticsStatsDto
+                {
+                    UserId = u.Id,
+                    UserName = u.UserName,
+                    TemplatesCount = u.Templates.Count(t => !t.IsDeleted && t.IsCurrentVersion),
+                    FormsCount = u.Forms.Count(f => !f.IsDeleted),
+                    CommentsCount = u.Comments.Count(c => !c.IsDeleted),
+                    LikesGivenCount = u.Likes.Count(l => !l.IsDeleted)
+                })
+                .ToListAsync();
+
+            return users;
         }
     }
 }

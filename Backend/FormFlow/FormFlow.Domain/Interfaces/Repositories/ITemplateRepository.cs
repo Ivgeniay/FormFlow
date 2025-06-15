@@ -56,5 +56,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId);
         Task RemoveAllTagsFromTemplateAsync(Guid templateId);
         Task<List<TemplateTag>> GetTemplateTagsAsync(Guid templateId);
+        Task<Dictionary<Guid, int>> GetTemplatesCountByTopicsAsync();
+        Task<Dictionary<string, int>> GetTemplatesCountByMonthAsync();
     }
 }

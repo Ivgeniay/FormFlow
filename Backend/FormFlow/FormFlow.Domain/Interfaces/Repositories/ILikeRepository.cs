@@ -22,5 +22,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<bool> RemoveLikeAsync(Guid templateId, Guid userId);
 
         Task<List<Template>> GetMostLikedTemplatesAsync(int count = 10);
+        Task<Dictionary<Guid, int>> GetLikesCountByTemplatesAsync(List<Guid> templateIds);
+        Task<int> GetTotalLikesCountAsync();
+        Task<Dictionary<string, int>> GetLikesCountByMonthAsync();
     }
 }

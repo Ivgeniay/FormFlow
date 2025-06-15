@@ -18,17 +18,20 @@ namespace FormFlow.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly ITagRepository _tagRepository;
         private readonly ISearchService _searchService;
+        private readonly ITopicRepository _topicRepository;
 
         public TemplateService(
             ITemplateRepository templateRepository,
             IUserRepository userRepository,
             ITagRepository tagRepository,
-            ISearchService searchService)
+            ISearchService searchService,
+            ITopicRepository topicRepository)
         {
             _templateRepository = templateRepository;
             _userRepository = userRepository;
             _tagRepository = tagRepository;
             _searchService = searchService;
+            _topicRepository = topicRepository;
         }
 
         public async Task<TemplateDto> CreateTemplateAsync(CreateTemplateRequest request, Guid authorId)
@@ -555,12 +558,16 @@ namespace FormFlow.Application.Services
         private async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
         {
             var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
+            var topic = await _topicRepository.GetTopicByIdAsync(template.TopicId);
+            var hasAccess = userId.HasValue ? await HasUserAccessToTemplateAsync(template.Id, userId.Value) : template.AccessType == TemplateAccess.Public;
+            var canEdit = userId.HasValue ? await CanUserEditTemplateAsync(template.Id, userId.Value) : false;
 
             var dto = new TemplateDto
             {
                 Id = template.Id,
                 Title = template.Title,
                 Description = template.Description,
+                Topic = topic?.Name ?? "Other",
                 ImageUrl = template.ImageUrl,
                 AccessType = template.AccessType,
                 AuthorId = template.AuthorId,
@@ -599,8 +606,8 @@ namespace FormFlow.Application.Services
                 LikesCount = template.LikesCount,
                 CommentsCount = template.CommentsCount,
                 IsUserLiked = false,
-                HasUserAccess = userId.HasValue ? await HasUserAccessToTemplateAsync(template.Id, userId.Value) : template.AccessType == TemplateAccess.Public,
-                CanUserEdit = userId.HasValue ? await CanUserEditTemplateAsync(template.Id, userId.Value) : false
+                HasUserAccess = hasAccess,
+                CanUserEdit = canEdit
             };
 
             return dto;
