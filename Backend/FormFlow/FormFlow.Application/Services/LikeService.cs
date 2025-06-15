@@ -173,6 +173,7 @@ namespace FormFlow.Application.Services
                 Id = template.Id,
                 Title = template.Title,
                 Description = template.Description,
+                TopicId = template.TopicId,
                 ImageUrl = template.ImageUrl,
                 AuthorName = template.Author?.UserName ?? "Unknown Author",
                 CreatedAt = template.CreatedAt,

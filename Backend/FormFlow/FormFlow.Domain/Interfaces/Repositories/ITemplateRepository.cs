@@ -16,7 +16,9 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task DeleteAsync(Guid id);
         Task DeleteAllVersionsAsync(Guid baseTemplateId);
 
-
+        Task<List<Guid>> GetTemplateTagIdsAsync(Guid templateId);
+        Task<List<Guid>> GetTemplateAllowedUserIdsAsync(Guid templateId);
+        Task<Dictionary<Guid, string>> GetTemplateTopicsAsync(List<Guid> templateIds);
 
         Task<PagedResult<Template>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize);
         Task<PagedResult<Template>> GetPopularTemplatesAsync(int page, int pageSize);
@@ -40,6 +42,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<bool> IsAuthorAsync(Guid templateId, Guid userId);
         Task<bool> IsAuthorOfBaseTemplateAsync(Guid baseTemplateId, Guid userId);
         Task AddAllowedUserAsync(Guid templateId, Guid userId);
+        Task AddAllowedUsersAsync(Guid templateId, List<Guid> userIds);
         Task RemoveAllowedUserAsync(Guid templateId, Guid userId);
 
         Task<int> GetFormsCountAsync(Guid templateId);
@@ -53,8 +56,10 @@ namespace FormFlow.Domain.Interfaces.Repositories
 
         Task AddTagToTemplateAsync(Guid templateId, Guid tagId);
         Task AddTagsToTemplateAsync(Guid templateId, List<Guid> tagIds);
+        Task RemoveTagsFromTemplateAsync(Guid templateId, List<Guid> tagIds);
         Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId);
         Task RemoveAllTagsFromTemplateAsync(Guid templateId);
+        Task RemoveAllowedUsersFromTemplateAsync(Guid templateId, List<Guid> userIds);
         Task<List<TemplateTag>> GetTemplateTagsAsync(Guid templateId);
         Task<Dictionary<Guid, int>> GetTemplatesCountByTopicsAsync();
         Task<Dictionary<string, int>> GetTemplatesCountByMonthAsync();

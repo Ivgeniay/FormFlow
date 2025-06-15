@@ -77,6 +77,7 @@ namespace FormFlow.Application.Services
             {
                 Id = template.Id,
                 Title = template.Title,
+                TopicId = template.TopicId,
                 Description = template.Description,
                 ImageUrl = template.ImageUrl,
                 AuthorName = template.Author?.UserName ?? string.Empty,

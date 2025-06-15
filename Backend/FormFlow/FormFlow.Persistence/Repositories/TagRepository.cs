@@ -25,6 +25,14 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Name == normalizedName);
         }
 
+        public async Task<Dictionary<string, Guid>> GetTagIdsByNamesAsync(List<string> names)
+        {
+            var normalizedNames = names.Select(n => n.Trim().ToLower()).ToList();
+            return await _context.Tags
+                .Where(t => normalizedNames.Contains(t.Name))
+                .ToDictionaryAsync(t => t.Name, t => t.Id);
+        }
+
         public async Task<Tag> CreateAsync(Tag tag)
         {
             _context.Tags.Add(tag);

@@ -1,13 +1,12 @@
-﻿using FormFlow.Application.DTOs.Templates;
+﻿using FormFlow.Domain.Models.General.QuestionDetailsModels;
+using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Models.SearchService;
+using FormFlow.Domain.Interfaces.Services;
+using FormFlow.Application.DTOs.Templates;
 using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
-using FormFlow.Domain.Interfaces.Repositories;
-using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
-using FormFlow.Domain.Models.General.QuestionDetailsModels;
-using FormFlow.Domain.Models.SearchService;
-using System;
 using System.Text.Json;
 
 namespace FormFlow.Application.Services
@@ -46,6 +45,7 @@ namespace FormFlow.Application.Services
             var template = new Template
             {
                 Title = request.Title,
+                TopicId = request.TopicId,
                 Description = request.Description,
                 AccessType = request.AccessType,
                 AuthorId = authorId,
@@ -63,13 +63,8 @@ namespace FormFlow.Application.Services
             }
 
             if (request.AllowedUserIds.Any())
-            {
-                foreach (var userId in request.AllowedUserIds)
-                {
-                    await _templateRepository.AddAllowedUserAsync(createdTemplate.Id, userId);
-                }
-            }
-
+                await _templateRepository.AddAllowedUsersAsync(createdTemplate.Id, request.AllowedUserIds);
+            
             await IndexTemplateAsync(createdTemplate.Id);
 
             return await MapToTemplateDtoAsync(createdTemplate, authorId);
@@ -119,17 +114,14 @@ namespace FormFlow.Application.Services
             }
 
             if (request.AllowedUserIds.Any())
-            {
-                foreach (var allowedUserId in request.AllowedUserIds)
-                {
-                    await _templateRepository.AddAllowedUserAsync(createdVersion.Id, allowedUserId);
-                }
-            }
+                await _templateRepository.AddAllowedUsersAsync(createdVersion.Id, request.AllowedUserIds);
+
 
             await IndexTemplateAsync(createdVersion.Id);
 
             return await MapToTemplateDtoAsync(createdVersion, userId);
         }
+
 
         public async Task<TemplateDto> UpdateTemplateAsync(UpdateTemplateRequest request, Guid userId)
         {
@@ -143,6 +135,7 @@ namespace FormFlow.Application.Services
             template.Title = request.Title;
             template.Description = request.Description;
             template.AccessType = request.AccessType;
+            template.TopicId = request.TopicId;
 
             template.Questions.Clear();
             foreach (var questionDto in request.Questions)
@@ -159,32 +152,55 @@ namespace FormFlow.Application.Services
                 template.Questions.Add(question);
             }
 
-            await _templateRepository.RemoveAllTagsFromTemplateAsync(template.Id);
-            if (request.Tags.Any())
-            {
-                var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
-                await _templateRepository.AddTagsToTemplateAsync(template.Id, tags.Select(t => t.Id).ToList());
-            }
+            var existingTagIds = await _templateRepository.GetTemplateTagIdsAsync(template.Id);
+            var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
+            var newTagIds = tags.Select(t => t.Id).ToList();
 
-            var existingAllowedUserIds = template.AllowedUsers.Select(au => au.UserId).ToList();
-            foreach (var existingUserId in existingAllowedUserIds)
-            {
-                await _templateRepository.RemoveAllowedUserAsync(template.Id, existingUserId);
-            }
+            var tagsToRemove = existingTagIds.Except(newTagIds).ToList();
+            var tagsToAdd = newTagIds.Except(existingTagIds).ToList();
 
-            if (request.AllowedUserIds.Any())
-            {
-                foreach (var allowedUserId in request.AllowedUserIds)
-                {
-                    await _templateRepository.AddAllowedUserAsync(template.Id, allowedUserId);
-                }
-            }
+            if (tagsToRemove.Any())
+                await _templateRepository.RemoveTagsFromTemplateAsync(template.Id, tagsToRemove);
+            if (tagsToAdd.Any())
+                await _templateRepository.AddTagsToTemplateAsync(template.Id, tagsToAdd);
+
+            var existingAllowedUserIds = await _templateRepository.GetTemplateAllowedUserIdsAsync(template.Id);
+            var usersToRemove = existingAllowedUserIds.Except(request.AllowedUserIds).ToList();
+            var usersToAdd = request.AllowedUserIds.Except(existingAllowedUserIds).ToList();
+
+            if (usersToRemove.Any())
+                await _templateRepository.RemoveAllowedUsersFromTemplateAsync(template.Id, usersToRemove);
+            if (usersToAdd.Any())
+                await _templateRepository.AddAllowedUsersAsync(template.Id, usersToAdd);
 
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
-
             await IndexTemplateAsync(updatedTemplate.Id);
-
             return await MapToTemplateDtoAsync(updatedTemplate, userId);
+        }
+
+        public async Task<TemplateDto> UpdateTemplateAllowedUsersAsync(Guid templateId, UpdateTemplateAllowedUsersRequest request, Guid userId)
+        {
+            if (!await CanUserEditTemplateAsync(templateId, userId))
+                throw new UnauthorizedAccessException("User cannot edit this template");
+
+            var existingUserIds = await _templateRepository.GetTemplateAllowedUserIdsAsync(templateId);
+            var newUserIds = request.AllowedUserIds;
+
+            var usersToRemove = existingUserIds.Except(newUserIds).ToList();
+            var usersToAdd = newUserIds.Except(existingUserIds).ToList();
+
+            if (usersToRemove.Any())
+            {
+                await _templateRepository.RemoveAllowedUsersFromTemplateAsync(templateId, usersToRemove);
+            }
+
+            if (usersToAdd.Any())
+                await _templateRepository.AddAllowedUsersAsync(templateId, usersToAdd);
+
+            await IndexTemplateAsync(templateId);
+
+            var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
+            return await MapToTemplateDtoAsync(template!, userId);
         }
 
         public async Task<TemplateDto> PublishTemplateAsync(Guid templateId, Guid userId)
@@ -416,18 +432,39 @@ namespace FormFlow.Application.Services
             if (!await CanUserEditTemplateAsync(templateId, userId))
                 throw new UnauthorizedAccessException("User cannot edit this template");
 
-            await _templateRepository.RemoveAllTagsFromTemplateAsync(templateId);
+            var existingTagIds = await _templateRepository.GetTemplateTagIdsAsync(templateId);
 
-            if (request.Tags.Any())
+            var existingTagsByName = await _tagRepository.GetTagIdsByNamesAsync(request.Tags);
+            var missingTagNames = request.Tags.Except(existingTagsByName.Keys).ToList();
+
+            if (missingTagNames.Any())
             {
-                var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
-                await _templateRepository.AddTagsToTemplateAsync(templateId, tags.Select(t => t.Id).ToList());
+                var newTags = await _tagRepository.GetOrCreateByNamesAsync(missingTagNames);
+                foreach (var tag in newTags)
+                {
+                    existingTagsByName[tag.Name] = tag.Id;
+                }
             }
+
+            var newTagIds = existingTagsByName.Values.ToList();
+            var tagsToRemove = existingTagIds.Except(newTagIds).ToList();
+            var tagsToAdd = newTagIds.Except(existingTagIds).ToList();
+
+            if (tagsToRemove.Any())
+            {
+                await _templateRepository.RemoveTagsFromTemplateAsync(templateId, tagsToRemove);
+            }
+
+            if (tagsToAdd.Any())
+            {
+                await _templateRepository.AddTagsToTemplateAsync(templateId, tagsToAdd);
+            }
+
+            await IndexTemplateAsync(templateId);
 
             var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
             return await MapToTemplateDtoAsync(template!, userId);
         }
-
 
         public async Task AddAllowedUserToTemplateAsync(Guid templateId, Guid allowedUserId, Guid ownerId)
         {
@@ -501,11 +538,6 @@ namespace FormFlow.Application.Services
             return await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId);
         }
 
-        public async Task<string> UploadTemplateImageAsync(Guid templateId, Stream imageStream, string fileName, Guid userId)
-        {
-            throw new NotImplementedException("Image upload not implemented yet");
-        }
-
         public async Task RemoveTemplateImageAsync(Guid templateId, Guid userId)
         {
             if (!await CanUserEditTemplateAsync(templateId, userId))
@@ -558,7 +590,9 @@ namespace FormFlow.Application.Services
         private async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
         {
             var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
-            var topic = await _topicRepository.GetTopicByIdAsync(template.TopicId);
+            var topicName = (await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id }))
+                .GetValueOrDefault(template.Id, "Other");
+
             var hasAccess = userId.HasValue ? await HasUserAccessToTemplateAsync(template.Id, userId.Value) : template.AccessType == TemplateAccess.Public;
             var canEdit = userId.HasValue ? await CanUserEditTemplateAsync(template.Id, userId.Value) : false;
 
@@ -567,7 +601,7 @@ namespace FormFlow.Application.Services
                 Id = template.Id,
                 Title = template.Title,
                 Description = template.Description,
-                Topic = topic?.Name ?? "Other",
+                Topic = topicName,
                 ImageUrl = template.ImageUrl,
                 AccessType = template.AccessType,
                 AuthorId = template.AuthorId,

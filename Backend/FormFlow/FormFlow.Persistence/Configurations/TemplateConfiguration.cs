@@ -30,6 +30,15 @@ namespace FormFlow.Persistence.Configurations
                 .HasMaxLength(Validation.TemplateDescriptionMaxLength)
                 .HasColumnName(ColumnNames.TemplateDescription);
 
+            builder.Property(t => t.TopicId)
+                .IsRequired()
+                .HasColumnName("topic_id");
+
+            builder.HasOne<Topic>()
+                .WithMany()
+                .HasForeignKey(t => t.TopicId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.Property(t => t.ImageUrl)
                 .HasMaxLength(Validation.ImageUrlMaxLength)
                 .HasColumnName(ColumnNames.ImageUrl);

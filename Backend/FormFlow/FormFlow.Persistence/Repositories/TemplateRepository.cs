@@ -110,6 +110,39 @@ namespace FormFlow.Persistence.Repositories
             }
         }
 
+        public async Task<Dictionary<Guid, string>> GetTemplateTopicsAsync(List<Guid> templateIds)
+        {
+            return await _context.Templates
+                .Where(t => templateIds.Contains(t.Id) && !t.IsDeleted)
+                .Join(_context.Topics,
+                    t => t.TopicId,
+                    topic => topic.Id,
+                    (t, topic) => new { t.Id, topic.Name })
+                .ToDictionaryAsync(x => x.Id, x => x.Name);
+        }
+
+        public async Task<List<Guid>> GetTemplateAllowedUserIdsAsync(Guid templateId)
+        {
+            var template = await _context.Templates
+                .FirstOrDefaultAsync(t => t.Id == templateId && !t.IsDeleted);
+
+            if (template == null || template.AccessType == TemplateAccess.Public)
+                return new List<Guid>();
+
+            return await _context.TemplateAllowedUser
+                .Where(tau => tau.TemplateId == templateId)
+                .Select(tau => tau.UserId)
+                .ToListAsync();
+        }
+
+        public async Task<List<Guid>> GetTemplateTagIdsAsync(Guid templateId)
+        {
+            return await _context.TemplateTags
+                .Where(tt => tt.TemplateId == templateId)
+                .Select(tt => tt.TagId)
+                .ToListAsync();
+        }
+
         public async Task DeleteAllVersionsAsync(Guid baseTemplateId)
         {
             await _context.Templates
@@ -426,6 +459,21 @@ namespace FormFlow.Persistence.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task RemoveTagsFromTemplateAsync(Guid templateId, List<Guid> tagIds)
+        {
+            if (!tagIds.Any()) return;
+
+            var templateTags = await _context.TemplateTags
+                .Where(tt => tt.TemplateId == templateId && tagIds.Contains(tt.TagId))
+                .ToListAsync();
+
+            if (templateTags.Any())
+            {
+                _context.TemplateTags.RemoveRange(templateTags);
+                await _context.SaveChangesAsync();
+            }
+        }
+
         public async Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId)
         {
             var templateTag = await _context.TemplateTags
@@ -447,6 +495,43 @@ namespace FormFlow.Persistence.Repositories
             if (templateTags.Any())
             {
                 _context.TemplateTags.RemoveRange(templateTags);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task RemoveAllowedUsersFromTemplateAsync(Guid templateId, List<Guid> userIds)
+        {
+            if (!userIds.Any()) return;
+
+            var allowedUsers = await _context.TemplateAllowedUser
+                .Where(tau => tau.TemplateId == templateId && userIds.Contains(tau.UserId))
+                .ToListAsync();
+
+            if (allowedUsers.Any())
+            {
+                _context.TemplateAllowedUser.RemoveRange(allowedUsers);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task AddAllowedUsersAsync(Guid templateId, List<Guid> userIds)
+        {
+            if (!userIds.Any()) return;
+            var existingUserIds = await _context.TemplateAllowedUser
+                .Where(tau => tau.TemplateId == templateId && userIds.Contains(tau.UserId))
+                .Select(tau => tau.UserId)
+                .ToListAsync();
+            var newUserIds = userIds.Except(existingUserIds);
+            if (newUserIds.Any())
+            {
+                var templateAllowedUsers = newUserIds.Select(userId => new TemplateAllowedUser
+                {
+                    TemplateId = templateId,
+                    UserId = userId,
+                    CreatedAt = DateTime.UtcNow
+                }).ToList();
+
+                _context.TemplateAllowedUser.AddRange(templateAllowedUsers);
                 await _context.SaveChangesAsync();
             }
         }

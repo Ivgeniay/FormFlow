@@ -9,6 +9,7 @@ namespace FormFlow.Application.Interfaces
         Task<TemplateDto> CreateTemplateAsync(CreateTemplateRequest request, Guid authorId);
         Task<TemplateDto> CreateNewVersionAsync(CreateNewVersionRequest request, Guid userId);
         Task<TemplateDto> UpdateTemplateAsync(UpdateTemplateRequest request, Guid userId);
+        
         Task<TemplateDto> PublishTemplateAsync(Guid templateId, Guid userId);
         Task<TemplateDto> ArchiveTemplateAsync(Guid templateId, Guid userId);
         Task DeleteTemplateAsync(Guid templateId, Guid userId);
@@ -30,7 +31,9 @@ namespace FormFlow.Application.Interfaces
 
         Task AddTagToTemplateAsync(Guid templateId, string tagName, Guid userId);
         Task RemoveTagFromTemplateAsync(Guid templateId, Guid tagId, Guid userId);
+
         Task<TemplateDto> UpdateTemplateTagsAsync(Guid templateId, UpdateTemplateTagsRequest request, Guid userId);
+        Task<TemplateDto> UpdateTemplateAllowedUsersAsync(Guid templateId, UpdateTemplateAllowedUsersRequest request, Guid userId);
 
         Task<bool> UpdateTemplateImageAsync(Guid templateId, string imageUrl, Guid userId);
 
@@ -44,7 +47,6 @@ namespace FormFlow.Application.Interfaces
         Task<bool> CanUserEditTemplateAsync(Guid templateId, Guid userId);
         Task<bool> CanUserCreateNewVersionAsync(Guid baseTemplateId, Guid userId);
 
-        Task<string> UploadTemplateImageAsync(Guid templateId, Stream imageStream, string fileName, Guid userId);
         Task RemoveTemplateImageAsync(Guid templateId, Guid userId);
 
         Task<TemplateVersionInfoDto> GetVersionInfoAsync(Guid baseTemplateId, Guid userId);

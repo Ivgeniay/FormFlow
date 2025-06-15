@@ -6,6 +6,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
     {
         Task<Tag?> GetByIdAsync(Guid id);
         Task<Tag?> GetByNameAsync(string name);
+        Task<Dictionary<string, Guid>> GetTagIdsByNamesAsync(List<string> names);
         Task<Tag> CreateAsync(Tag tag);
         Task<Tag> UpdateAsync(Tag tag);
         Task<bool> ExistsAsync(Guid id);

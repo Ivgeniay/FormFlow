@@ -230,19 +230,36 @@ namespace FormFlow.Application.Services
         public async Task<List<TemplateListItemDto>> GetMostPopularTemplatesAsync(int count = 5)
         {
             var popularTemplates = await _templateRepository.GetPopularTemplatesAsync(1, count);
-            return popularTemplates.Data.Select(MapToTemplateListItem).ToList();
+            return popularTemplates.Data.Select(s => MapToTemplateListItem(s)).ToList();
         }
 
         public async Task<List<TemplateListItemDto>> GetMostLikedTemplatesAsync(int count = 10)
         {
             var likedTemplates = await _likeRepository.GetMostLikedTemplatesAsync(count);
-            return likedTemplates.Select(MapToTemplateListItem).ToList();
+            return likedTemplates.Select(s => MapToTemplateListItem(s)).ToList();
         }
 
         public async Task<List<TemplateListItemDto>> GetLatestTemplatesAsync(int count = 10)
         {
             var latestTemplates = await _templateRepository.GetLatestTemplatesAsync(count);
-            return latestTemplates.Select(MapToTemplateListItem).ToList();
+            return latestTemplates.Select(s => MapToTemplateListItem(s)).ToList();
+        }
+
+        private TemplateListItemDto MapToTemplateListItem(Template s)
+        {
+            return new TemplateListItemDto
+            {
+                Id = s.Id,
+                Title = s.Title,
+                Description = s.Description,
+                TopicId = s.TopicId,
+                ImageUrl = s.ImageUrl,
+                AuthorName = s.Author?.UserName ?? string.Empty,
+                CreatedAt = s.CreatedAt,
+                Tags = s.Tags?.Select(tt => tt.Tag.Name).ToList() ?? new List<string>(),
+                FormsCount = s.FormsCount,
+                LikesCount = s.LikesCount
+            };
         }
 
         public async Task<UserAnalyticsDto> GetUserAnalyticsAsync(Guid userId)
@@ -461,7 +478,11 @@ namespace FormFlow.Application.Services
 
         private TextAnalyticsDto AnalyzeTextAnswers(List<object> answers)
         {
-            var textAnswers = answers.Select(a => a?.ToString() ?? "").Where(s => !string.IsNullOrEmpty(s)).ToList();
+            var textAnswers = answers
+                .Select(a => a?
+                .ToString() ?? "")
+                .Where(s => !string.IsNullOrEmpty(s))
+                .ToList();
 
             if (!textAnswers.Any())
                 return new TextAnalyticsDto();
@@ -737,11 +758,6 @@ namespace FormFlow.Application.Services
             }
 
             return "\"" + value + "\"";
-        }
-
-        private TemplateListItemDto MapToTemplateListItem(Template template, int arg2)
-        {
-            throw new NotImplementedException();
         }
     }
 }

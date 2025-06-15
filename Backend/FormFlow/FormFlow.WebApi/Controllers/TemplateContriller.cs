@@ -314,5 +314,43 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPut("{id}/tags")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTemplateTags(Guid id, [FromBody] UpdateTemplateTagsRequest request)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var template = await _templateService.UpdateTemplateTagsAsync(id, request, userId.Value);
+                return Ok(template);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPut("{id}/allowed-users")]
+        [Authorize]
+        public async Task<IActionResult> UpdateTemplateAllowedUsers(Guid id, [FromBody] UpdateTemplateAllowedUsersRequest request)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var template = await _templateService.UpdateTemplateAllowedUsersAsync(id, request, userId.Value);
+                return Ok(template);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
     }
 }
