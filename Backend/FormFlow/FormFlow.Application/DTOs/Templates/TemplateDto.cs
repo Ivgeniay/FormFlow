@@ -9,6 +9,7 @@ namespace FormFlow.Application.DTOs.Templates
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public Guid? TopicId { get; set; }
         public string Topic { get; set; } = string.Empty;
         public string? ImageUrl { get; set; }
         public TemplateAccess AccessType { get; set; }

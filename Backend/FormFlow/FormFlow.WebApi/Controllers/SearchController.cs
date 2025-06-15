@@ -24,6 +24,7 @@ namespace FormFlow.WebApi.Controllers
             [FromQuery] string q = "",
             [FromQuery] string[]? tags = null,
             [FromQuery] string? author = null,
+            [FromQuery] string? topic = null,
             [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
@@ -37,6 +38,7 @@ namespace FormFlow.WebApi.Controllers
                 var searchQuery = new SearchQuery
                 {
                     Query = q?.Trim() ?? "",
+                    Topic = topic?.Trim(),
                     Tags = tags?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
                     AuthorName = author?.Trim(),
                     SortBy = sortBy,
@@ -64,6 +66,7 @@ namespace FormFlow.WebApi.Controllers
                     searchInfo = new
                     {
                         query = searchQuery.Query,
+                        topic = searchQuery.Topic,
                         tags = searchQuery.Tags ?? new List<string>(),
                         author = searchQuery.AuthorName,
                         sortBy = sortBy.ToString(),
@@ -113,6 +116,7 @@ namespace FormFlow.WebApi.Controllers
                     Query = request.Query?.Trim() ?? "",
                     Tags = request.Tags?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
                     AuthorName = request.AuthorName?.Trim(),
+                    Topic = request.Topic?.Trim(),
                     SortBy = request.SortBy,
                     Page = request.Page,
                     PageSize = request.PageSize,
@@ -142,6 +146,7 @@ namespace FormFlow.WebApi.Controllers
                         query = searchQuery.Query,
                         tags = searchQuery.Tags ?? new List<string>(),
                         author = searchQuery.AuthorName,
+                        topic = searchQuery.Topic,
                         sortBy = request.SortBy.ToString(),
                         dateRange = new { from = request.CreatedAfter, to = request.CreatedBefore },
                         includeArchived = request.IncludeArchived,
@@ -155,19 +160,21 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+
         [HttpGet("admin")]
         [Authorize]
         [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> AdminSearch(
-            [FromQuery] string q = "",
-            [FromQuery] string[]? tags = null,
-            [FromQuery] string? author = null,
-            [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
-            [FromQuery] bool includeDeleted = false,
-            [FromQuery] bool includeArchived = true,
-            [FromQuery] bool includeUnpublished = true,
-            [FromQuery] int page = 1,
-            [FromQuery] int pageSize = 20)
+    [FromQuery] string q = "",
+    [FromQuery] string[]? tags = null,
+    [FromQuery] string? author = null,
+    [FromQuery] string? topic = null,
+    [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
+    [FromQuery] bool includeDeleted = false,
+    [FromQuery] bool includeArchived = true,
+    [FromQuery] bool includeUnpublished = true,
+    [FromQuery] int page = 1,
+    [FromQuery] int pageSize = 20)
         {
             try
             {
@@ -178,6 +185,7 @@ namespace FormFlow.WebApi.Controllers
                     Query = q?.Trim() ?? "",
                     Tags = tags?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
                     AuthorName = author?.Trim(),
+                    Topic = topic?.Trim(),
                     SortBy = sortBy,
                     Page = page,
                     PageSize = pageSize,
@@ -207,6 +215,7 @@ namespace FormFlow.WebApi.Controllers
                         {
                             tags = searchQuery.Tags ?? new List<string>(),
                             author = searchQuery.AuthorName,
+                            topic = searchQuery.Topic,
                             includeDeleted,
                             includeArchived,
                             includeUnpublished
@@ -296,6 +305,7 @@ namespace FormFlow.WebApi.Controllers
         public string Query { get; set; } = "";
         public List<string>? Tags { get; set; }
         public string? AuthorName { get; set; }
+        public string? Topic { get; set; }
         public SearchSortBy SortBy { get; set; } = SearchSortBy.Relevance;
         public DateTime? CreatedAfter { get; set; }
         public DateTime? CreatedBefore { get; set; }

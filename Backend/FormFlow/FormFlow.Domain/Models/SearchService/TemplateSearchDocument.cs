@@ -5,6 +5,7 @@
         public Guid Id { get; set; }
         public string Title { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
+        public string Topic { get; set; } = string.Empty;
         public string QuestionsText { get; set; } = string.Empty;
         public string CommentsText { get; set; } = string.Empty;
         public string AuthorName { get; set; } = string.Empty;

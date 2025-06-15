@@ -601,6 +601,7 @@ namespace FormFlow.Application.Services
                 Id = template.Id,
                 Title = template.Title,
                 Description = template.Description,
+                TopicId = template.TopicId,
                 Topic = topicName,
                 ImageUrl = template.ImageUrl,
                 AccessType = template.AccessType,
@@ -695,10 +696,14 @@ namespace FormFlow.Application.Services
                 .Aggregate("", (current, content) => current + " " + content)
                 .Trim() ?? "";
 
+            var topicNames = await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id });
+            var topicName = topicNames.GetValueOrDefault(template.Id, "Other");
+
             return new TemplateSearchDocument
             {
                 Id = template.Id,
                 Title = template.Title,
+                Topic = topicName,
                 Description = template.Description,
                 QuestionsText = questionsText,
                 CommentsText = commentsText,

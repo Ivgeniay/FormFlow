@@ -7,6 +7,7 @@
         public int PageSize { get; set; } = 20;
         public List<string>? Tags { get; set; }
         public string? AuthorName { get; set; }
+        public string? Topic { get; set; }
         public bool? IncludeDeleted { get; set; }
         public bool? IncludeArchived { get; set; }
         public bool? IncludeUnpublished { get; set; }

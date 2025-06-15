@@ -56,6 +56,7 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ITagService, TagService>();
             builder.Services.AddScoped<IFormSubscribeService, FormSubscribeService>();
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+            builder.Services.AddScoped<ITopicService, TopicService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 

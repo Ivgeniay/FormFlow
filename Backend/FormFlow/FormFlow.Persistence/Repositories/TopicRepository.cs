@@ -48,7 +48,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<Topic?> GetTopicByIdAsync(Guid topicId) =>
             await _context.Topics
                 .FirstOrDefaultAsync(t => t.Id == topicId);
-        
+
 
         public async Task<PagedResult<Topic>> GetTopicsAsync(int count, int page)
         {
@@ -59,6 +59,38 @@ namespace FormFlow.Persistence.Repositories
 
             var totalCount = await _context.Topics.CountAsync();
             return new PagedResult<Topic>(li, totalCount, page, count);
+        }
+
+        public async Task<bool> TopicNameExistsAsync(string name) =>
+            await _context.Topics.AnyAsync(t => t.Name == name);
+
+        public async Task<Topic> CreateTopicAsync(Topic topic)
+        {
+            if (await TopicNameExistsAsync(topic.Name))
+                throw new ArgumentException($"Topic with name '{topic.Name}' already exists");
+            _context.Topics.Add(topic);
+            await _context.SaveChangesAsync();
+            return topic;
+        }
+
+        public async Task<Topic> UpdateTopicAsync(Guid id, string name)
+        {
+            var topic = await GetTopicByIdAsync(id);
+            if (topic == null)
+                throw new ArgumentException($"Topic with ID '{id}' not found");
+            topic.Name = name.Trim();
+            _context.Topics.Update(topic);
+            await _context.SaveChangesAsync();
+            return topic;
+        }
+
+        public async Task DeleteTopicAsync(Guid id)
+        {
+            var topic = await GetTopicByIdAsync(id);
+            if (topic == null)
+                throw new ArgumentException($"Topic with ID '{id}' not found");
+            _context.Topics.Remove(topic);
+            await _context.SaveChangesAsync();
         }
     }
 }

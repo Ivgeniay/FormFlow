@@ -125,6 +125,10 @@ namespace FormFlow.Infrastructure.Services
                             .Analyzer("standard")
                         )
                         .Text(t => t
+                            .Name(n => n.Topic)
+                            .Analyzer("standard")
+                        )
+                        .Text(t => t
                             .Name(n => n.QuestionsText)
                             .Analyzer("standard")
                         )
@@ -200,6 +204,15 @@ namespace FormFlow.Infrastructure.Services
                 {
                     Field = "tags",
                     Terms = query.Tags
+                });
+            }
+
+            if (query.Topic != null)
+            {
+                queries.Add(new TermQuery
+                {
+                    Field = "topic",
+                    Value = query.Topic
                 });
             }
 
