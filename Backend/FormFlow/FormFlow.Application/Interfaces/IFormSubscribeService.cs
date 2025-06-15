@@ -11,5 +11,6 @@ namespace FormFlow.Application.Interfaces
         Task<List<TemplateListItemDto>> GetUserSubscriptionsAsync(Guid userId);
         Task<List<UserSearchDto>> GetSubscribersAsync(Guid templateId);
         Task NotifySubscribersAsync(Guid formId);
+        Task NotifyMeAsync(Guid formId, Guid userId);
     }
 }

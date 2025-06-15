@@ -24,6 +24,7 @@ namespace FormFlow.WebApi.Controllers
         [Authorize]
         public async Task<IActionResult> SubmitForm([FromBody] SubmitFormRequest request)
         {
+            bool isFormSubmitted = false;
             try
             {
                 var userId = this.GetCurrentUserId();
@@ -31,14 +32,20 @@ namespace FormFlow.WebApi.Controllers
                     return Unauthorized(new { message = "Invalid user context" });
 
                 var form = await _formService.SubmitFormAsync(request, userId.Value);
+                isFormSubmitted = true;
 
-                await _formSubscribeService.NotifySubscribersAsync(form.Id);
+                if (request.SendCopyToEmail)
+                    await _formSubscribeService.NotifyMeAsync(form.Id, userId.Value);
 
                 return Ok(form);
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new
+                {
+                    message = ex.Message,
+                    isFormSubmitted = isFormSubmitted,
+                });
             }
         }
 

@@ -131,5 +131,23 @@ namespace FormFlow.Application.Services
                 }
             }
         }
+
+        public async Task NotifyMeAsync(Guid formId, Guid userId)
+        {
+            var form = await _formRepository.GetWithTemplateAsync(formId);
+            if (form == null)
+                throw new FormNotFoundException(formId);
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+            if (user.IsBlocked)
+                throw new UserBlockedException(userId);
+
+            var contact = user.Contacts?.FirstOrDefault(e => e.Type == ContactType.Email && e.IsPrimary);
+            if (contact != null)
+            {
+                await _emailService.SendFormAnswersAsync(contact.Value, formId);
+            }
+        }
     }
 }

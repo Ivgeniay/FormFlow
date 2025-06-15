@@ -2,6 +2,7 @@
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.General.QuestionDetailsModels;
 using System.Text.Json;
@@ -13,15 +14,18 @@ namespace FormFlow.Application.Services
         private readonly IFormRepository _formRepository;
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IFormSubscribeService _formSubscribeService;
 
         public FormService(
             IFormRepository formRepository,
             ITemplateRepository templateRepository,
-            IUserRepository userRepository)
+            IUserRepository userRepository,
+            IFormSubscribeService formSubscribeService)
         {
             _formRepository = formRepository;
             _templateRepository = templateRepository;
             _userRepository = userRepository;
+            _formSubscribeService = formSubscribeService;
         }
 
         public async Task<FormDto> SubmitFormAsync(SubmitFormRequest request, Guid userId)
@@ -36,6 +40,10 @@ namespace FormFlow.Application.Services
             var template = await _templateRepository.GetByIdAsync(request.TemplateId);
             if (template == null)
                 throw new TemplateNotFoundException(request.TemplateId);
+            if (template.IsDeleted)
+                throw new TemplateDeletedException(request.TemplateId);
+            if (!template.IsPublished)
+                throw new TemplateNotPublishedException(request.TemplateId);
 
             if (!await _templateRepository.HasUserAccessAsync(request.TemplateId, userId))
                 throw new TemplateAccessDeniedException(request.TemplateId, userId);
@@ -55,6 +63,8 @@ namespace FormFlow.Application.Services
             };
 
             var createdForm = await _formRepository.CreateAsync(form);
+            await _formSubscribeService.NotifySubscribersAsync(createdForm.Id);
+
             return await MapToFormDtoAsync(createdForm, userId);
         }
 
@@ -257,64 +267,5 @@ namespace FormFlow.Application.Services
             return dto;
         }
 
-        private FormListItemDto MapToFormListItemDto(Form form)
-        {
-            var answers = JsonSerializer.Deserialize<Dictionary<Guid, object>>(form.AnswersData) ?? new Dictionary<Guid, object>();
-
-            var dto = new FormListItemDto
-            {
-                Id = form.Id,
-                TemplateId = form.TemplateId,
-                TemplateName = form.Template?.Title ?? "Unknown Template",
-                UserName = form.User?.UserName ?? "Unknown User",
-                SubmittedAt = form.SubmittedAt,
-                DisplayColumns = new List<FormResultColumnDto>()
-            };
-
-            if (form.Template?.Questions != null)
-            {
-                var displayQuestions = form.Template.Questions
-                    .Where(q => !q.IsDeleted && q.ShowInResults)
-                    .OrderBy(q => q.Order)
-                    .Take(5);
-
-                foreach (var question in displayQuestions)
-                {
-                    var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(question.Data);
-                    var answerValue = answers.ContainsKey(question.Id) ? answers[question.Id] : null;
-                    var displayValue = FormatAnswerForDisplay(answerValue, questionDetails?.Type ?? QuestionType.ShortText);
-
-                    dto.DisplayColumns.Add(new FormResultColumnDto
-                    {
-                        QuestionId = question.Id,
-                        QuestionTitle = questionDetails?.Title ?? "Unknown Question",
-                        QuestionType = questionDetails?.Type ?? QuestionType.ShortText,
-                        DisplayValue = displayValue
-                    });
-                }
-            }
-
-            return dto;
-        }
-
-        private string FormatAnswerForDisplay(object? answer, QuestionType questionType)
-        {
-            if (answer == null) return "—";
-
-            return questionType switch
-            {
-                QuestionType.ShortText or QuestionType.LongText =>
-                    answer.ToString()?.Length > 50 ? answer.ToString()![..50] + "..." : answer.ToString() ?? "—",
-                QuestionType.SingleChoice or QuestionType.Dropdown =>
-                    $"Option {answer}",
-                QuestionType.MultipleChoice =>
-                    "Multiple",
-                QuestionType.Scale or QuestionType.Rating =>
-                    answer.ToString() ?? "—",
-                QuestionType.Date or QuestionType.Time =>
-                    DateTime.TryParse(answer.ToString(), out var date) ? date.ToString("yyyy-MM-dd") : answer.ToString() ?? "—",
-                _ => answer.ToString() ?? "—"
-            };
-        }
     }
 }
