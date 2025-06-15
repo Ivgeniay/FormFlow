@@ -119,10 +119,7 @@ namespace FormFlow.WebApi
             app.MapOpenApi();
             app.MapScalarApiReference();
 #endif
-            app.EnsureDB()
-                .WithDefaultColorThemes()
-                .WithDefaultLanguages()
-                .WithDefaultTopics();
+
             app.UseCors();
 
             app.UseHttpsRedirection();
@@ -133,6 +130,18 @@ namespace FormFlow.WebApi
 
             app.MapControllers();
             app.MapHub<TemplateActivityHub>("/hubs/template-activity");
+
+            Task.Run(async () =>
+            {
+                await app.EnsureDB();
+                await app.WithDefaultColorThemes();
+                await app.WithDefaultLanguages();
+                await app.WithDefaultTopics();
+                await app.WithUsers(10);
+                await app.WithTemplates(15);
+                await app.WithLikes(0.5f);
+
+            });
 
             app.Run();
         }
