@@ -131,17 +131,18 @@ namespace FormFlow.WebApi
             app.MapControllers();
             app.MapHub<TemplateActivityHub>("/hubs/template-activity");
 
-            Task.Run(async () =>
+            try
             {
-                await app.EnsureDB();
-                await app.WithDefaultColorThemes();
-                await app.WithDefaultLanguages();
-                await app.WithDefaultTopics();
-                await app.WithUsers(10);
-                await app.WithTemplates(15);
-                await app.WithLikes(0.5f);
-
-            });
+                Task.Run(async () =>
+                {
+                    await app.EnsureDB();
+                    await TestDataSeeder.ExecuteTestData(app, userCount: 10, templateCount: 15, likeProbability: 0.5f);
+                });
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"Error during database initialization: {e.Message}");
+            }
 
             app.Run();
         }

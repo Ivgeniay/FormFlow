@@ -380,7 +380,6 @@ namespace FormFlow.Application.Services
         public async Task<PagedResult<UserDto>> GetUsersPagedAsync(int page, int pageSize)
         {
             var result = await _userRepository.GetUsersWithContactsPagedAsync(page, pageSize);
-            //var userDtos = result.Data.Select(DTOMapper.MapToUserListItemDto).Cast<UserDto>().ToList();
             var userDtos = result.Data.Select(DTOMapper.MapToUserDto).Cast<UserDto>().ToList();
             return new PagedResult<UserDto>(userDtos, result.Pagination.TotalCount, page, pageSize);
         }
