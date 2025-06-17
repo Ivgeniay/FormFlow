@@ -1,10 +1,6 @@
-import React from 'react';
-import { AppLoader } from './components/AppLoader';
-import { ThemeToggle } from './ThemeToggle';
 import { ColorTheme } from './shared/hooks/useTheme';
 import { Language } from './shared/hooks/useLanguage';
-import { ThemeDropdown } from './components/ThemeDropdown';
-import { LanguageDropdown } from './components/LanguageDropdown';
+import { Layout } from './components/Layout';
 
 function App() {
 
@@ -86,15 +82,15 @@ function App() {
 
   return (
     <>
-      <div className="p-5 bg-background text-text min-h-screen">
+      <Layout availableLanguages={languages} availableThemes={themes}>Kek</Layout>
+      {/* <div className="p-5 bg-background text-text min-h-screen">
       <div className="flex gap-4 mb-8">
         <ThemeDropdown availableThemes={themes} />
         <LanguageDropdown availableLanguages={languages} />
-        <ThemeToggle availableThemes={themes} />
-      </div>
+      </div> */}
       
-      <AppLoader onRetry={() => console.log("Retry")}/> 
-    </div>
+      {/* <AppLoader onRetry={() => console.log("Retry")}/>  */}
+    {/* </div> */}
     </>
   );
 }

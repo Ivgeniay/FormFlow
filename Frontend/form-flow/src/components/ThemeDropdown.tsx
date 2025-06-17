@@ -17,8 +17,8 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 
     const themeItems: DropdownItem[] = availableThemes.map(theme => ({
         id: theme.id,
-        label: theme.name,
-        value: theme.name,
+        label: t(theme.name.toLowerCase()),
+        value: theme.name.toLowerCase(),
         disabled: !theme.isActive
     }));
 

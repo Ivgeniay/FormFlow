@@ -6,7 +6,7 @@
 
     "welcome": "Welcome",
     "search": "Search",
-    "searchPlaceholder": "Search templates...",
+    "searchPlaceholder": "Search...",
     
     "login": "Login",
     "register": "Register",
@@ -47,7 +47,9 @@
     
     "light": "Light",
     "dark": "Dark",
-    "theme": "Theme",
+    "purple": "Purple",
+    "orange": "Orange",
+    "pink": "Pink",
     "language": "Language",
     
     "success": "Success",

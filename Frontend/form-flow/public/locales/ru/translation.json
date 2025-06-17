@@ -6,7 +6,7 @@
 
     "welcome": "Добро пожаловать",
     "search": "Поиск",
-    "searchPlaceholder": "Поиск шаблонов...",
+    "searchPlaceholder": "Поиск...",
     
     "login": "Вход",
     "register": "Регистрация",
@@ -47,6 +47,9 @@
     
     "light": "Светлая",
     "dark": "Темная",
+    "purple": "Фиолетовая",
+    "orange": "Оранжевая",
+    "pink": "Розовая",
     "theme": "Тема",
     "language": "Язык",
     

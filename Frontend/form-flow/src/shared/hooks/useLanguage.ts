@@ -12,22 +12,15 @@ export interface Language {
     isActive: boolean;
 }
 
-export const useLanguage = (availableLanguages: Language[] = []) => {
-    //const { i18n } = useTranslation();
+export const useLanguage = (availableLanguages: Language[] = []) => { 
+    
     const [currentLanguage, setCurrentLanguage] = React.useState<Language | null>(null);
     const languageKey = 'formflow-language';
 
     const applyLanguage = useCallback((language: Language) => {
         document.documentElement.setAttribute('lang', language.shortCode);
-
-        if (i18n.isInitialized && typeof i18n.changeLanguage === 'function') {
-            i18n.changeLanguage(language.shortCode);
-        }
-        else {
-            console.warn('i18n is not initialized or changeLanguage is not a function');
-        }
-        //i18n.changeLanguage(language.shortCode);
         localStorage.setItem(languageKey, JSON.stringify(language));
+        i18n.changeLanguage(language.shortCode);
     }, []);
 
     React.useEffect(() => {

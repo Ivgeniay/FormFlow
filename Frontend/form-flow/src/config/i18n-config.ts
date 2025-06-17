@@ -11,10 +11,10 @@ i18n
     .init({
         fallbackLng: 'en',
         debug: true,
-        
+
         detection: {
             order: ['localStorage', 'navigator'],
-            lookupLocalStorage: 'formflow-language',
+            lookupLocalStorage: 'i18nextLng',
             caches: ['localStorage'],
         },
 
