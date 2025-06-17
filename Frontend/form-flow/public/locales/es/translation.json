@@ -1,0 +1,56 @@
+{
+    "appName": "FormFlow",
+    "loading": "Loading application...",
+    "retry": "Retry",
+    "errorLoading": "Loading error",
+
+    "welcome": "Welcome",
+    "search": "Search",
+    "searchPlaceholder": "Search templates...",
+    
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "password": "Password",
+    "username": "Username",
+    
+    "home": "Home",
+    "profile": "Profile", 
+    "settings": "Settings",
+    "adminPanel": "Admin Panel",
+    "myTemplates": "My Templates",
+    "myForms": "My Forms",
+    
+    "createTemplate": "Create Template",
+    "editTemplate": "Edit Template",
+    "deleteTemplate": "Delete Template",
+    "templateTitle": "Template Title",
+    "templateDescription": "Template Description",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "view": "View",
+    
+    "fillForm": "Fill Form",
+    "viewForm": "View Form",
+    "submit": "Submit",
+    "required": "Required",
+    
+    "likes": "Likes",
+    "comments": "Comments",
+    "tags": "Tags",
+    "topic": "Topic",
+    "author": "Author",
+    "createdAt": "Created",
+    
+    "light": "Light",
+    "dark": "Dark",
+    "theme": "Theme",
+    "language": "Language",
+    
+    "success": "Success",
+    "warning": "Warning", 
+    "error": "Error"
+}

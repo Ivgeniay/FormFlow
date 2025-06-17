@@ -1,0 +1,56 @@
+{
+    "appName": "FormFlow",
+    "loading": "Загрузка приложения...",
+    "retry": "Попробовать снова",
+    "errorLoading": "Ошибка загрузки",
+
+    "welcome": "Добро пожаловать",
+    "search": "Поиск",
+    "searchPlaceholder": "Поиск шаблонов...",
+    
+    "login": "Вход",
+    "register": "Регистрация",
+    "logout": "Выйти",
+    "email": "Электронная почта",
+    "password": "Пароль",
+    "username": "Имя пользователя",
+    
+    "home": "Главная",
+    "profile": "Профиль", 
+    "settings": "Настройки",
+    "adminPanel": "Админ панель",
+    "myTemplates": "Мои шаблоны",
+    "myForms": "Мои формы",
+    
+    "createTemplate": "Создать шаблон",
+    "editTemplate": "Редактировать шаблон",
+    "deleteTemplate": "Удалить шаблон",
+    "templateTitle": "Название шаблона",
+    "templateDescription": "Описание шаблона",
+    "save": "Сохранить",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "edit": "Редактировать",
+    "view": "Просмотр",
+    
+    "fillForm": "Заполнить форму",
+    "viewForm": "Просмотр формы",
+    "submit": "Отправить",
+    "required": "Обязательно",
+    
+    "likes": "Лайки",
+    "comments": "Комментарии",
+    "tags": "Теги",
+    "topic": "Тема",
+    "author": "Автор",
+    "createdAt": "Создано",
+    
+    "light": "Светлая",
+    "dark": "Темная",
+    "theme": "Тема",
+    "language": "Язык",
+    
+    "success": "Успех",
+    "warning": "Предупреждение", 
+    "error": "Ошибка"
+}

@@ -9,7 +9,6 @@ namespace FormFlow.WebApi.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
-    [RequireRole(UserRole.Admin)]
     public class AdminController : ControllerBase
     {
         private readonly IColorThemeService _colorThemeService;
@@ -53,6 +52,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("color-themes")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> CreateColorTheme([FromBody] ColorTheme colorTheme)
         {
             try
@@ -67,6 +67,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPut("color-themes/{id}")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> UpdateColorTheme(Guid id, [FromBody] ColorTheme colorTheme)
         {
             try
@@ -81,6 +82,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpDelete("color-themes/{id}")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> DeleteColorTheme(Guid id)
         {
             try
@@ -95,6 +97,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("color-themes/{id}/set-default")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> SetDefaultColorTheme(Guid id)
         {
             try
@@ -140,6 +143,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("languages")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> CreateLanguage([FromBody] Language language)
         {
             try
@@ -154,6 +158,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPut("languages/{id}")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> UpdateLanguage(Guid id, [FromBody] Language language)
         {
             try
@@ -168,6 +173,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpDelete("languages/{id}")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> DeleteLanguage(Guid id)
         {
             try
@@ -182,6 +188,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("languages/{id}/set-default")]
+        [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> SetDefaultLanguage(Guid id)
         {
             try

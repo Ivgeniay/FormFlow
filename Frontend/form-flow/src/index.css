@@ -2,14 +2,3 @@
 @import 'tailwindcss/components';
 @import 'tailwindcss/utilities';
 
-:root {
-  --primary-color: #6f42c1;
-}
-
-.theme-dark {
-  --primary-color: #6f42c1;
-}
-
-.theme-light {
-  --primary-color: #007bff;
-}

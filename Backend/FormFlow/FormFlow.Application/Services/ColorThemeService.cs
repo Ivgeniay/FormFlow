@@ -43,7 +43,7 @@ namespace FormFlow.Application.Services
 
             existing.Name = colorTheme.Name;
             existing.CssClass = colorTheme.CssClass;
-            existing.PrimaryColor = colorTheme.PrimaryColor;
+            existing.ColorVariables = colorTheme.ColorVariables;
             existing.IsActive = colorTheme.IsActive;
 
             return await _colorThemeRepository.UpdateAsync(existing);

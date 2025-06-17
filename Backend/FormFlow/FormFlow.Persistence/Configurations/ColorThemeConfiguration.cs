@@ -26,10 +26,10 @@ namespace FormFlow.Persistence.Configurations
                 .HasMaxLength(50)
                 .HasColumnName("css_class");
 
-            builder.Property(ct => ct.PrimaryColor)
+            builder.Property(ct => ct.ColorVariables)
                 .IsRequired()
-                .HasMaxLength(20)
-                .HasColumnName("primary_color");
+                .HasMaxLength(300)
+                .HasColumnName("color_variables");
 
             builder.Property(ct => ct.IsDefault)
                 .IsRequired()

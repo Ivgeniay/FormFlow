@@ -111,7 +111,17 @@ namespace FormFlow.WebApi.Common.Extensions
                 {
                     Name = "Light",
                     CssClass = "theme-light",
-                    PrimaryColor = "#007bff",
+                    ColorVariables = @"{
+""--primary-color"": ""#3b82f6"",
+""--background-color"": ""#ffffff"",
+""--surface-color"": ""#f8fafc"",
+""--text-color"": ""#1e293b"",
+""--text-muted-color"": ""#64748b"",
+""--border-color"": ""#e2e8f0"",
+""--success-color"": ""#10b981"",
+""--warning-color"": ""#f59e0b"",
+""--error-color"": ""#ef4444""
+}",
                     IsDefault = true,
                     IsActive = true
                 };
@@ -120,7 +130,74 @@ namespace FormFlow.WebApi.Common.Extensions
                 {
                     Name = "Dark",
                     CssClass = "theme-dark",
-                    PrimaryColor = "#6f42c1",
+                    ColorVariables = @"{
+""--primary-color"": ""#60a5fa"",
+""--background-color"": ""#0f172a"",
+""--surface-color"": ""#1e293b"",
+""--text-color"": ""#f1f5f9"",
+""--text-muted-color"": ""#94a3b8"",
+""--border-color"": ""#334155"",
+""--success-color"": ""#34d399"",
+""--warning-color"": ""#fbbf24"",
+""--error-color"": ""#f87171""
+}",
+                    IsDefault = false,
+                    IsActive = true
+                };
+
+                var purpleTheme = new ColorTheme
+                {
+                    Name = "Purple",
+                    CssClass = "theme-purple",
+                    ColorVariables = @"{
+""--primary-color"": ""#8b5cf6"",
+""--background-color"": ""#faf5ff"",
+""--surface-color"": ""#f3e8ff"",
+""--text-color"": ""#581c87"",
+""--text-muted-color"": ""#7c3aed"",
+""--border-color"": ""#ddd6fe"",
+""--success-color"": ""#10b981"",
+""--warning-color"": ""#f59e0b"",
+""--error-color"": ""#ef4444""
+}",
+                    IsDefault = false,
+                    IsActive = true
+                };
+
+                var orangeTheme = new ColorTheme
+                {
+                    Name = "Orange",
+                    CssClass = "theme-orange",
+                    ColorVariables = @"{
+""--primary-color"": ""#ea580c"",
+""--background-color"": ""#fff7ed"",
+""--surface-color"": ""#fed7aa"",
+""--text-color"": ""#9a3412"",
+""--text-muted-color"": ""#c2410c"",
+""--border-color"": ""#fdba74"",
+""--success-color"": ""#10b981"",
+""--warning-color"": ""#f59e0b"",
+""--error-color"": ""#ef4444""
+}",
+                    IsDefault = false,
+                    IsActive = true
+                };
+
+                var pinkTheme = new ColorTheme
+                {
+                    Name = "Pink",
+                    CssClass = "theme-pink",
+                    ColorVariables = @"{
+""--primary-color"": ""#ec4899"",
+""--background-color"": ""#fdf2f8"",
+""--surface-color"": ""#fce7f3"",
+""--text-color"": ""#831843"",
+""--text-muted-color"": ""#be185d"",
+""--border-color"": ""#f9a8d4"",
+""--success-color"": ""#10b981"",
+""--warning-color"": ""#f59e0b"",
+""--error-color"": ""#ef4444""
+}",
                     IsDefault = false,
                     IsActive = true
                 };
@@ -481,4 +558,5 @@ namespace FormFlow.WebApi.Common.Extensions
             };
         }
     }
+
 }

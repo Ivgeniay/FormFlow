@@ -1,18 +1,39 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 export interface ColorTheme {
-    id : string;
-    name : string;
-    cssClass : string;
-    primaryColor : string;
-    isDefault : boolean;
-    isActive : boolean;
+    id: string;
+    name: string;
+    cssClass: string;
+    colorVariables: string;
+    isDefault: boolean;
+    isActive: boolean;
 }
+
 
 export const useTheme = (availableThemes: ColorTheme[] = []) => {
     const [currentTheme, setCurrentTheme] = React.useState<ColorTheme | null>(null);
     const themeName = 'formflow-theme';
 
+    const applyTheme = useCallback((theme: ColorTheme) => {
+        document.documentElement.className = theme.cssClass;
+        
+        availableThemes.forEach(t => {
+            document.documentElement.classList.remove(t.cssClass);
+        });
+            
+        try {
+            const colorVariables = JSON.parse(theme.colorVariables);
+            
+            document.documentElement.classList.add(theme.cssClass);
+            Object.entries(colorVariables).forEach(([key, value]) => {
+                document.documentElement.style.setProperty(key, value as string);
+            });
+        } catch (error) {
+            console.error('Error parsing color variables:', error);
+        }
+        
+        localStorage.setItem(themeName, JSON.stringify(theme));
+    }, [availableThemes]);
 
     useEffect(() => {
         if (availableThemes.length === 0) return;
@@ -33,25 +54,25 @@ export const useTheme = (availableThemes: ColorTheme[] = []) => {
             setCurrentTheme(defaultTheme);
             applyTheme(defaultTheme);
         }
-    }, [availableThemes]);
-
-    const applyTheme = (theme: ColorTheme) => {
-        document.documentElement.className = theme.cssClass;
-        document.documentElement.style.setProperty('--primary-color', theme.primaryColor);
-        localStorage.setItem('formflow-theme', JSON.stringify(theme));
-    }
+    }, [availableThemes, applyTheme]);
     
     const setTheme = (theme: ColorTheme) => {
         setCurrentTheme(theme);
         applyTheme(theme);
-        localStorage.setItem('formflow-theme', JSON.stringify(theme));
     }
+
+    const setNext = () => {
+    if (!currentTheme || availableThemes.length === 0) return;
+    
+    const currentIndex = availableThemes.findIndex(theme => theme.id === currentTheme.id);
+    const nextIndex = (currentIndex + 1) % availableThemes.length;
+    const nextTheme = availableThemes[nextIndex];
+    setTheme(nextTheme);
+};
 
     return {
         currentTheme,
         setTheme,
-        primaryColor: currentTheme ? currentTheme.primaryColor : '#6f42c1',
+        setNext
     };
 };
-
-
