@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "./Header";
-import { NavMenu } from "./NavMenu";
+import { NavMenu } from "../modules/navMenu/NavMenu";
 import { Language } from "../shared/hooks/useLanguage";
 import { ColorTheme } from "../shared/hooks/useTheme";
 

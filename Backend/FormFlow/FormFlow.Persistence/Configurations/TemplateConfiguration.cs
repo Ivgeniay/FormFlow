@@ -106,6 +106,11 @@ namespace FormFlow.Persistence.Configurations
                 .HasForeignKey(t => t.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            builder.HasOne(t => t.Topic)
+                .WithMany(topic => topic.Templates)
+                .HasForeignKey(t => t.TopicId)
+                .OnDelete(DeleteBehavior.Restrict);
+
             builder.HasMany(t => t.Questions)
                 .WithOne(q => q.Template)
                 .HasForeignKey(q => q.TemplateId)

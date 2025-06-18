@@ -26,6 +26,7 @@
         public int CommentsCount => Comments?.Count(c => !c.IsDeleted) ?? 0;
 
         public User Author { get; set; }
+        public Topic Topic { get; set; }
         public List<Question> Questions { get; set; } = new List<Question>();
         public List<Form> Forms { get; set; } = new List<Form>();
         public List<Comment> Comments { get; set; } = new List<Comment>();

@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import i18n from "../../config/i18n-config";
+import i18n from "../../config/i18n";
 
 export interface Language {
     id: string;

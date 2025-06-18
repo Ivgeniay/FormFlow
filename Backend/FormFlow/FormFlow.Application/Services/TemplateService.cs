@@ -590,7 +590,9 @@ namespace FormFlow.Application.Services
         private async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
         {
             var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
-            var topicName = (await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id }))
+
+            var topicName = template.Topic?.Name ??
+                (await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id }))
                 .GetValueOrDefault(template.Id, "Other");
 
             var hasAccess = userId.HasValue ? await HasUserAccessToTemplateAsync(template.Id, userId.Value) : template.AccessType == TemplateAccess.Public;

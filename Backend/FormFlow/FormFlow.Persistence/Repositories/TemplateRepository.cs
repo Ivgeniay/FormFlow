@@ -273,6 +273,7 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Templates
                 .Include(t => t.Author)
+                .Include(t => t.Topic)
                 .Include(t => t.Questions.Where(q => !q.IsDeleted))
                 .Include(t => t.Forms.Where(f => !f.IsDeleted))
                 .ThenInclude(f => f.User)

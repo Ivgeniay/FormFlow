@@ -54,7 +54,7 @@ namespace FormFlow.Persistence.Configurations
             builder.HasIndex(f => new { f.TemplateId, f.UserId })
                 .IsUnique()
                 .HasDatabaseName(IndexNames.FormsTemplateUserIndex);
-
+            
             builder.HasOne(f => f.Template)
                 .WithMany(t => t.Forms)
                 .HasForeignKey(f => f.TemplateId)

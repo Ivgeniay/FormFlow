@@ -54,5 +54,7 @@
     
     "success": "Success",
     "warning": "Warning", 
-    "error": "Error"
+    "error": "Error",
+
+    "tagSearch": "Search by tags"
 }
