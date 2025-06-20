@@ -1,67 +1,30 @@
-import React, { useCallback } from "react";
-import i18n from "../../config/i18n";
-import { Language } from "../types/language";
+import { useTranslation } from "react-i18next";
+import { useAppStore } from "../../stores/appStore";
+import { useEffect } from "react";
 
-export const useLanguage = (availableLanguages: Language[] = []) => {
-	const [currentLanguage, setCurrentLanguage] = React.useState<Language | null>(
-		null
-	);
-	const languageKey = "formflow-language";
+export const useLanguage = () => {
+	const { i18n } = useTranslation();
+	const { currentLanguage, setCurrentLanguage, languages } = useAppStore();
 
-	const applyLanguage = useCallback((language: Language) => {
-		document.documentElement.setAttribute("lang", language.shortCode);
-		localStorage.setItem(languageKey, JSON.stringify(language));
-		i18n.changeLanguage(language.shortCode);
-	}, []);
-
-	React.useEffect(() => {
-		if (availableLanguages.length === 0) return;
-
-		const savedLanguage = localStorage.getItem(languageKey);
-		if (savedLanguage) {
-			try {
-				const savedLanguageData = JSON.parse(savedLanguage);
-				const language = availableLanguages.find(
-					(l) => l.id === savedLanguageData.id
-				);
-				if (language) {
-					setCurrentLanguage(language);
-					applyLanguage(language);
-					return;
-				}
-			} catch (error) {
-				console.error("Error parsing saved language:", error);
-				localStorage.removeItem(languageKey);
-			}
+	useEffect(() => {
+		if (currentLanguage) {
+			if (i18n.language !== currentLanguage.shortCode)
+				i18n.changeLanguage(currentLanguage.shortCode);
 		}
+	}, [currentLanguage, i18n]);
 
-		const defaultLanguage = availableLanguages.find((l) => l.isDefault);
-		if (defaultLanguage) {
-			setCurrentLanguage(defaultLanguage);
-			applyLanguage(defaultLanguage);
-		}
-	}, [availableLanguages, applyLanguage]);
-
-	const setLanguage = (language: Language) => {
-		setCurrentLanguage(language);
-		applyLanguage(language);
+	const setLanguageById = (id: string) => {
+		setCurrentLanguage(id);
 	};
 
-	const setNext = () => {
-		if (!currentLanguage || availableLanguages.length === 0) return;
-
-		const currentIndex = availableLanguages.findIndex(
-			(l) => l.id === currentLanguage.id
-		);
-		const nextIndex = (currentIndex + 1) % availableLanguages.length;
-		const nextLanguage = availableLanguages[nextIndex];
-
-		setLanguage(nextLanguage);
+	const setLanguageByName = (name: string) => {
+		const language = languages.find((l) => l.name === name);
+		if (language) setCurrentLanguage(language.id);
 	};
 
 	return {
 		currentLanguage,
-		setLanguage,
-		setNext,
+		setLanguageById,
+		setLanguageByName,
 	};
 };

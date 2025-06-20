@@ -1,76 +1,42 @@
-import React, { useCallback, useEffect } from "react";
-import { ColorTheme } from "../types/color-theme";
+import { useEffect } from "react";
+import { useAppStore } from "../../stores/appStore";
 
-export const useTheme = (availableThemes: ColorTheme[] = []) => {
-	const [currentTheme, setCurrentTheme] = React.useState<ColorTheme | null>(
-		null
-	);
-	const themeName = "formflow-theme";
-
-	const applyTheme = useCallback(
-		(theme: ColorTheme) => {
-			document.documentElement.className = theme.cssClass;
-
-			availableThemes.forEach((t) => {
-				document.documentElement.classList.remove(t.cssClass);
-			});
-
-			try {
-				const colorVariables = JSON.parse(theme.colorVariables);
-
-				document.documentElement.classList.add(theme.cssClass);
-				Object.entries(colorVariables).forEach(([key, value]) => {
-					document.documentElement.style.setProperty(key, value as string);
-				});
-			} catch (error) {
-				console.error("Error parsing color variables:", error);
-			}
-
-			localStorage.setItem(themeName, JSON.stringify(theme));
-		},
-		[availableThemes]
-	);
+export const useTheme = () => {
+	const { currentTheme, setCurrentTheme, themes } = useAppStore();
 
 	useEffect(() => {
-		if (availableThemes.length === 0) return;
+		if (currentTheme) {
+			applyTheme(currentTheme);
+		}
+	}, [currentTheme]);
 
-		const savedTheme = localStorage.getItem(themeName);
-		if (savedTheme) {
-			const savedThemeData = JSON.parse(savedTheme);
-			const theme = availableThemes.find((t) => t.id === savedThemeData.id);
-			if (theme) {
-				setCurrentTheme(theme);
-				applyTheme(theme);
-				return;
-			}
+	const applyTheme = (theme: any) => {
+		const root = document.documentElement;
+
+		if (theme.colorVariables) {
+			const variables = JSON.parse(theme.colorVariables);
+			Object.entries(variables).forEach(([key, value]) => {
+				root.style.setProperty(key, value as string);
+			});
 		}
 
-		const defaultTheme = availableThemes.find((t) => t.isDefault);
-		if (defaultTheme) {
-			setCurrentTheme(defaultTheme);
-			applyTheme(defaultTheme);
+		if (theme.cssClass) {
+			document.body.className = theme.cssClass;
 		}
-	}, [availableThemes, applyTheme]);
-
-	const setTheme = (theme: ColorTheme) => {
-		setCurrentTheme(theme);
-		applyTheme(theme);
 	};
 
-	const setNext = () => {
-		if (!currentTheme || availableThemes.length === 0) return;
+	const setThemeById = (id: string) => {
+		setCurrentTheme(id);
+	};
 
-		const currentIndex = availableThemes.findIndex(
-			(theme) => theme.id === currentTheme.id
-		);
-		const nextIndex = (currentIndex + 1) % availableThemes.length;
-		const nextTheme = availableThemes[nextIndex];
-		setTheme(nextTheme);
+	const setThemeByName = (name: string) => {
+		const theme = themes.find((t) => t.name === name);
+		if (theme) setCurrentTheme(theme.id);
 	};
 
 	return {
 		currentTheme,
-		setTheme,
-		setNext,
+		setThemeById,
+		setThemeByName,
 	};
 };

@@ -66,7 +66,7 @@ namespace FormFlow.WebApi.Common.Extensions
                     CreateDefaultTopics,
                     (scope) => CreateUsers(scope, userCount),
                     (scope) => CreateTemplates(scope, templateCount),
-                    (scope) => CreateLikes(scope, likeProbability)
+                    //(scope) => CreateLikes(scope, likeProbability)
                 };
 
                 foreach (var step in steps)
@@ -204,6 +204,9 @@ namespace FormFlow.WebApi.Common.Extensions
 
                 await colorThemeService.CreateAsync(lightTheme);
                 await colorThemeService.CreateAsync(darkTheme);
+                await colorThemeService.CreateAsync(purpleTheme);
+                await colorThemeService.CreateAsync(orangeTheme);
+                await colorThemeService.CreateAsync(pinkTheme);
 
                 Console.WriteLine("Default color themes created successfully.");
                 return true;
@@ -471,6 +474,7 @@ namespace FormFlow.WebApi.Common.Extensions
 
                 var random = new Random();
                 var likesCreated = 0;
+                var likesDropped = 0;
                 var totalPossibleLikes = usersResult.Data.Count * templatesResult.Data.Count;
                 var errors = 0;
 
@@ -482,10 +486,14 @@ namespace FormFlow.WebApi.Common.Extensions
                         {
                             try
                             {
-                                var success = await likeService.AddLikeAsync(user.Id, template.Id);
-                                if (success)
+                                var success = await likeService.ToggleLikeAsync(user.Id, template.Id);
+                                if (success.IsLiked)
                                 {
                                     likesCreated++;
+                                }
+                                else
+                                {
+                                    likesDropped++;
                                 }
                             }
                             catch (Exception ex)
@@ -501,7 +509,7 @@ namespace FormFlow.WebApi.Common.Extensions
                     }
                 }
 
-                Console.WriteLine($"Test likes creation completed. Created: {likesCreated}/{totalPossibleLikes} possible likes");
+                Console.WriteLine($"Test likes creation completed. Created: {likesCreated}/{totalPossibleLikes} possible likes. Likes dropped: {likesDropped}");
                 return true;
             }
             catch (Exception ex)

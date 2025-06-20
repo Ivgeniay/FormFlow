@@ -7,7 +7,7 @@ namespace FormFlow.WebApi.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     public class UserSettingsController : ControllerBase
     {
         private readonly IUserSettingsService _userSettingsService;
@@ -25,6 +25,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<IActionResult> GetMySettings()
         {
             try

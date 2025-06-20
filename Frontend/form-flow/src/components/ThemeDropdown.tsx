@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Dropdown, DropdownItem } from "../ui/Dropdown/Dropdown";
 import { useTheme } from "../shared/hooks/useTheme";
 import { ColorTheme } from "../shared/types/color-theme";
+import { useAppStore } from "../stores/appStore";
 
 interface ThemeDropdownProps {
 	availableThemes: ColorTheme[];
@@ -14,7 +15,8 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 	className,
 }) => {
 	const { t } = useTranslation();
-	const { currentTheme, setTheme } = useTheme(availableThemes);
+	const { currentTheme } = useAppStore();
+	const { setThemeById } = useTheme();
 
 	const themeItems: DropdownItem[] = availableThemes.map((theme) => ({
 		id: theme.id,
@@ -26,7 +28,7 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 	const handleThemeSelect = (item: DropdownItem) => {
 		const selectedTheme = availableThemes.find((theme) => theme.id === item.id);
 		if (selectedTheme) {
-			setTheme(selectedTheme);
+			setThemeById(selectedTheme.id);
 		}
 	};
 

@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { Dropdown, DropdownItem } from "../ui/Dropdown/Dropdown";
 import { useLanguage } from "../shared/hooks/useLanguage";
 import { Language } from "../shared/types/language";
+import { useAppStore } from "../stores/appStore";
 
 interface LanguageDropdownProps {
 	availableLanguages: Language[];
@@ -13,7 +14,8 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 	className,
 }) => {
 	const { t } = useTranslation();
-	const { currentLanguage, setLanguage } = useLanguage(availableLanguages);
+	const { currentLanguage } = useAppStore();
+	const { setLanguageById } = useLanguage();
 
 	const languageItems: DropdownItem[] = availableLanguages.map((language) => ({
 		id: language.id,
@@ -27,7 +29,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 			(language) => language.id === item.id
 		);
 		if (selectedLanguage) {
-			setLanguage(selectedLanguage);
+			setLanguageById(selectedLanguage.id);
 		}
 	};
 

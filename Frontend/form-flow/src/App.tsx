@@ -12,6 +12,9 @@ import { GoogleCallbackPage } from "./pages/auth/GoogleCallbackPage";
 import { useAuth } from "./modules/auth/hooks/useAuth";
 import { mockThemes, mockLanguages } from "./shared/mock_data";
 import { HomePage } from "./pages/homePage/HomePage";
+import { useAppInitialization } from "./shared/hooks/useAppInitialization";
+import { AppLoader } from "./components/AppLoader";
+import { useAppStore } from "./stores/appStore";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -25,6 +28,13 @@ const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 function App() {
+	const { themes, languages } = useAppStore();
+	const { isInitialized, isLoading, error, retry } = useAppInitialization();
+	if (isLoading) return <AppLoader isVisible={true} />;
+	if (error) {
+		return <div>Error {error}</div>;
+	}
+
 	return (
 		<Router>
 			<Routes>
@@ -54,7 +64,7 @@ function App() {
 				<Route
 					path="/"
 					element={
-						<Layout availableLanguages={mockLanguages} availableThemes={mockThemes}>
+						<Layout availableLanguages={languages} availableThemes={themes}>
 							<HomePage />
 						</Layout>
 					}
