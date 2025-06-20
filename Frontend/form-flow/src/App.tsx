@@ -1,384 +1,69 @@
-import { ColorTheme } from './shared/hooks/useTheme';
-import { Language } from './shared/hooks/useLanguage';
-import { Layout } from './components/Layout';
-import { TagDto, TemplateDto, TopicDto } from './shared/api_types';
-import { TemplateGallery } from './modules/templates/components/TemplateGallery';
-import { User, UserRole } from './shared/domain_types';
-import { TagCloud } from './modules/Tag/components/TagCloud';
+import React from "react";
+import {
+	BrowserRouter as Router,
+	Routes,
+	Route,
+	Navigate,
+} from "react-router-dom";
+import { Layout } from "./components/Layout";
+import { LoginPage } from "./pages/auth/LoginPage";
+import { RegisterPage } from "./pages/auth/RegisterPage";
+import { GoogleCallbackPage } from "./pages/auth/GoogleCallbackPage";
+import { useAuth } from "./modules/auth/hooks/useAuth";
+import { mockThemes, mockLanguages } from "./shared/mock_data";
+import { HomePage } from "./pages/homePage/HomePage";
+
+const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
+	children,
+}) => {
+	const { isAuthenticated } = useAuth();
+
+	if (isAuthenticated) {
+		return <Navigate to="/" replace />;
+	}
+	return <>{children}</>;
+};
 
 function App() {
+	return (
+		<Router>
+			<Routes>
+				<Route
+					path="/login"
+					element={
+						<AuthOnlyRoute>
+							<LoginPage
+								onSwitchToRegister={() => (window.location.href = "/register")}
+							/>
+						</AuthOnlyRoute>
+					}
+				/>
+				<Route
+					path="/register"
+					element={
+						<AuthOnlyRoute>
+							<RegisterPage
+								onSwitchToLogin={() => (window.location.href = "/login")}
+							/>
+						</AuthOnlyRoute>
+					}
+				/>
 
-  const themes: ColorTheme[] = [
-    {
-      id: 'light',
-      name: 'Light',
-      cssClass: 'theme-light',
-      colorVariables: '{"--primary-color": "#3b82f6", "--background-color": "#ffffff", "--surface-color": "#f8fafc", "--text-color": "#1e293b", "--text-muted-color": "#64748b", "--border-color": "#e2e8f0", "--success-color": "#10b981", "--warning-color": "#f59e0b", "--error-color": "#ef4444"}',
-      isDefault: true,
-      isActive: true
-    },
-    {
-      id: 'dark',
-      name: 'Dark',
-      cssClass: 'theme-dark',
-      colorVariables: '{"--primary-color": "#60a5fa", "--background-color": "#0f172a", "--surface-color": "#1e293b", "--text-color": "#f1f5f9", "--text-muted-color": "#94a3b8", "--border-color": "#334155", "--success-color": "#34d399", "--warning-color": "#fbbf24", "--error-color": "#f87171"}',
-      isDefault: false,
-      isActive: true
-    },
-    {
-      id: 'purple',
-      name: 'Purple',
-      cssClass: 'theme-purple',
-      colorVariables: '{"--primary-color": "#8b5cf6", "--background-color": "#faf5ff", "--surface-color": "#f3e8ff", "--text-color": "#581c87", "--text-muted-color": "#7c3aed", "--border-color": "#ddd6fe", "--success-color": "#10b981", "--warning-color": "#f59e0b", "--error-color": "#ef4444"}',
-      isDefault: false,
-      isActive: true
-    },
-    {
-      id: 'orange',
-      name: 'Orange',
-      cssClass: 'theme-orange',
-      colorVariables: '{"--primary-color": "#ea580c", "--background-color": "#fff7ed", "--surface-color": "#fed7aa", "--text-color": "#9a3412", "--text-muted-color": "#c2410c", "--border-color": "#fdba74", "--success-color": "#10b981", "--warning-color": "#f59e0b", "--error-color": "#ef4444"}',
-      isDefault: false,
-      isActive: true
-    },
-    {
-      id: 'pink',
-      name: 'Pink',
-      cssClass: 'theme-pink',
-      colorVariables: '{"--primary-color": "#ec4899", "--background-color": "#fdf2f8", "--surface-color": "#fce7f3", "--text-color": "#831843", "--text-muted-color": "#be185d", "--border-color": "#f9a8d4", "--success-color": "#10b981", "--warning-color": "#f59e0b", "--error-color": "#ef4444"}',
-      isDefault: false,
-      isActive: true
-    }
-  ];
-  const languages: Language[] = [
-    {
-      id: 'en',
-      code: 'en-US',
-      shortCode: 'en',
-      name: 'English',
-      iconURL: null,
-      region: 'United States',
-      isDefault: true,
-      isActive: true
-    },
-    {
-      id: 'ru',
-      code: 'ru-RU', 
-      shortCode: 'ru',
-      name: 'Русский',
-      iconURL: null,
-      region: 'Russia',
-      isDefault: false,
-      isActive: true
-    },
-    {
-      id: 'es',
-      code: 'es-ES',
-      shortCode: 'es', 
-      name: 'Español',
-      iconURL: null,
-      region: 'Spain',
-      isDefault: false,
-      isActive: false
-    }
-  ];
-  const mockUsers: User[] = [
-    {
-      id: '1',
-      userName: 'Александр Петров',
-      role: UserRole.User,
-      isBlocked: false,
-      isDeleted: false,
-      createdAt: new Date('2024-01-15'),
-      updatedAt: new Date('2024-01-15')
-    },
-    {
-      id: '2', 
-      userName: 'Мария Сидорова',
-      role: UserRole.Admin,
-      isBlocked: false,
-      isDeleted: false,
-      createdAt: new Date('2024-02-01'),
-      updatedAt: new Date('2024-02-01')
-    },
-    {
-      id: '3',
-      userName: 'Дмитрий Козлов',
-      role: UserRole.User,
-      isBlocked: false,
-      isDeleted: false,
-      createdAt: new Date('2024-03-10'),
-      updatedAt: new Date('2024-03-10')
-    }
-  ];
+				<Route path="/auth/google/callback" element={<GoogleCallbackPage />} />
 
-  const mockTopics: TopicDto[] = [
-	{ id: 'topic_1', name: 'Образование', isActive: true },
-	{ id: 'topic_2', name: 'Событие', isActive: true },
-	{ id: 'topic_3', name: 'Работа', isActive: true },
-	{ id: 'topic_4', name: 'Исследование', isActive: true },
-	{ id: 'topic_5', name: 'Регистрация', isActive: true },
-	{ id: 'topic_6', name: 'Опрос', isActive: true },
-	{ id: 'topic_7', name: 'Тестирование', isActive: true },
-	{ id: 'topic_8', name: 'Другое', isActive: true }
-];
+				<Route
+					path="/"
+					element={
+						<Layout availableLanguages={mockLanguages} availableThemes={mockThemes}>
+							<HomePage />
+						</Layout>
+					}
+				/>
 
-  const mockTags: TagDto[] = [
-    { id: '1', name: 'Образование', usageCount: 45, createdAt: '2024-01-01T00:00:00Z' },
-    { id: '2', name: 'Опрос', usageCount: 32, createdAt: '2024-01-02T00:00:00Z' },
-    { id: '3', name: 'Работа', usageCount: 28, createdAt: '2024-01-03T00:00:00Z' },
-    { id: '4', name: 'Исследование', usageCount: 15, createdAt: '2024-01-04T00:00:00Z' },
-    { id: '5', name: 'Событие', usageCount: 12, createdAt: '2024-01-05T00:00:00Z' },
-    { id: '6', name: 'Регистрация', usageCount: 8, createdAt: '2024-01-06T00:00:00Z' },
-    { id: '7', name: 'Обратная связь', usageCount: 22, createdAt: '2024-01-07T00:00:00Z' },
-    { id: '8', name: 'Тестирование', usageCount: 18, createdAt: '2024-01-08T00:00:00Z' },
-    { id: '9', name: 'Здоровье', usageCount: 14, createdAt: '2024-01-09T00:00:00Z' },
-    { id: '10', name: 'IT', usageCount: 25, createdAt: '2024-01-10T00:00:00Z' },
-    { id: '11', name: 'Спорт', usageCount: 9, createdAt: '2024-01-11T00:00:00Z' },
-    { id: '12', name: 'Музыка', usageCount: 6, createdAt: '2024-01-12T00:00:00Z' }
-  ];
-
-  const mockTemplates: TemplateDto[] = [
-	{
-      id: '1',
-      title: 'Анкета удовлетворенности студентов',
-      description: 'Опрос для оценки качества образовательных программ и работы преподавателей. Помогает улучшить учебный процесс на основе обратной связи студентов.',
-      topicId: 'topic_1',
-      topic: mockTopics.find(t => t.id === 'topic_1')?.name || 'undefind',
-      imageUrl: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=400&h=300&fit=crop',
-      accessType: 1,
-      authorId: '1',
-      authorName: mockUsers.find(u => u.id ==='1')?.userName || 'undefind',
-      createdAt: '2024-02-15T10:30:00Z',
-      updatedAt: '2024-02-20T14:45:00Z',
-      version: 1,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Образование')!,
-        mockTags.find(t => t.name === 'Опрос')!,
-        mockTags.find(t => t.name === 'Обратная связь')!
-      ],
-      allowedUsers: [],
-      formsCount: 342,
-      likesCount: 156,
-      commentsCount: 23,
-      isUserLiked: false,
-      hasUserAccess: true,
-      canUserEdit: false
-    },
-    {
-      id: '2',
-      title: 'Регистрация на IT-конференцию 2024',
-      description: 'Форма регистрации участников на ежегодную конференцию по информационным технологиям. Включает выбор секций и дополнительных мероприятий.',
-      topicId: 'topic_2',
-      topic: mockTopics.find(t => t.id === 'topic_2')?.name || 'undefind',
-      imageUrl: 'https://images.unsplash.com/photo-1540575467063-178a50c2df87?w=400&h=300&fit=crop',
-      accessType: 1,
-      authorId: '2',
-      authorName: mockUsers.find(u => u.id ==='2')?.userName || 'undefind',
-      createdAt: '2024-03-01T09:15:00Z',
-      updatedAt: '2024-03-15T16:20:00Z',
-      version: 2,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Событие')!,
-        mockTags.find(t => t.name === 'Регистрация')!,
-        mockTags.find(t => t.name === 'IT')!
-      ],
-      allowedUsers: [],
-      formsCount: 567,
-      likesCount: 89,
-      commentsCount: 12,
-      isUserLiked: true,
-      hasUserAccess: true,
-      canUserEdit: false
-    },
-    {
-      id: '3',
-      title: 'Тестирование новой системы управления',
-      description: 'Опрос для сотрудников компании по тестированию нового программного обеспечения. Сбор отзывов о удобстве интерфейса и функциональности.',
-      topicId: 'topic_7',
-      topic: mockTopics.find(t => t.id === 'topic_7')?.name || 'undefind',
-      accessType: 2,
-      authorId: '3',
-      authorName: mockUsers.find(u => u.id ==='3')?.userName || 'undefind',
-      createdAt: '2024-03-20T11:00:00Z',
-      updatedAt: '2024-03-22T13:30:00Z',
-      version: 1,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Тестирование')!,
-        mockTags.find(t => t.name === 'Обратная связь')!,
-        mockTags.find(t => t.name === 'Работа')!,
-        mockTags.find(t => t.name === 'IT')!
-      ],
-      allowedUsers: [],
-      formsCount: 127,
-      likesCount: 34,
-      commentsCount: 8,
-      isUserLiked: false,
-      hasUserAccess: true,
-      canUserEdit: true
-    },
-    {
-      id: '4',
-      title: 'Анкета по здоровому образу жизни',
-      description: 'Исследование привычек и отношения к здоровому питанию, спорту и режиму дня среди молодежи.',
-      topicId: 'topic_4',
-      topic: mockTopics.find(t => t.id === 'topic_4')?.name || 'undefind',
-      imageUrl: 'https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=400&h=300&fit=crop',
-      accessType: 1,
-      authorId: '1',
-      authorName: mockUsers.find(u => u.id ==='1')?.userName || 'undefind',
-      createdAt: '2024-04-01T08:45:00Z',
-      updatedAt: '2024-04-01T08:45:00Z',
-      version: 1,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Исследование')!,
-        mockTags.find(t => t.name === 'Здоровье')!,
-        mockTags.find(t => t.name === 'Спорт')!
-      ],
-      allowedUsers: [],
-      formsCount: 245,
-      likesCount: 78,
-      commentsCount: 15,
-      isUserLiked: false,
-      hasUserAccess: true,
-      canUserEdit: false
-    },
-    {
-      id: '5',
-      title: 'Заявка на отпуск',
-      description: 'Простая форма для подачи заявления на отпуск с указанием дат, типа отпуска и контактной информации.',
-      topicId: 'topic_3',
-      topic: mockTopics.find(t => t.id === 'topic_3')?.name || 'undefind',
-      accessType: 2,
-      authorId: '2',
-      authorName: mockUsers.find(u => u.id ==='2')?.userName || 'undefind',
-      createdAt: '2024-01-10T07:30:00Z',
-      updatedAt: '2024-04-05T15:10:00Z',
-      version: 3,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Работа')!,
-        mockTags.find(t => t.name === 'Регистрация')!
-      ],
-      allowedUsers: [],
-      formsCount: 89,
-      likesCount: 12,
-      commentsCount: 3,
-      isUserLiked: true,
-      hasUserAccess: false,
-      canUserEdit: false
-    },
-    {
-      id: '6',
-      title: 'Оценка курса "Веб-разработка"',
-      description: 'Форма для сбора отзывов студентов о курсе веб-разработки. Оценка преподавателей, материалов и практических заданий.',
-      topicId: 'topic_1',
-      topic: mockTopics.find(t => t.id === 'topic_5')?.name || 'undefind',
-      imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
-      accessType: 1,
-      authorId: '3',
-      authorName: mockUsers.find(u => u.id ==='3')?.userName || 'undefind',
-      createdAt: '2024-04-10T12:00:00Z',
-      updatedAt: '2024-04-12T09:30:00Z',
-      version: 1,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Образование')!,
-        mockTags.find(t => t.name === 'IT')!,
-        mockTags.find(t => t.name === 'Обратная связь')!
-      ],
-      allowedUsers: [],
-      formsCount: 156,
-      likesCount: 67,
-      commentsCount: 18,
-      isUserLiked: true,
-      hasUserAccess: true,
-      canUserEdit: true
-    },
-    {
-      id: '7',
-      title: 'Оценка курса "Веб-разработка"',
-      description: 'Форма для сбора отзывов студентов о курсе веб-разработки. Оценка преподавателей, материалов и практических заданий.',
-      topicId: 'topic_1',
-      topic: mockTopics.find(t => t.id === 'topic_1')?.name || 'undefind',
-      imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=400&h=300&fit=crop',
-      accessType: 1,
-      authorId: '3',
-      authorName: mockUsers.find(u => u.id ==='3')?.userName || 'undefind',
-      createdAt: '2024-04-10T12:00:00Z',
-      updatedAt: '2024-04-12T09:30:00Z',
-      version: 1,
-      isCurrentVersion: true,
-      isPublished: true,
-      isArchived: false,
-      questions: [],
-      tags: [
-        mockTags.find(t => t.name === 'Образование')!,
-        mockTags.find(t => t.name === 'IT')!,
-        mockTags.find(t => t.name === 'Обратная связь')!
-      ],
-      allowedUsers: [],
-      formsCount: 156,
-      likesCount: 67,
-      commentsCount: 18,
-      isUserLiked: true,
-      hasUserAccess: true,
-      canUserEdit: true
-    }
-  ];
-
-  const mockLatestTemplates = mockTemplates
-    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, mockTemplates.length);
-
-  return (
-    <>
-      <Layout availableLanguages={languages} availableThemes={themes}>
-        <TemplateGallery 
-          templates={mockLatestTemplates} 
-          title="Последние шаблоны"
-          maxItems={4}
-          mode="compact"
-          columns={6}
-        />
-        <TagCloud 
-          tags={mockTags} 
-          onTagClick={(e) => console.log(e)}
-        />
-        
-        </Layout>
-      {/* <div className="p-5 bg-background text-text min-h-screen">
-      <div className="flex gap-4 mb-8">
-        <ThemeDropdown availableThemes={themes} />
-        <LanguageDropdown availableLanguages={languages} />
-      </div> */}
-      
-      {/* <AppLoader onRetry={() => console.log("Retry")}/>  */}
-    {/* </div> */}
-    </>
-  );
+				<Route path="*" element={<Navigate to="/" replace />} />
+			</Routes>
+		</Router>
+	);
 }
 
 export default App;
