@@ -1,30 +1,17 @@
 import { useState } from "react";
 import { Header } from "./Header";
 import { NavMenu } from "../modules/navMenu/NavMenu";
-import { Language } from "../shared/types/language";
-import { ColorTheme } from "../shared/types/color-theme";
-
-interface User {
-	id: string;
-	username: string;
-	email: string;
-	isAdmin: boolean;
-}
+import { useAuth } from "../modules/auth/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 interface LayoutProps {
 	children: React.ReactNode;
-	availableThemes: ColorTheme[];
-	availableLanguages: Language[];
 }
 
-export const Layout: React.FC<LayoutProps> = ({
-	children,
-	availableThemes,
-	availableLanguages,
-}) => {
+export const Layout: React.FC<LayoutProps> = ({ children }) => {
 	const [isNavMenuOpen, setIsNavMenuOpen] = useState(false);
-	const [user, setUser] = useState<User | null>(null);
-	const [isAuthenticated, setIsAuthenticated] = useState(false);
+	const navigate = useNavigate();
+	const { user, isAuthenticated, logout } = useAuth();
 
 	const toggleNavMenu = () => {
 		setIsNavMenuOpen(!isNavMenuOpen);
@@ -35,12 +22,19 @@ export const Layout: React.FC<LayoutProps> = ({
 	};
 
 	const handleLogin = () => {
-		console.log("Login clicked");
+		navigate("/login");
 	};
 
-	const handleLogout = () => {
-		setUser(null);
-		setIsAuthenticated(false);
+	const handleRegister = () => {
+		navigate("/register");
+	};
+
+	const handleLogout = async () => {
+		try {
+			await logout();
+		} catch (error) {
+			console.error("Logout failed:", error);
+		}
 	};
 
 	const handleSearch = (query: string) => {
@@ -48,18 +42,18 @@ export const Layout: React.FC<LayoutProps> = ({
 	};
 
 	const handleNavigate = (path: string) => {
-		console.log("Navigate to:", path);
+		navigate(path);
+		closeNavMenu();
 	};
 
 	return (
 		<div className="min-h-screen bg-background">
 			<Header
-				availableThemes={availableThemes}
-				availableLanguages={availableLanguages}
 				user={user}
 				isAuthenticated={isAuthenticated}
 				onToggleNavMenu={toggleNavMenu}
 				onLogin={handleLogin}
+				onRegister={handleRegister}
 				onLogout={handleLogout}
 				onSearch={handleSearch}
 			/>

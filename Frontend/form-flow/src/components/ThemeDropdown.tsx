@@ -25,6 +25,19 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 		disabled: !theme.isActive,
 	}));
 
+	const getThemeItem = (colorTheme: ColorTheme): DropdownItem | null => {
+		var curItem = availableThemes.find((t) => t.id === colorTheme.id);
+		if (curItem) {
+			return {
+				id: curItem.id,
+				label: t(curItem.name.toLowerCase()),
+				value: curItem.name.toLowerCase(),
+				disabled: !curItem.isActive,
+			};
+		}
+		return null;
+	};
+
 	const handleThemeSelect = (item: DropdownItem) => {
 		const selectedTheme = availableThemes.find((theme) => theme.id === item.id);
 		if (selectedTheme) {
@@ -35,6 +48,7 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 	return (
 		<Dropdown
 			items={themeItems}
+			currentItem={getThemeItem(currentTheme)}
 			selectedId={currentTheme?.id}
 			placeholder={t("theme") || "Theme"}
 			onSelect={handleThemeSelect}

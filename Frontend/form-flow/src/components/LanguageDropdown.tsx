@@ -24,6 +24,19 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 		disabled: !language.isActive,
 	}));
 
+	const getLanguageItem = (language: Language): DropdownItem | null => {
+		var lang = availableLanguages.find((l) => l.id === language.id);
+		if (lang) {
+			return {
+				id: language.id,
+				label: language.name,
+				value: language.shortCode,
+				disabled: !language.isActive,
+			};
+		}
+		return null;
+	};
+
 	const handleLanguageSelect = (item: DropdownItem) => {
 		const selectedLanguage = availableLanguages.find(
 			(language) => language.id === item.id
@@ -36,6 +49,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 	return (
 		<Dropdown
 			items={languageItems}
+			currentItem={getLanguageItem(currentLanguage)}
 			selectedId={currentLanguage?.id}
 			placeholder={t("language") || "Language"}
 			onSelect={handleLanguageSelect}

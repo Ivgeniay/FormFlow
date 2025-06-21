@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@amcharts/amcharts5": "^5.13.3",
+    "@hookform/resolvers": "^5.1.1",
     "@microsoft/signalr": "^8.0.7",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
@@ -11,6 +12,8 @@
     "@radix-ui/react-switch": "^1.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
+    "@radix-ui/react-toggle": "^1.1.9",
+    "@radix-ui/react-toolbar": "^1.1.10",
     "@tanstack/react-query": "^5.80.7",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -23,6 +26,7 @@
     "@types/react-router-dom": "^5.3.3",
     "@types/uuid": "^10.0.0",
     "@types/validator": "^13.15.2",
+    "@uiw/react-md-editor": "^4.0.7",
     "autoprefixer": "^10.4.19",
     "axios": "^1.10.0",
     "clsx": "^2.1.1",
@@ -33,6 +37,7 @@
     "i18next-http-backend": "^2.6.1",
     "postcss": "^8.4.38",
     "react": "^19.1.0",
+    "react-contenteditable": "^3.3.7",
     "react-dnd": "^16.0.1",
     "react-dnd-html5-backend": "^16.0.1",
     "react-dom": "^19.1.0",
@@ -41,6 +46,7 @@
     "react-hot-toast": "^2.5.2",
     "react-i18next": "^12.3.1",
     "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
     "react-router-dom": "^7.6.2",
     "react-scripts": "5.0.1",
     "tailwindcss": "^3.4.17",
@@ -48,6 +54,7 @@
     "uuid": "^11.1.0",
     "validator": "^13.15.15",
     "web-vitals": "^2.1.4",
+    "yup": "^1.6.1",
     "zustand": "^5.0.5"
   },
   "scripts": {

@@ -3,6 +3,7 @@ using FormFlow.Domain.Models.General;
 using FormFlow.Infrastructure.Models;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.WebApi.Common;
+using System.Security.Claims;
 
 namespace FormFlow.WebApi.Middlewares
 {
@@ -17,14 +18,29 @@ namespace FormFlow.WebApi.Middlewares
 
         public async Task InvokeAsync(HttpContext context, IJwtService jwtService)
         {
+            Console.WriteLine($"=== UserContextMiddleware Debug ===");
+            Console.WriteLine($"IsAuthenticated: {context.User.Identity?.IsAuthenticated}");
+            Console.WriteLine($"Claims count: {context.User.Claims.Count()}");
+
+            foreach (var claim in context.User.Claims)
+            {
+                Console.WriteLine($"Claim: {claim.Type} = {claim.Value}");
+            }
+
             if (context.User.Identity?.IsAuthenticated == true)
             {
                 try
                 {
-                    var userIdClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Subject);
-                    var userNameClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Name);
-                    var emailClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Email);
-                    var roleClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Role);
+                    //var userIdClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Subject);
+                    //var userNameClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Name);
+                    //var emailClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Email);
+                    //var roleClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.Role);
+                    //var authTypeClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.AuthType);
+                    //var isBlockedClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.IsBlocked);
+                    var userIdClaim = context.User.FindFirst(ClaimTypes.NameIdentifier);
+                    var userNameClaim = context.User.FindFirst(ClaimTypes.Name);
+                    var emailClaim = context.User.FindFirst(ClaimTypes.Email);
+                    var roleClaim = context.User.FindFirst(ClaimTypes.Role);
                     var authTypeClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.AuthType);
                     var isBlockedClaim = context.User.FindFirst(Infrastructure.Constants.JwtClaimNames.IsBlocked);
 

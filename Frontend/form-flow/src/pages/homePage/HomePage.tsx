@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { AppLoader } from "../../components/AppLoader";
 import { TagCloud } from "../../modules/Tag/components/TagCloud";
 import { TemplateGallery } from "../../modules/templates/components/TemplateGallery";
 import { mockTags, mockTemplates } from "../../shared/mock_data";
+import { QuestionCardDemo } from "./QuestionCardDemo";
 
 export const HomePage: React.FC = () => {
 	const [isVisible, setVisible] = useState(true);
@@ -28,6 +28,7 @@ export const HomePage: React.FC = () => {
 				mode="compact"
 				columns={6}
 			/>
+			<QuestionCardDemo></QuestionCardDemo>
 			<TagCloud
 				tags={mockTags}
 				onTagClick={(tagName) => console.log("Tag clicked:", tagName)}

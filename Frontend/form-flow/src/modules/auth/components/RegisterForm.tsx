@@ -18,7 +18,11 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 	className = "",
 }) => {
 	const { t } = useTranslation();
-	const { register: registerUser, isLoading, generateGoogleAuthUrl } = useAuth();
+	const {
+		register: registerUser,
+		isLoading,
+		generateGoogleAuthUrl,
+	} = useAuth();
 
 	const {
 		register,
@@ -72,8 +76,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 								minLength: {
 									value: 1,
 									message:
-										t("usernameMinLength", "Username must be at least 1 character") ||
-										"Username must be at least 1 character",
+										t(
+											"usernameMinLength",
+											"Username must be at least 1 character"
+										) || "Username must be at least 1 character",
 								},
 								maxLength: {
 									value: 50,
@@ -88,23 +94,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 							id="userName"
 							disabled={isFormLoading}
 							className={`
-                w-full px-3 py-2 border rounded-md
-                bg-background text-text placeholder-textMuted
-                border-border focus:border-primary focus:ring-1 focus:ring-primary
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors duration-200
-                ${
-																	errors.userName
-																		? "border-error focus:border-error focus:ring-error"
-																		: ""
-																}
-              `}
+									w-full px-3 py-2 border rounded-md
+									bg-background text-text placeholder-textMuted
+									border-border focus:border-primary focus:ring-1 focus:ring-primary
+									disabled:opacity-50 disabled:cursor-not-allowed
+									transition-colors duration-200
+									${errors.userName ? "border-error focus:border-error focus:ring-error" : ""} `}
 							placeholder={
-								t("usernamePlaceholder", "Enter your username") || "Enter your username"
+								t("usernamePlaceholder", "Enter your username") ||
+								"Enter your username"
 							}
 						/>
 						{errors.userName && (
-							<p className="mt-1 text-sm text-error">{errors.userName.message}</p>
+							<p className="mt-1 text-sm text-error">
+								{errors.userName.message}
+							</p>
 						)}
 					</div>
 
@@ -118,34 +122,33 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 						<input
 							{...register("email", {
 								required:
-									t("emailRequired", "Email is required") || "Email is required",
+									t("emailRequired", "Email is required") ||
+									"Email is required",
 								pattern: {
 									value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
 									message:
-										t("emailInvalid", "Invalid email address") || "Invalid email address",
+										t("emailInvalid", "Invalid email address") ||
+										"Invalid email address",
 								},
 								maxLength: {
 									value: 100,
 									message:
-										t("emailMaxLength", "Email must be no more than 100 characters") ||
-										"Email must be no more than 100 characters",
+										t(
+											"emailMaxLength",
+											"Email must be no more than 100 characters"
+										) || "Email must be no more than 100 characters",
 								},
 							})}
 							type="email"
 							id="email"
 							disabled={isFormLoading}
 							className={`
-                w-full px-3 py-2 border rounded-md
-                bg-background text-text placeholder-textMuted
-                border-border focus:border-primary focus:ring-1 focus:ring-primary
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors duration-200
-                ${
-																	errors.email
-																		? "border-error focus:border-error focus:ring-error"
-																		: ""
-																}
-              `}
+										w-full px-3 py-2 border rounded-md
+										bg-background text-text placeholder-textMuted
+										border-border focus:border-primary focus:ring-1 focus:ring-primary
+										disabled:opacity-50 disabled:cursor-not-allowed
+										transition-colors duration-200
+										${errors.email ? "border-error focus:border-error focus:ring-error" : ""} `}
 							placeholder={
 								t("emailPlaceholder", "Enter your email") || "Enter your email"
 							}
@@ -170,8 +173,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 								minLength: {
 									value: 3,
 									message:
-										t("passwordMinLength", "Password must be at least 3 characters") ||
-										"Password must be at least 3 characters",
+										t(
+											"passwordMinLength",
+											"Password must be at least 3 characters"
+										) || "Password must be at least 3 characters",
 								},
 								maxLength: {
 									value: 100,
@@ -186,23 +191,21 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 							id="password"
 							disabled={isFormLoading}
 							className={`
-                w-full px-3 py-2 border rounded-md
-                bg-background text-text placeholder-textMuted
-                border-border focus:border-primary focus:ring-1 focus:ring-primary
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors duration-200
-                ${
-																	errors.password
-																		? "border-error focus:border-error focus:ring-error"
-																		: ""
-																}
-              `}
+									w-full px-3 py-2 border rounded-md
+									bg-background text-text placeholder-textMuted
+									border-border focus:border-primary focus:ring-1 focus:ring-primary
+									disabled:opacity-50 disabled:cursor-not-allowed
+									transition-colors duration-200
+									${errors.password ? "border-error focus:border-error focus:ring-error" : ""} `}
 							placeholder={
-								t("passwordPlaceholder", "Enter your password") || "Enter your password"
+								t("passwordPlaceholder", "Enter your password") ||
+								"Enter your password"
 							}
 						/>
 						{errors.password && (
-							<p className="mt-1 text-sm text-error">{errors.password.message}</p>
+							<p className="mt-1 text-sm text-error">
+								{errors.password.message}
+							</p>
 						)}
 					</div>
 
@@ -216,8 +219,10 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 						<input
 							{...register("confirmPassword", {
 								required:
-									t("confirmPasswordRequired", "Please confirm your password") ||
-									"Please confirm your password",
+									t(
+										"confirmPasswordRequired",
+										"Please confirm your password"
+									) || "Please confirm your password",
 								validate: (value) =>
 									value === password ||
 									t("passwordsDoNotMatch", "Passwords do not match") ||
@@ -227,17 +232,16 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 							id="confirmPassword"
 							disabled={isFormLoading}
 							className={`
-                w-full px-3 py-2 border rounded-md
-                bg-background text-text placeholder-textMuted
-                border-border focus:border-primary focus:ring-1 focus:ring-primary
-                disabled:opacity-50 disabled:cursor-not-allowed
-                transition-colors duration-200
-                ${
-																	errors.confirmPassword
-																		? "border-error focus:border-error focus:ring-error"
-																		: ""
-																}
-              `}
+									w-full px-3 py-2 border rounded-md
+									bg-background text-text placeholder-textMuted
+									border-border focus:border-primary focus:ring-1 focus:ring-primary
+									disabled:opacity-50 disabled:cursor-not-allowed
+									transition-colors duration-200
+									${
+										errors.confirmPassword
+											? "border-error focus:border-error focus:ring-error"
+											: ""
+									}`}
 							placeholder={
 								t("confirmPasswordPlaceholder", "Confirm your password") ||
 								"Confirm your password"
@@ -254,18 +258,19 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 						type="submit"
 						disabled={isFormLoading}
 						className={`
-              w-full py-2 px-4 rounded-md font-medium
-              bg-primary text-white hover:bg-primary/90
-              disabled:opacity-50 disabled:cursor-not-allowed
-              transition-colors duration-200
-              focus:ring-2 focus:ring-primary focus:ring-offset-2
-              ${isFormLoading ? "cursor-not-allowed" : "cursor-pointer"}
-            `}
+								w-full py-2 px-4 rounded-md font-medium
+								bg-primary text-white hover:bg-primary/90
+								disabled:opacity-50 disabled:cursor-not-allowed
+								transition-colors duration-200
+								focus:ring-2 focus:ring-primary focus:ring-offset-2
+								${isFormLoading ? "cursor-not-allowed" : "cursor-pointer"}
+								`}
 					>
 						{isFormLoading ? (
 							<div className="flex items-center justify-center">
 								<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-								{t("registering", "Creating account...") || "Creating account..."}
+								{t("registering", "Creating account...") ||
+									"Creating account..."}
 							</div>
 						) : (
 							t("register") || "Register"
@@ -290,13 +295,13 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
 						onClick={handleGoogleRegister}
 						disabled={isFormLoading}
 						className={`
-              w-full mt-3 py-2 px-4 border border-border rounded-md
-              bg-background text-text hover:bg-surface
-              disabled:opacity-50 disabled:cursor-not-allowed
-              transition-colors duration-200
-              focus:ring-2 focus:ring-primary focus:ring-offset-2
-              flex items-center justify-center gap-2
-            `}
+									w-full mt-3 py-2 px-4 border border-border rounded-md
+									bg-background text-text hover:bg-surface
+									disabled:opacity-50 disabled:cursor-not-allowed
+									transition-colors duration-200
+									focus:ring-2 focus:ring-primary focus:ring-offset-2
+									flex items-center justify-center gap-2
+									`}
 					>
 						<svg className="w-5 h-5" viewBox="0 0 24 24">
 							<path

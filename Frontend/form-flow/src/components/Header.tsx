@@ -1,52 +1,118 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ColorTheme } from "../shared/types/color-theme";
-import { Language } from "../shared/types/language";
-import { ThemeDropdown } from "./ThemeDropdown";
-import { LanguageDropdown } from "./LanguageDropdown";
 import { SearchInput } from "./SearchInput";
-
-interface User {
-	id: string;
-	username: string;
-	email: string;
-	isAdmin: boolean;
-}
+import { UserDto } from "../shared/api_types";
+import {
+	DropdownMenu,
+	DropdownMenuItemType,
+} from "../ui/Dropdown/DropdownMenu";
 
 interface HeaderProps {
-	availableThemes: ColorTheme[];
-	availableLanguages: Language[];
-	user: User | null;
+	user: UserDto | null;
 	isAuthenticated: boolean;
 	onToggleNavMenu: () => void;
 	onLogin: () => void;
+	onRegister: () => void;
 	onLogout: () => void;
 	onSearch: (query: string) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
-	availableThemes,
-	availableLanguages,
 	user,
 	isAuthenticated,
 	onToggleNavMenu,
 	onLogin,
+	onRegister,
 	onLogout,
 	onSearch,
 }) => {
 	const { t } = useTranslation();
-
+	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		onSearch(e.target.value);
 	};
 
 	const handleUserMenuClick = () => {
-		if (isAuthenticated) {
-			console.log("User menu clicked");
-		} else {
-			onLogin();
-		}
+		setIsUserMenuOpen(!isUserMenuOpen);
 	};
+
+	const closeUserMenu = () => {
+		setIsUserMenuOpen(false);
+	};
+
+	const userMenuItems: DropdownMenuItemType[] = [
+		{
+			id: "profile",
+			label: t("profile") || "Profile",
+			icon: (
+				<svg
+					className="w-4 h-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth={2}
+						d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+					/>
+				</svg>
+			),
+			onClick: () => console.log("Navigate to profile"),
+		},
+		{
+			id: "settings",
+			label: t("settings") || "Settings",
+			icon: (
+				<svg
+					className="w-4 h-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth={2}
+						d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+					/>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth={2}
+						d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+					/>
+				</svg>
+			),
+			onClick: () => console.log("Navigate to settings"),
+		},
+		{
+			type: "separator",
+			id: "sep1",
+		},
+		{
+			id: "logout",
+			label: t("logout") || "Logout",
+			variant: "danger",
+			icon: (
+				<svg
+					className="w-4 h-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth={2}
+						d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+					/>
+				</svg>
+			),
+			onClick: onLogout,
+		},
+	];
 
 	return (
 		<header className="bg-surface border-b border-border px-4 py-1 sticky top-0 z-40">
@@ -84,25 +150,49 @@ export const Header: React.FC<HeaderProps> = ({
 						handleSearchChange={handleSearchChange}
 						className="relative w-full"
 					/>
-					<ThemeDropdown
-						availableThemes={availableThemes}
-						className="min-w-[120px] "
-					/>
+					{/* <ThemeDropdown availableThemes={themes} className="min-w-[120px] " /> */}
 				</div>
 
 				<div className="flex items-center gap-3">
-					<LanguageDropdown
-						availableLanguages={availableLanguages}
+					{/* <LanguageDropdown
+						availableLanguages={languages}
 						className="min-w-[120px]"
-					/>
+					/> */}
 
 					<div className="flex items-center gap-2 min-w-[240px] justify-end">
 						{isAuthenticated ? (
 							<>
 								<span className="text-sm text-textMuted hidden md:inline truncate max-w-[180px]">
-									{user?.username}
+									{user?.userName}
 								</span>
-								<button
+								<DropdownMenu
+									isOpen={isUserMenuOpen}
+									onClose={closeUserMenu}
+									items={userMenuItems}
+									align="right"
+									trigger={
+										<button
+											onClick={handleUserMenuClick}
+											className="p-2 rounded-lg text-text hover:bg-background transition-colors flex-shrink-0"
+											aria-label={t("userMenu") || "User menu"}
+										>
+											<svg
+												className="w-6 h-6"
+												fill="none"
+												stroke="currentColor"
+												viewBox="0 0 24 24"
+											>
+												<path
+													strokeLinecap="round"
+													strokeLinejoin="round"
+													strokeWidth={2}
+													d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+												/>
+											</svg>
+										</button>
+									}
+								/>
+								{/* <button
 									onClick={handleUserMenuClick}
 									className="p-2 rounded-lg text-text hover:bg-background transition-colors flex-shrink-0"
 									aria-label={t("userMenu") || "User menu"}
@@ -120,40 +210,25 @@ export const Header: React.FC<HeaderProps> = ({
 											d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
 										/>
 									</svg>
-								</button>
+								</button> */}
 							</>
 						) : (
-							<button
-								onClick={onLogin}
-								className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors min-w-[100px]"
-							>
-								{t("login")}
-							</button>
+							<div>
+								<button
+									onClick={onLogin}
+									className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors min-w-[100px]"
+								>
+									{t("login")}
+								</button>
+								<button
+									onClick={onRegister}
+									className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors min-w-[100px]"
+								>
+									{t("register")}
+								</button>
+							</div>
 						)}
 					</div>
-					{/* {isAuthenticated ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-textMuted hidden md:inline">
-                {user?.username}
-              </span>
-              <button 
-                onClick={handleUserMenuClick}
-                className="p-2 rounded-lg text-text hover:bg-background transition-colors"
-                aria-label={t('userMenu') || 'User menu'}
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-              </button>
-            </div>
-          ) : (
-            <button 
-              onClick={onLogin}
-              className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors"
-            >
-              {t('login')}
-            </button>
-          )} */}
 				</div>
 			</div>
 		</header>

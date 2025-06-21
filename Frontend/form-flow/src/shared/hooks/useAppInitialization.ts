@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { useTheme } from "./useTheme";
 import { useLanguage } from "./useLanguage";
-import { userSettingsApi } from "../../api/user-settings";
+import { userSettingsApi } from "../../api/userSettings";
 import { useAppStore } from "../../stores/appStore";
 import i18n from "../../config/i18n";
 
@@ -44,7 +44,6 @@ export const useAppInitialization = () => {
 	};
 
 	const initializeI18n = async () => {
-		console.log("IS INITIALIZED: }", i18n.isInitialized);
 		if (!i18n.isInitialized) await i18n.init();
 	};
 
@@ -80,6 +79,7 @@ export const useAppInitialization = () => {
 		}
 
 		try {
+			console.log(`Auth!!! with: ${accessToken}`);
 			const userSettings = await userSettingsApi.getMySettings(accessToken);
 
 			setThemeById(userSettings.colorThemeId);
