@@ -2,7 +2,7 @@
 {
     public class DateDetails : QuestionDetails
     {
-        public DateTime Date { get; set; }
-        public bool IncludeTime { get; set; } = false;
+        public DateTime StartDate { get; set; }
+        public DateTime PastDate { get; set; }
     }
 }

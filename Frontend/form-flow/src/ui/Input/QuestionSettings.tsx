@@ -107,7 +107,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 								}}
 								className="text-sm text-primary hover:underline"
 							>
-								+ Add option
+								+ {t("addOption") || "Add option"}
 							</button>
 						</div>
 					</div>
@@ -122,7 +122,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 						<div className="grid grid-cols-2 gap-4">
 							<div>
 								<label className="block text-xs text-textMuted mb-1">
-									Min Value
+									{t("minValue") || "Min Value"}
 								</label>
 								<input
 									type="number"
@@ -135,7 +135,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 							</div>
 							<div>
 								<label className="block text-xs text-textMuted mb-1">
-									Max Value
+									{t("maxValue") || "Max Value"}
 								</label>
 								<input
 									type="number"
@@ -158,7 +158,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 						</div>
 						<div>
 							<label className="block text-xs text-textMuted mb-1">
-								Max Rating
+								{t("maxRating") || "Max Rating"}
 							</label>
 							<input
 								type="number"
@@ -170,6 +170,80 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 								}
 								className="w-20 px-2 py-1 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
 							/>
+						</div>
+					</div>
+				);
+
+			case QuestionType.Date:
+				return (
+					<div className="space-y-3">
+						<div className="text-sm text-textMuted mb-2">
+							{t("dateHint") || "Users will select a date"}
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								<label className="block text-xs text-textMuted mb-1">
+									{t("minDate") || "Minimum Date"}
+								</label>
+								<input
+									type="date"
+									value={question.typeSpecificData.startDate || ""}
+									onChange={(e) => updateSetting("startDate", e.target.value)}
+									max={question.typeSpecificData.pastDate || undefined}
+									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label className="block text-xs text-textMuted mb-1">
+									{t("maxDate") || "Maximum Date"}
+								</label>
+								<input
+									type="date"
+									value={question.typeSpecificData.pastDate || ""}
+									onChange={(e) => updateSetting("pastDate", e.target.value)}
+									min={question.typeSpecificData.startDate || undefined}
+									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+								/>
+							</div>
+						</div>
+					</div>
+				);
+
+			case QuestionType.Time:
+				return (
+					<div className="space-y-3">
+						<div className="text-sm text-textMuted mb-2">
+							{t("timeHint") || "Users will select a time"}
+						</div>
+
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								<label className="block text-xs text-textMuted mb-1">
+									{t("minTime") || "Minimum Time"}
+								</label>
+								<input
+									type="time"
+									value={question.typeSpecificData.startTime || ""}
+									onChange={(e) => updateSetting("startTime", e.target.value)}
+									max={question.typeSpecificData.endTime || undefined}
+									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+								/>
+							</div>
+
+							<div>
+								<label className="block text-xs text-textMuted mb-1">
+									{t("maxTime") || "Maximum Time"}
+								</label>
+								<input
+									type="time"
+									value={question.typeSpecificData.endTime || ""}
+									onChange={(e) => updateSetting("endTime", e.target.value)}
+									min={question.typeSpecificData.startTime || undefined}
+									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+								/>
+							</div>
 						</div>
 					</div>
 				);

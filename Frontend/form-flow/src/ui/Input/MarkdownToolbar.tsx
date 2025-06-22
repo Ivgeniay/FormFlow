@@ -37,6 +37,81 @@ export const MarkdownToolbar: React.FC<ToolbarProps> = ({
 			>
 				U
 			</button>
+			<div className="w-px h-6 bg-border mx-1"></div>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("strikeThrough")}
+				className="p-2 hover:bg-surface rounded text-sm line-through text-text transition-colors"
+				title="Strikethrough"
+			>
+				S
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("subscript")}
+				className="p-2 hover:bg-surface rounded text-xs text-text transition-colors"
+				title="Subscript"
+			>
+				X₂
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("superscript")}
+				className="p-2 hover:bg-surface rounded text-xs text-text transition-colors"
+				title="Superscript"
+			>
+				X²
+			</button>
+			<div className="w-px h-6 bg-border mx-1"></div>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("insertUnorderedList")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Bullet List"
+			>
+				⫷
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("justifyCenter")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Align Center"
+			>
+				≡
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("justifyRight")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Align Right"
+			>
+				⫸
+			</button>
+			<div className="w-px h-6 bg-border mx-1"></div>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("createLink")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Create Link"
+			>
+				✕
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("undo")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Undo"
+			>
+				↶
+			</button>
+			<button
+				onMouseDown={(e) => e.preventDefault()}
+				onClick={() => onFormat("redo")}
+				className="p-2 hover:bg-surface rounded text-sm text-text transition-colors"
+				title="Redo"
+			>
+				↷
+			</button>
 		</div>
 	);
 };

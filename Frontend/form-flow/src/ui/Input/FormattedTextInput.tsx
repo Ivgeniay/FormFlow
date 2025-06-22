@@ -61,8 +61,8 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	};
 
 	const baseClasses = multiline
-		? "w-full bg-transparent text-text border-0 border-b border-transparent hover:border-border focus:border-primary focus:outline-none transition-colors resize-none p-2 -ml-2 min-h-[50px]"
-		: "w-full text-lg font-medium bg-transparent text-text border-0 border-b-2 border-transparent hover:border-border focus:border-primary focus:outline-none transition-colors p-2 -ml-2";
+		? "w-full bg-transparent text-text border-0 focus:outline-none resize-none p-1.5 -ml-1.5 min-h-[40px]"
+		: "w-full text-lg font-medium bg-transparent text-text border-0 focus:outline-none p-1.5 -ml-1.5";
 
 	return (
 		<div className={`relative ${className}`}>
@@ -83,12 +83,21 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 			/>
 
 			{!value && placeholder && (
-				<div className="absolute inset-0 pointer-events-none text-textMuted p-2 -ml-2">
+				<div className="absolute inset-0 pointer-events-none text-textMuted p-1.5 -ml-1.5 text-sm">
 					{placeholder}
 				</div>
 			)}
 
-			{showToolbar && <MarkdownToolbar onFormat={formatText} />}
+			{/* {showToolbar && <MarkdownToolbar onFormat={formatText} />} */}
+			<div
+				className={`transition-all duration-200 ease-in-out overflow-hidden ${
+					showToolbar
+						? "opacity-100 translate-y-0 max-h-20"
+						: "opacity-0 -translate-y-2 pointer-events-none max-h-0"
+				}`}
+			>
+				<MarkdownToolbar onFormat={formatText} />
+			</div>
 		</div>
 	);
 };

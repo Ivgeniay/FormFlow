@@ -1,6 +1,7 @@
 import React from "react";
 import * as Select from "@radix-ui/react-select";
 import { QuestionType } from "../../shared/domain_types";
+import { useTranslation } from "react-i18next";
 
 interface QuestionTypeSelectProps {
 	value: QuestionType;
@@ -11,20 +12,37 @@ export const QuestionTypeSelect: React.FC<QuestionTypeSelectProps> = ({
 	value,
 	onChange,
 }) => {
+	const { t } = useTranslation();
 	const questionTypeOptions = [
-		{ value: QuestionType.ShortText, label: "Short Text", icon: "📝" },
-		{ value: QuestionType.LongText, label: "Long Text", icon: "📄" },
-		{ value: QuestionType.SingleChoice, label: "Single Choice", icon: "🔘" },
+		{
+			value: QuestionType.ShortText,
+			label: t("shortText") || "Short Text",
+			icon: "📝",
+		},
+		{
+			value: QuestionType.LongText,
+			label: t("longText") || "Long Text",
+			icon: "📄",
+		},
+		{
+			value: QuestionType.SingleChoice,
+			label: t("singleChoice") || "Single Choice",
+			icon: "🔘",
+		},
 		{
 			value: QuestionType.MultipleChoice,
-			label: "Multiple Choice",
+			label: t("multipleChoice") || "Multiple Choice",
 			icon: "☑️",
 		},
-		{ value: QuestionType.Dropdown, label: "Dropdown", icon: "📋" },
-		{ value: QuestionType.Scale, label: "Scale", icon: "📊" },
-		{ value: QuestionType.Rating, label: "Rating", icon: "⭐" },
-		{ value: QuestionType.Date, label: "Date", icon: "📅" },
-		{ value: QuestionType.Time, label: "Time", icon: "🕒" },
+		{
+			value: QuestionType.Dropdown,
+			label: t("dropdown") || "Dropdown",
+			icon: "📋",
+		},
+		{ value: QuestionType.Scale, label: t("scale") || "Scale", icon: "📊" },
+		{ value: QuestionType.Rating, label: t("rating") || "Rating", icon: "⭐" },
+		{ value: QuestionType.Date, label: t("date") || "Date", icon: "📅" },
+		{ value: QuestionType.Time, label: t("time") || "Time", icon: "🕒" },
 	];
 
 	const selectedOption = questionTypeOptions.find((opt) => opt.value === value);
@@ -34,9 +52,11 @@ export const QuestionTypeSelect: React.FC<QuestionTypeSelectProps> = ({
 			value={value.toString()}
 			onValueChange={(val) => onChange(Number(val) as QuestionType)}
 		>
-			<Select.Trigger className="inline-flex items-center justify-between px-3 py-2 border border-border rounded-md bg-background text-text focus:border-primary focus:outline-none min-w-[150px]">
-				<Select.Value>
-					{selectedOption?.icon} {selectedOption?.label}
+			<Select.Trigger className="inline-flex items-center justify-between px-2 py-1.5 border border-border bg-background text-text focus:border-primary focus:outline-none min-w-[130px] max-w-[150px] overflow-hidden whitespace-nowrap">
+				<Select.Value asChild>
+					<div className="truncate">
+						{selectedOption?.icon} {selectedOption?.label}
+					</div>
 				</Select.Value>
 				<Select.Icon>
 					<svg
@@ -61,7 +81,7 @@ export const QuestionTypeSelect: React.FC<QuestionTypeSelectProps> = ({
 							<Select.Item
 								key={option.value}
 								value={option.value.toString()}
-								className="flex items-center px-3 py-2 text-sm text-text hover:bg-background rounded cursor-pointer focus:bg-background focus:outline-none"
+								className="flex items-center px-2 py-1.5 text-sm text-text hover:bg-background rounded cursor-pointer focus:bg-background focus:outline-none"
 							>
 								<Select.ItemText>
 									{option.icon} {option.label}

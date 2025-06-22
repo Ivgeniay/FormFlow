@@ -7,6 +7,8 @@ import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { QuestionTypeSelect } from "../../../../ui/Input/QuestionTypeSelect";
 import { QuestionSettings } from "../../../../ui/Input/QuestionSettings";
 import { RequiredToggle } from "../../../../ui/Input/RequiredToggle";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 interface QuestionCardProps {
 	question: QuestionData;
@@ -20,6 +22,7 @@ interface QuestionCardProps {
 
 export interface QuestionData {
 	id: string;
+	order: number;
 	title: string;
 	description: string;
 	type: QuestionType;
@@ -28,116 +31,127 @@ export interface QuestionData {
 	typeSpecificData: Record<string, any>;
 }
 
-export const QuestionCard: React.FC<QuestionCardProps> = ({
-	question,
-	onQuestionChange,
-	onDelete,
-	isActive = false,
-	onActivate,
-	dragHandleProps,
-	className = "",
-}) => {
-	const { t } = useTranslation();
+export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
+	(
+		{
+			question,
+			onQuestionChange,
+			onDelete,
+			isActive = false,
+			onActivate,
+			dragHandleProps,
+			className = "",
+		},
+		ref
+	) => {
+		const { t } = useTranslation();
 
-	const handleFieldChange = (fieldName: keyof QuestionData, value: any) => {
-		const updatedQuestion = {
-			...question,
-			[fieldName]: value,
+		const handleFieldChange = (fieldName: keyof QuestionData, value: any) => {
+			const updatedQuestion = {
+				...question,
+				[fieldName]: value,
+			};
+			onQuestionChange(updatedQuestion);
 		};
-		onQuestionChange(updatedQuestion);
-	};
 
-	const handleTypeChange = (newType: QuestionType) => {
-		const updatedQuestion = {
-			...question,
-			type: newType,
-			typeSpecificData: {},
+		const handleTypeChange = (newType: QuestionType) => {
+			const updatedQuestion = {
+				...question,
+				type: newType,
+				typeSpecificData: {},
+			};
+			onQuestionChange(updatedQuestion);
 		};
-		onQuestionChange(updatedQuestion);
-	};
 
-	const handleTypeSpecificDataChange = (data: Record<string, any>) => {
-		const updatedQuestion = {
-			...question,
-			typeSpecificData: data,
+		const handleTypeSpecificDataChange = (data: Record<string, any>) => {
+			const updatedQuestion = {
+				...question,
+				typeSpecificData: data,
+			};
+			onQuestionChange(updatedQuestion);
 		};
-		onQuestionChange(updatedQuestion);
-	};
 
-	return (
-		<div
-			className={`bg-surface border-2 rounded-lg transition-all duration-200 ${
-				isActive
-					? "border-primary shadow-md"
-					: "border-border hover:border-primary/50"
-			} ${className}`}
-			onClick={onActivate}
-		>
-			<div className="relative">
-				<DragHandle dragHandleProps={dragHandleProps} />
+		const {
+			attributes,
+			listeners,
+			setNodeRef,
+			transform,
+			transition,
+			isDragging,
+		} = useSortable({ id: question.id, animateLayoutChanges: () => false });
 
-				<div className="p-6 pt-12">
-					<div className="space-y-4">
-						<div className="flex items-center gap-4">
-							<div className="flex-1">
-								<FormattedTextInput
-									value={question.title}
-									onChange={(value) => handleFieldChange("title", value)}
-									placeholder={t("questionPlaceholder") || "Question"}
+		const style = {
+			transform: CSS.Transform.toString(transform),
+			transition: isDragging ? "none" : undefined,
+			// transition,
+		};
+
+		const combinedRef = (element: HTMLDivElement | null) => {
+			setNodeRef(element);
+			if (ref && typeof ref === "function") {
+				ref(element);
+			} else if (ref) {
+				ref.current = element;
+			}
+		};
+
+		return (
+			<div
+				ref={combinedRef}
+				style={style}
+				className={`relative bg-surface border-2 ${
+					isActive
+						? "border-primary shadow-md"
+						: "border-border hover:border-primary/50"
+				} ${isDragging ? "opacity-50" : "opacity-100"} ${className}`}
+				onClick={onActivate}
+			>
+				{/* <div className="relative"> */}
+				<>
+					<DragHandle dragHandleProps={{ ...attributes, ...listeners }} />
+
+					<div className="p-4 pt-10">
+						<div className="space-y-3">
+							<div className="flex items-center gap-3">
+								<div className="flex-1">
+									<FormattedTextInput
+										value={question.title}
+										onChange={(value) => handleFieldChange("title", value)}
+										placeholder={t("questionPlaceholder") || "Question"}
+									/>
+								</div>
+
+								<QuestionTypeSelect
+									value={question.type}
+									onChange={handleTypeChange}
 								/>
 							</div>
 
-							<QuestionTypeSelect
-								value={question.type}
-								onChange={handleTypeChange}
+							<FormattedTextInput
+								value={question.description}
+								onChange={(value) => handleFieldChange("description", value)}
+								placeholder={
+									t("descriptionPlaceholder") || "Description (optional)"
+								}
+								multiline
+							/>
+
+							<QuestionSettings
+								question={question}
+								onChange={handleTypeSpecificDataChange}
 							/>
 						</div>
 
-						<FormattedTextInput
-							value={question.description}
-							onChange={(value) => handleFieldChange("description", value)}
-							placeholder={
-								t("descriptionPlaceholder") || "Description (optional)"
-							}
-							multiline
-						/>
-
-						<QuestionSettings
-							question={question}
-							onChange={handleTypeSpecificDataChange}
-						/>
-					</div>
-
-					<div className="flex items-center justify-between mt-6 pt-4 border-t border-border">
-						<div className="flex items-center gap-4">
-							<button
-								onClick={onDelete}
-								className="p-2 text-textMuted hover:text-error transition-colors"
-								title={t("deleteQuestion") || "Delete question"}
-							>
-								<svg
-									className="w-5 h-5"
-									fill="none"
-									stroke="currentColor"
-									viewBox="0 0 24 24"
-								>
-									<path
-										strokeLinecap="round"
-										strokeLinejoin="round"
-										strokeWidth={2}
-										d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-									/>
-								</svg>
-							</button>
+						<div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
+							<RequiredToggle
+								value={question.isRequired}
+								onChange={(value) => handleFieldChange("isRequired", value)}
+							/>
 						</div>
-
-						<RequiredToggle
-							value={question.isRequired}
-							onChange={(value) => handleFieldChange("isRequired", value)}
-						/>
 					</div>
-				</div>
+					{/* </div> */}
+				</>
 			</div>
-		</div>
-	);
-};
+		);
+	}
+);
