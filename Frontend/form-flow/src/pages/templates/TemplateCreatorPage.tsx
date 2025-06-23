@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
-import { TemplateEditor } from "../../pages/homePage/TemplateEditor";
+import { TemplateEditor } from "./TemplateEditor";
 import { FormTemplate } from "../../modules/templates/types/types";
 import { QuestionType, TemplateAccess } from "../../shared/domain_types";
 import {
@@ -11,8 +11,9 @@ import {
 	QuestionCreateRequest,
 } from "../../api/templateApi";
 import toast from "react-hot-toast";
+import { imageApi } from "../../api/imageApi";
 
-export const TemplateCreator: React.FC = () => {
+export const TemplateCreatorPage: React.FC = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { accessToken } = useAuth();
@@ -174,6 +175,15 @@ export const TemplateCreator: React.FC = () => {
 				accessToken
 			);
 
+			if (formTemplate.image) {
+				const response = await imageApi.uploadTemplateImage(
+					createdTemplate.id,
+					formTemplate.image,
+					accessToken
+				);
+				console.log(response);
+			}
+
 			if (publishImmediately) {
 				await templateApi.publishTemplate(createdTemplate.id, accessToken);
 				toast.success("Template created and published successfully!");
@@ -195,88 +205,113 @@ export const TemplateCreator: React.FC = () => {
 		navigate(-1);
 	};
 
+	const goBack = () => {
+		if (window.history.length > 1) {
+			navigate(-1);
+		} else {
+			navigate("/");
+		}
+	};
+
 	return (
-		<div className="min-h-screen bg-background">
-			<div className="container mx-auto px-4 py-8">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-text mb-2">
-						{t("createTemplate", "Create New Template")}
-					</h1>
-					<p className="text-textMuted">
-						{t("createTemplateDescription", "Design your custom form template")}
-					</p>
-				</div>
+		<>
+			<button
+				onClick={goBack}
+				className="inline-flex items-center gap-2 text-textMuted hover:text-text transition-colors mb-6"
+			>
+				<svg
+					className="w-4 h-4"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
+					<path
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth={2}
+						d="M15 19l-7-7 7-7"
+					/>
+				</svg>
+				{t("back") || "Back"}
+			</button>
+			<div className="mb-8">
+				<h1 className="text-3xl font-bold text-text mb-2">
+					{t("createTemplate", "Create New Template")}
+				</h1>
+				<p className="text-textMuted">
+					{t("createTemplateDescription", "Design your custom form template")}
+				</p>
+			</div>
 
-				<TemplateEditor
-					formTemplate={formTemplate}
-					onFormTemplateChange={handleFormTemplateChange}
-					mode="create"
-				/>
+			<TemplateEditor
+				formTemplate={formTemplate}
+				onFormTemplateChange={handleFormTemplateChange}
+				mode="create"
+			/>
 
-				<div className="max-w-2xl mx-auto mt-8">
-					<div className="bg-surface border border-border rounded-lg p-6">
-						<div className="flex items-center justify-between">
-							<div className="flex items-center gap-4">
-								<label className="flex items-center gap-2 cursor-pointer">
-									<input
-										type="checkbox"
-										checked={publishImmediately}
-										onChange={(e) => setPublishImmediately(e.target.checked)}
-										className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary"
-									/>
-									<span className="text-text">
-										{t("publishImmediately", "Publish immediately")}
-									</span>
-								</label>
-								<span className="text-sm text-textMuted">
-									{publishImmediately
-										? t(
-												"publishedTemplateNote",
-												"Template will be visible to users immediately"
-										  )
-										: t("draftTemplateNote", "Template will be saved as draft")}
+			<div className="max-w-2xl mx-auto mt-8">
+				<div className="bg-surface border border-border rounded-lg p-6">
+					<div className="flex items-center justify-between">
+						<div className="flex items-center gap-4">
+							<label className="flex items-center gap-2 cursor-pointer">
+								<input
+									type="checkbox"
+									checked={publishImmediately}
+									onChange={(e) => setPublishImmediately(e.target.checked)}
+									className="w-4 h-4 text-primary bg-background border-border rounded focus:ring-primary"
+								/>
+								<span className="text-text">
+									{t("publishImmediately", "Publish immediately")}
 								</span>
-							</div>
+							</label>
+							<span className="text-sm text-textMuted">
+								{publishImmediately
+									? t(
+											"publishedTemplateNote",
+											"Template will be visible to users immediately"
+									  )
+									: t("draftTemplateNote", "Template will be saved as draft")}
+							</span>
 						</div>
+					</div>
 
-						<div className="flex items-center justify-end gap-3 mt-6">
-							<button
-								onClick={handleCancel}
-								disabled={isCreating}
-								className="px-6 py-2 text-textMuted hover:text-text border border-border rounded-lg hover:bg-background transition-colors disabled:opacity-50"
-							>
-								{t("cancel", "Cancel")}
-							</button>
-							<button
-								onClick={handleCreateTemplate}
-								disabled={isCreating}
-								className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
-							>
-								{isCreating ? (
-									<>
-										<svg
-											className="w-4 h-4 animate-spin"
-											fill="none"
-											stroke="currentColor"
-											viewBox="0 0 24 24"
-										>
-											<path
-												strokeLinecap="round"
-												strokeLinejoin="round"
-												strokeWidth={2}
-												d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-											/>
-										</svg>
-										{t("creating", "Creating...")}
-									</>
-								) : (
-									t("createTemplate", "Create Template")
-								)}
-							</button>
-						</div>
+					<div className="flex items-center justify-end gap-3 mt-6">
+						<button
+							onClick={handleCancel}
+							disabled={isCreating}
+							className="px-6 py-2 text-textMuted hover:text-text border border-border rounded-lg hover:bg-background transition-colors disabled:opacity-50"
+						>
+							{t("cancel", "Cancel")}
+						</button>
+						<button
+							onClick={handleCreateTemplate}
+							disabled={isCreating}
+							className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
+						>
+							{isCreating ? (
+								<>
+									<svg
+										className="w-4 h-4 animate-spin"
+										fill="none"
+										stroke="currentColor"
+										viewBox="0 0 24 24"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											strokeWidth={2}
+											d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+										/>
+									</svg>
+									{t("creating", "Creating...")}
+								</>
+							) : (
+								t("createTemplate", "Create Template")
+							)}
+						</button>
 					</div>
 				</div>
 			</div>
-		</div>
+		</>
 	);
 };

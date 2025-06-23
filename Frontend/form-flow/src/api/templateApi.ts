@@ -223,6 +223,22 @@ class TemplateApi {
 		return response.data;
 	}
 
+	async getUserTemplates(
+		userId: string,
+		page: number = 1,
+		pageSize: number = 20,
+		accessToken: string
+	): Promise<PaginatedResponse<TemplateDto>> {
+		const response = await axios.get<PaginatedResponse<TemplateDto>>(
+			`${API_BASE_URL}/template/user/${userId}`,
+			{
+				params: { page, pageSize },
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
 	async createNewVersion(
 		id: string,
 		request: CreateNewVersionRequest,

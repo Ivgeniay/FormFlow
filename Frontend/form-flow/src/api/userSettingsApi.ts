@@ -63,6 +63,7 @@ class UserSettingsApiService {
 			});
 			return response.data;
 		} catch (error) {
+			console.error(error);
 			this.handleError(error as AxiosError);
 		}
 	}
@@ -80,7 +81,9 @@ class UserSettingsApiService {
 
 	async getAvailableLanguages(): Promise<LanguageDto[]> {
 		try {
-			const response = await axios.get<LanguageDto[]>(`${this.baseUrl}/languages`);
+			const response = await axios.get<LanguageDto[]>(
+				`${this.baseUrl}/languages`
+			);
 			return response.data;
 		} catch (error) {
 			this.handleError(error as AxiosError);

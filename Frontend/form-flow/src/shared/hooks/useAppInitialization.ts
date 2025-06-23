@@ -13,7 +13,13 @@ export const useAppInitialization = () => {
 
 	const { setThemes, setLanguages, getSaftyThemes, getSaftyLanguages } =
 		useAppStore();
-	const { refreshTokens, clearAuth, isAuthenticated, accessToken } = useAuth();
+	const {
+		refreshTokens,
+		clearAuth,
+		isAuthenticated,
+		accessToken,
+		isTokenExpired,
+	} = useAuth();
 	const { setThemeById } = useTheme();
 	const { setLanguageById } = useLanguage();
 
@@ -62,10 +68,12 @@ export const useAppInitialization = () => {
 			return;
 		}
 
-		try {
-			await refreshTokens();
-		} catch (error) {
-			clearAuth();
+		if (isTokenExpired()) {
+			try {
+				await refreshTokens();
+			} catch (error) {
+				clearAuth();
+			}
 		}
 	};
 

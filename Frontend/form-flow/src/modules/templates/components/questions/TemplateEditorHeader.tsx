@@ -7,7 +7,7 @@ import { ImageUploader } from "../../../../ui/Input/ImageUploader";
 import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { usersApi } from "../../../../api/usersApi";
 import { TemplateAccess } from "../../../../shared/domain_types";
-import { mode } from "../../../../pages/homePage/TemplateEditor";
+import { mode } from "../../../../pages/templates/TemplateEditor";
 
 interface Topic {
 	id: string;

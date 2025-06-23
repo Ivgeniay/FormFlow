@@ -33,7 +33,7 @@ namespace FormFlow.Application.Services
             _tagRepository = tagRepository;
             _searchService = searchService;
             _topicRepository = topicRepository;
-            this._questionRepository = questionRepository;
+            _questionRepository = questionRepository;
         }
 
         public async Task<TemplateDto> CreateTemplateAsync(CreateTemplateRequest request, Guid authorId)
@@ -69,7 +69,7 @@ namespace FormFlow.Application.Services
                     Data = q.Data
                 }).ToList();
 
-                await _questionRepository.CreateRangeAsync(questions);
+                await _questionRepository.CreateRangeForTemplateAsync(questions);
             }
 
             if (request.Tags.Any())

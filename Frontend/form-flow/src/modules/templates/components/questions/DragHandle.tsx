@@ -1,5 +1,5 @@
 import { useTranslation } from "react-i18next";
-import { mode } from "../../../../pages/homePage/TemplateEditor";
+import { mode } from "../../../../pages/templates/TemplateEditor";
 
 interface DragHandleProps {
 	dragHandleProps?: any;

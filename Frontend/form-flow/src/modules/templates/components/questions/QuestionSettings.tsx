@@ -2,7 +2,7 @@ import { useTranslation } from "react-i18next";
 import { QuestionType } from "../../../../shared/domain_types";
 import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { QuestionData } from "../../types/types";
-import { mode } from "../../../../pages/homePage/TemplateEditor";
+import { mode } from "../../../../pages/templates/TemplateEditor";
 
 interface QuestionSettingsProps {
 	question: QuestionData;

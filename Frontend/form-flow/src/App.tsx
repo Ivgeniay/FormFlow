@@ -17,6 +17,7 @@ import { I18nextProvider } from "react-i18next";
 import i18n from "./config/i18n";
 import { UserSettings } from "./pages/settings/UserSettings";
 import { TemplatePage } from "./pages/templates/TemplatePage";
+import { Toaster } from "react-hot-toast";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -37,53 +38,76 @@ function App() {
 	}
 
 	return (
-		<I18nextProvider i18n={i18n}>
-			<Router>
-				<Routes>
-					<Route
-						path="/login"
-						element={
-							<AuthOnlyRoute>
-								<LoginPage
-									onSwitchToRegister={() =>
-										(window.location.href = "/register")
-									}
-								/>
-							</AuthOnlyRoute>
-						}
-					/>
-					<Route
-						path="/register"
-						element={
-							<AuthOnlyRoute>
-								<RegisterPage
-									onSwitchToLogin={() => (window.location.href = "/login")}
-								/>
-							</AuthOnlyRoute>
-						}
-					/>
-					<Route path="/template" element={<TemplatePage />} />
-					<Route path="/template/:id" element={<TemplatePage />} />
-					{/* <Route path="/form/:id" element={<FormPage />} /> */}
-					<Route path="/settings" element={<UserSettings />} />
-					<Route
-						path="/auth/google/callback"
-						element={<GoogleCallbackPage />}
-					/>
+		<>
+			<I18nextProvider i18n={i18n}>
+				<Router>
+					<Routes>
+						<Route
+							path="/login"
+							element={
+								<AuthOnlyRoute>
+									<LoginPage
+										onSwitchToRegister={() =>
+											(window.location.href = "/register")
+										}
+									/>
+								</AuthOnlyRoute>
+							}
+						/>
+						<Route
+							path="/register"
+							element={
+								<AuthOnlyRoute>
+									<RegisterPage
+										onSwitchToLogin={() => (window.location.href = "/login")}
+									/>
+								</AuthOnlyRoute>
+							}
+						/>
+						<Route
+							path="/template"
+							element={
+								<Layout>
+									<TemplatePage />
+								</Layout>
+							}
+						/>
 
-					<Route
-						path="/"
-						element={
-							<Layout>
-								<HomePage />
-							</Layout>
-						}
-					/>
+						<Route
+							path="/template/:id"
+							element={
+								<Layout>
+									<TemplatePage />
+								</Layout>
+							}
+						/>
+						{/* <Route path="/form/:id" element={<FormPage />} /> */}
+						<Route path="/settings" element={<UserSettings />} />
+						<Route
+							path="/auth/google/callback"
+							element={<GoogleCallbackPage />}
+						/>
 
-					<Route path="*" element={<Navigate to="/" replace />} />
-				</Routes>
-			</Router>
-		</I18nextProvider>
+						<Route
+							path="/"
+							element={
+								<Layout>
+									<HomePage />
+								</Layout>
+							}
+						/>
+
+						<Route path="*" element={<Navigate to="/" replace />} />
+					</Routes>
+				</Router>
+			</I18nextProvider>
+			<Toaster
+				position="top-right"
+				toastOptions={{
+					duration: 4000,
+				}}
+			/>
+		</>
 	);
 }
 

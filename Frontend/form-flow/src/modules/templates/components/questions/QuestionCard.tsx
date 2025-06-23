@@ -10,7 +10,7 @@ import { RequiredToggle } from "../../../../ui/Input/RequiredToggle";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { QuestionData } from "../../types/types";
-import { mode } from "../../../../pages/homePage/TemplateEditor";
+import { mode } from "../../../../pages/templates/TemplateEditor";
 
 interface QuestionCardProps {
 	question: QuestionData;
