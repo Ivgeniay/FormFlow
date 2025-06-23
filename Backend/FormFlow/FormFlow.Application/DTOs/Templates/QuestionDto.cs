@@ -1,5 +1,13 @@
 ﻿namespace FormFlow.Application.DTOs.Templates
 {
+    public class QuestionRequestDto
+    {
+        public int Order { get; set; }
+        public bool ShowInResults { get; set; }
+        public bool IsRequired { get; set; }
+        public string Data { get; set; } = string.Empty;
+    }
+
     public class QuestionDto
     {
         public Guid Id { get; set; }

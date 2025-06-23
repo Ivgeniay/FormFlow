@@ -8,6 +8,7 @@ interface FormattedTextInputProps {
 	placeholder?: string;
 	multiline?: boolean;
 	className?: string;
+	isReadOnly?: boolean;
 }
 
 export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
@@ -16,6 +17,7 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	placeholder,
 	multiline = false,
 	className = "",
+	isReadOnly = false,
 }) => {
 	const [showToolbar, setShowToolbar] = useState(false);
 	const contentRef = useRef<HTMLElement | null>(null);
@@ -67,9 +69,11 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	return (
 		<div className={`relative ${className}`}>
 			<ContentEditable
+				contentEditable={!isReadOnly}
+				suppressContentEditableWarning={true}
 				innerRef={contentRef as any}
 				html={value}
-				disabled={false}
+				disabled={isReadOnly}
 				onChange={handleChange}
 				onKeyDown={handleKeyDown}
 				onFocus={handleFocus}
@@ -96,7 +100,7 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 						: "opacity-0 -translate-y-2 pointer-events-none max-h-0"
 				}`}
 			>
-				<MarkdownToolbar onFormat={formatText} />
+				{!isReadOnly && <MarkdownToolbar onFormat={formatText} />}
 			</div>
 		</div>
 	);

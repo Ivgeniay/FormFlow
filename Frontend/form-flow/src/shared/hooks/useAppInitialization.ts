@@ -79,7 +79,6 @@ export const useAppInitialization = () => {
 		}
 
 		try {
-			console.log(`Auth!!! with: ${accessToken}`);
 			const userSettings = await userSettingsApi.getMySettings(accessToken);
 
 			setThemeById(userSettings.colorThemeId);

@@ -6,11 +6,13 @@ import { useTranslation } from "react-i18next";
 interface QuestionTypeSelectProps {
 	value: QuestionType;
 	onChange: (value: QuestionType) => void;
+	isDisable?: boolean;
 }
 
 export const QuestionTypeSelect: React.FC<QuestionTypeSelectProps> = ({
 	value,
 	onChange,
+	isDisable = false,
 }) => {
 	const { t } = useTranslation();
 	const questionTypeOptions = [
@@ -51,6 +53,7 @@ export const QuestionTypeSelect: React.FC<QuestionTypeSelectProps> = ({
 		<Select.Root
 			value={value.toString()}
 			onValueChange={(val) => onChange(Number(val) as QuestionType)}
+			disabled={isDisable}
 		>
 			<Select.Trigger className="inline-flex items-center justify-between px-2 py-1.5 border border-border bg-background text-text focus:border-primary focus:outline-none min-w-[130px] max-w-[150px] overflow-hidden whitespace-nowrap">
 				<Select.Value asChild>

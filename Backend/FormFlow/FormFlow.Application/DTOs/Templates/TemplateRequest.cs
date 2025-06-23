@@ -10,7 +10,8 @@ namespace FormFlow.Application.DTOs.Templates
         public TemplateAccess AccessType { get; set; } = TemplateAccess.Public;
         public List<string> Tags { get; set; } = new List<string>();
         public List<Guid> AllowedUserIds { get; set; } = new List<Guid>();
-    }
+        public List<QuestionRequestDto> Questions { get; set; } = new List<QuestionRequestDto>();
+    } 
 
     public class UpdateTemplateRequest
     {

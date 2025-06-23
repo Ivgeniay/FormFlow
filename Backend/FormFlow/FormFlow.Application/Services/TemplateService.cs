@@ -18,19 +18,22 @@ namespace FormFlow.Application.Services
         private readonly ITagRepository _tagRepository;
         private readonly ISearchService _searchService;
         private readonly ITopicRepository _topicRepository;
+        private readonly IQuestionRepository _questionRepository;
 
         public TemplateService(
             ITemplateRepository templateRepository,
             IUserRepository userRepository,
             ITagRepository tagRepository,
             ISearchService searchService,
-            ITopicRepository topicRepository)
+            ITopicRepository topicRepository, 
+            IQuestionRepository questionRepository)
         {
             _templateRepository = templateRepository;
             _userRepository = userRepository;
             _tagRepository = tagRepository;
             _searchService = searchService;
             _topicRepository = topicRepository;
+            this._questionRepository = questionRepository;
         }
 
         public async Task<TemplateDto> CreateTemplateAsync(CreateTemplateRequest request, Guid authorId)
@@ -55,6 +58,19 @@ namespace FormFlow.Application.Services
             };
 
             var createdTemplate = await _templateRepository.CreateAsync(template);
+            if (request.Questions.Any())
+            {
+                var questions = request.Questions.Select(q => new Question
+                {
+                    TemplateId = createdTemplate.Id,
+                    Order = q.Order,
+                    ShowInResults = q.ShowInResults,
+                    IsRequired = q.IsRequired,
+                    Data = q.Data
+                }).ToList();
+
+                await _questionRepository.CreateRangeAsync(questions);
+            }
 
             if (request.Tags.Any())
             {

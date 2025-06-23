@@ -1,11 +1,14 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { mode } from "../../../../pages/homePage/TemplateEditor";
 
 interface QuestionToolbarProps {
 	onAddQuestion: () => void;
 	onDuplicateQuestion: () => void;
 	onDeleteQuestion: () => void;
 	isVisible: boolean;
+	mode: mode;
+	binDisable?: boolean;
 }
 
 export const QuestionToolbar = React.forwardRef<
@@ -13,7 +16,14 @@ export const QuestionToolbar = React.forwardRef<
 	QuestionToolbarProps
 >(
 	(
-		{ onAddQuestion, onDuplicateQuestion, onDeleteQuestion, isVisible },
+		{
+			onAddQuestion,
+			onDuplicateQuestion,
+			onDeleteQuestion,
+			isVisible,
+			mode,
+			binDisable = false,
+		},
 		ref
 	) => {
 		const { t } = useTranslation();
@@ -27,6 +37,7 @@ export const QuestionToolbar = React.forwardRef<
 			>
 				<button
 					onClick={onAddQuestion}
+					disabled={mode === "readonly"}
 					className="p-3 text-text hover:bg-background rounded-lg transition-colors group"
 					title={t("addQuestion") || "Add Question"}
 				>
@@ -46,6 +57,7 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
+					disabled={mode === "readonly"}
 					onClick={onDuplicateQuestion}
 					className="p-3 text-text hover:bg-background rounded-lg transition-colors group"
 					title={t("duplicateQuestion") || "Duplicate Question"}
@@ -66,6 +78,7 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
+					disabled={binDisable || mode === "readonly"}
 					onClick={onDeleteQuestion}
 					className="p-3 text-textMuted hover:text-error hover:bg-background rounded-lg transition-colors group"
 					title={t("deleteQuestion") || "Delete Question"}

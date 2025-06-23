@@ -10,6 +10,7 @@ import { RequiredToggle } from "../../../../ui/Input/RequiredToggle";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { QuestionData } from "../../types/types";
+import { mode } from "../../../../pages/homePage/TemplateEditor";
 
 interface QuestionCardProps {
 	question: QuestionData;
@@ -19,6 +20,7 @@ interface QuestionCardProps {
 	onActivate?: () => void;
 	dragHandleProps?: any;
 	className?: string;
+	mode: mode;
 }
 
 export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
@@ -31,6 +33,7 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
 			onActivate,
 			dragHandleProps,
 			className = "",
+			mode,
 		},
 		ref
 	) => {
@@ -96,9 +99,11 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
 				} ${isDragging ? "opacity-50" : "opacity-100"} ${className}`}
 				onClick={onActivate}
 			>
-				{/* <div className="relative"> */}
 				<>
-					<DragHandle dragHandleProps={{ ...attributes, ...listeners }} />
+					<DragHandle
+						dragHandleProps={{ ...attributes, ...listeners }}
+						mode={mode}
+					/>
 
 					<div className="p-4 pt-10">
 						<div className="space-y-3">
@@ -108,12 +113,14 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
 										value={question.title}
 										onChange={(value) => handleFieldChange("title", value)}
 										placeholder={t("questionPlaceholder") || "Question"}
+										isReadOnly={mode === "readonly"}
 									/>
 								</div>
 
 								<QuestionTypeSelect
 									value={question.type}
 									onChange={handleTypeChange}
+									isDisable={mode !== "create"}
 								/>
 							</div>
 
@@ -124,11 +131,13 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
 									t("descriptionPlaceholder") || "Description (optional)"
 								}
 								multiline
+								isReadOnly={mode === "readonly"}
 							/>
 
 							<QuestionSettings
 								question={question}
 								onChange={handleTypeSpecificDataChange}
+								mode={mode}
 							/>
 						</div>
 
@@ -136,10 +145,10 @@ export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(
 							<RequiredToggle
 								value={question.isRequired}
 								onChange={(value) => handleFieldChange("isRequired", value)}
+								isReadOnly={mode === "readonly"}
 							/>
 						</div>
 					</div>
-					{/* </div> */}
 				</>
 			</div>
 		);

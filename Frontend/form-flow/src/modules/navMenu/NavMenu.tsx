@@ -143,7 +143,6 @@ export const NavMenu: React.FC<NavMenuProps> = ({
 					<button
 						onClick={onClose}
 						className="p-2 rounded-lg text-text hover:bg-background transition-colors"
-						aria-label={t("closeMenu") || "Close menu"}
 					>
 						<svg
 							className="w-5 h-5"

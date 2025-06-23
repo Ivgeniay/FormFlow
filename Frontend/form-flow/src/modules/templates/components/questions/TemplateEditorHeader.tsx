@@ -7,6 +7,7 @@ import { ImageUploader } from "../../../../ui/Input/ImageUploader";
 import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { usersApi } from "../../../../api/usersApi";
 import { TemplateAccess } from "../../../../shared/domain_types";
+import { mode } from "../../../../pages/homePage/TemplateEditor";
 
 interface Topic {
 	id: string;
@@ -19,7 +20,7 @@ interface User {
 	primaryEmail: string;
 }
 
-interface TemplateHeaderData {
+export interface TemplateHeaderData {
 	title: string;
 	description: string;
 	image: File | null;
@@ -32,11 +33,13 @@ interface TemplateHeaderData {
 interface TemplateEditorHeaderProps {
 	data: TemplateHeaderData;
 	onDataChange: (data: TemplateHeaderData) => void;
+	mode: mode;
 }
 
 export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 	data,
 	onDataChange,
+	mode,
 }) => {
 	const { t } = useTranslation();
 	const { accessToken } = useAuth();
@@ -231,6 +234,7 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 						value={data.title}
 						onChange={handleTitleChange}
 						placeholder={t("enterTemplateTitle") || "Enter template title"}
+						isReadOnly={mode === "readonly"}
 					/>
 				</div>
 
@@ -245,6 +249,7 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 							t("enterTemplateDescription") || "Enter template description"
 						}
 						multiline
+						isReadOnly={mode === "readonly"}
 					/>
 				</div>
 
@@ -377,7 +382,8 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 
 						{!accessToken ? (
 							<div className="text-sm text-textMuted">
-								{t("loginRequired") || "Please log in to search users"}
+								{t("loginRequiredToSearchUser") ||
+									"Please log in to search users"}
 							</div>
 						) : (
 							<div className="relative">

@@ -2,15 +2,18 @@ import { useTranslation } from "react-i18next";
 import { QuestionType } from "../../../../shared/domain_types";
 import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { QuestionData } from "../../types/types";
+import { mode } from "../../../../pages/homePage/TemplateEditor";
 
 interface QuestionSettingsProps {
 	question: QuestionData;
 	onChange: (data: Record<string, any>) => void;
+	mode?: mode;
 }
 
 export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 	question,
 	onChange,
+	mode,
 }) => {
 	const { t } = useTranslation();
 
@@ -30,6 +33,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 							value={question.typeSpecificData.placeholder || ""}
 							onChange={(value) => updateSetting("placeholder", value)}
 							placeholder={t("placeholderText") || "Placeholder text"}
+							isReadOnly={mode === "readonly"}
 						/>
 					</div>
 				);
@@ -44,6 +48,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 							value={question.typeSpecificData.placeholder || ""}
 							onChange={(value) => updateSetting("placeholder", value)}
 							placeholder={t("placeholderText") || "Placeholder text"}
+							isReadOnly={mode === "readonly"}
 						/>
 					</div>
 				);
@@ -80,6 +85,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 											}}
 											placeholder={`Option ${index + 1}`}
 											className="flex-1"
+											isReadOnly={mode === "readonly"}
 										/>
 										<button
 											onClick={() => {
@@ -89,6 +95,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 												updateSetting("options", newOptions);
 											}}
 											className="p-1 text-textMuted hover:text-error"
+											disabled={mode === "readonly"}
 										>
 											×
 										</button>
@@ -106,6 +113,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									updateSetting("options", newOptions);
 								}}
 								className="text-sm text-primary hover:underline"
+								disabled={mode === "readonly"}
 							>
 								+ {t("addOption") || "Add option"}
 							</button>
@@ -131,6 +139,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 										updateSetting("minValue", parseInt(e.target.value))
 									}
 									className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 							<div>
@@ -144,6 +153,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 										updateSetting("maxValue", parseInt(e.target.value))
 									}
 									className="w-full px-2 py-1 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 						</div>
@@ -169,6 +179,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									updateSetting("maxRating", parseInt(e.target.value))
 								}
 								className="w-20 px-2 py-1 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+								readOnly={mode === "readonly"}
 							/>
 						</div>
 					</div>
@@ -192,6 +203,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									onChange={(e) => updateSetting("startDate", e.target.value)}
 									max={question.typeSpecificData.pastDate || undefined}
 									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 
@@ -205,6 +217,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									onChange={(e) => updateSetting("pastDate", e.target.value)}
 									min={question.typeSpecificData.startDate || undefined}
 									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 						</div>
@@ -229,6 +242,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									onChange={(e) => updateSetting("startTime", e.target.value)}
 									max={question.typeSpecificData.endTime || undefined}
 									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 
@@ -242,6 +256,7 @@ export const QuestionSettings: React.FC<QuestionSettingsProps> = ({
 									onChange={(e) => updateSetting("endTime", e.target.value)}
 									min={question.typeSpecificData.startTime || undefined}
 									className="w-full px-2 py-1.5 text-sm border border-border rounded bg-background text-text focus:border-primary focus:outline-none"
+									readOnly={mode === "readonly"}
 								/>
 							</div>
 						</div>

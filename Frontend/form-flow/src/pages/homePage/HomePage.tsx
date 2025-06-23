@@ -5,6 +5,7 @@ import { mockTags, mockTemplates } from "../../shared/mock_data";
 import { QuestionType, TemplateAccess } from "../../shared/domain_types";
 import { QuestionData } from "../../modules/templates/types/types";
 import { TemplateEditor } from "./TemplateEditor";
+import { TemplatePage } from "../templates/TemplatePage";
 
 export const HomePage: React.FC = () => {
 	const [isVisible, setVisible] = useState(true);
@@ -98,18 +99,6 @@ export const HomePage: React.FC = () => {
 				maxItems={4}
 				mode="compact"
 				columns={6}
-			/>
-			<TemplateEditor
-				formTemplate={{
-					title: "",
-					description: "",
-					image: null,
-					topicId: "",
-					accessType: TemplateAccess.Public,
-					tags: [],
-					allowedUserIds: [],
-					questions: mockQuestions,
-				}}
 			/>
 			<TagCloud
 				tags={mockTags}

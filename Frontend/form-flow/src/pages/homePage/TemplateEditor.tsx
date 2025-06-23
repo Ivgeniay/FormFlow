@@ -14,15 +14,20 @@ import {
 } from "../../modules/templates/types/types";
 import { TemplateEditorHeader } from "../../modules/templates/components/questions/TemplateEditorHeader";
 
+export type mode = "create" | "edit" | "readonly";
+
 interface FormTemplateProps {
 	formTemplate: FormTemplate;
+	onFormTemplateChange: (template: FormTemplate) => void;
+	mode: mode;
 }
 
 export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	formTemplate,
+	onFormTemplateChange,
+	mode,
 }) => {
-	const [formTemplateState, setFormTemplate] =
-		useState<FormTemplate>(formTemplate);
+	// const [formTemplateState, setFormTemplate] = useState<FormTemplate>(formTemplate);
 
 	const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 	const toolbarRef = useRef<HTMLDivElement>(null);
@@ -32,21 +37,23 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 		questionId: string,
 		updatedQuestion: QuestionData
 	) => {
-		setFormTemplate((p) => ({
-			...p,
-			questions: p.questions.map((q) =>
+		const updatedTemplate = {
+			...formTemplate,
+			questions: formTemplate.questions.map((q) =>
 				q.id === questionId ? updatedQuestion : q
 			),
-		}));
+		};
+		onFormTemplateChange(updatedTemplate);
 	};
 
 	const updateQuestions = (
 		updater: (prev: QuestionData[]) => QuestionData[]
 	) => {
-		setFormTemplate((prev) => ({
-			...prev,
-			questions: updater(prev.questions),
-		}));
+		const updatedTemplate = {
+			...formTemplate,
+			questions: updater(formTemplate.questions),
+		};
+		onFormTemplateChange(updatedTemplate);
 	};
 
 	const setCardRef = (questionId: string, element: HTMLDivElement | null) => {
@@ -89,19 +96,21 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	const duplicateQuestion = () => {
 		if (!activeQuestionId) return;
 
-		const questionToDuplicate = formTemplateState.questions.find(
+		const questionToDuplicate = formTemplate.questions.find(
 			(q) => q.id === activeQuestionId
 		);
 		if (!questionToDuplicate) return;
 
+		const newId = getNextQuestionId();
+
 		const newQuestion: QuestionData = {
 			...questionToDuplicate,
-			id: Date.now().toString(),
+			id: newId,
 			order: questionToDuplicate.order + 1,
 			title: questionToDuplicate.title + " (Copy)",
 		};
 
-		const activeIndex = formTemplateState.questions.findIndex(
+		const activeIndex = formTemplate.questions.findIndex(
 			(q) => q.id === activeQuestionId
 		);
 
@@ -127,17 +136,29 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 		});
 	};
 
+	const getNextQuestionId = () => {
+		if (formTemplate.questions.length === 0) {
+			return "1";
+		}
+		const maxId = Math.max(
+			...formTemplate.questions.map((q) => parseInt(q.id) || 0)
+		);
+		return (maxId + 1).toString();
+	};
+
 	const addNewQuestion = () => {
 		const activeIndex = activeQuestionId
-			? formTemplateState.questions.findIndex((q) => q.id === activeQuestionId)
+			? formTemplate.questions.findIndex((q) => q.id === activeQuestionId)
 			: -1;
 		const newOrder =
 			activeIndex !== -1
-				? formTemplateState.questions[activeIndex].order + 1
-				: formTemplateState.questions.length + 1;
+				? formTemplate.questions[activeIndex].order + 1
+				: formTemplate.questions.length + 1;
+
+		const newId = getNextQuestionId();
 
 		const newQuestion: QuestionData = {
-			id: Date.now().toString(),
+			id: newId,
 			order: newOrder,
 			title: "",
 			description: "",
@@ -197,35 +218,33 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	return (
 		<DndContext
 			collisionDetection={closestCenter}
-			onDragEnd={handleDragEnd}
+			onDragEnd={mode === "readonly" ? undefined : handleDragEnd}
 			modifiers={[restrictToVerticalAxis]}
 		>
 			<SortableContext
-				items={formTemplateState.questions.map((q) => q.id)}
+				items={formTemplate.questions.map((q) => q.id)}
 				strategy={verticalListSortingStrategy}
 			>
 				<div className="min-h-screen bg-background p-8">
 					<div className="max-w-2xl mx-auto">
 						<TemplateEditorHeader
 							data={{
-								title: formTemplateState.title,
-								description: formTemplateState.description,
-								image: formTemplateState.image,
-								topicId: formTemplateState.topicId,
-								accessType: formTemplateState.accessType,
-								tags: formTemplateState.tags,
-								allowedUserIds: formTemplateState.allowedUserIds,
+								title: formTemplate.title,
+								description: formTemplate.description,
+								image: formTemplate.image,
+								topicId: formTemplate.topicId,
+								accessType: formTemplate.accessType,
+								tags: formTemplate.tags,
+								allowedUserIds: formTemplate.allowedUserIds,
 							}}
 							onDataChange={(headerData) => {
-								setFormTemplate((prev) => ({
-									...prev,
-									...headerData,
-								}));
+								onFormTemplateChange({ ...formTemplate, ...headerData });
 							}}
+							mode={mode}
 						/>
 
 						<div className="space-y-2">
-							{formTemplateState.questions.map((question, index) => (
+							{formTemplate.questions.map((question, index) => (
 								<QuestionCard
 									key={question.id}
 									ref={(el) => setCardRef(question.id, el)}
@@ -236,6 +255,7 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 									onDelete={() => handleDeleteQuestion(question.id)}
 									isActive={activeQuestionId === question.id}
 									onActivate={() => setActiveQuestionId(question.id)}
+									mode={mode}
 								/>
 							))}
 						</div>
@@ -246,6 +266,8 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 							onAddQuestion={addNewQuestion}
 							onDuplicateQuestion={duplicateQuestion}
 							onDeleteQuestion={deleteActiveQuestion}
+							mode={mode}
+							binDisable={formTemplate.questions.length < 2}
 						/>
 
 						<div className="mt-12 p-6 bg-surface border border-border rounded-lg">
@@ -258,14 +280,14 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 								</div>
 								<div>
 									<strong>Total Questions:</strong>{" "}
-									{formTemplateState.questions.length}
+									{formTemplate.questions.length}
 								</div>
 								<details className="mt-4">
 									<summary className="cursor-pointer text-primary">
 										View Questions Data (JSON)
 									</summary>
 									<pre className="mt-2 p-4 bg-background border border-border rounded text-xs overflow-auto">
-										{JSON.stringify(formTemplateState.questions, null, 2)}
+										{JSON.stringify(formTemplate.questions, null, 2)}
 									</pre>
 								</details>
 							</div>

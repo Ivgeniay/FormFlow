@@ -16,6 +16,7 @@ import { AppLoader } from "./components/AppLoader";
 import { I18nextProvider } from "react-i18next";
 import i18n from "./config/i18n";
 import { UserSettings } from "./pages/settings/UserSettings";
+import { TemplatePage } from "./pages/templates/TemplatePage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -61,6 +62,9 @@ function App() {
 							</AuthOnlyRoute>
 						}
 					/>
+					<Route path="/template" element={<TemplatePage />} />
+					<Route path="/template/:id" element={<TemplatePage />} />
+					{/* <Route path="/form/:id" element={<FormPage />} /> */}
 					<Route path="/settings" element={<UserSettings />} />
 					<Route
 						path="/auth/google/callback"

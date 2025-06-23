@@ -49,6 +49,7 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<IColorThemeRepository, ColorThemeRepository>();
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
+            builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 
 
             builder.Services.AddScoped<IUserService, UserService>();
