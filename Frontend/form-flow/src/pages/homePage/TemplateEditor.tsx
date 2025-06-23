@@ -1,114 +1,55 @@
 import React, { useEffect, useRef, useState } from "react";
 import { QuestionType } from "../../shared/domain_types";
-import {
-	QuestionCard,
-	QuestionData,
-} from "../../modules/templates/components/questions/QuestionCard";
+import { QuestionCard } from "../../modules/templates/components/questions/QuestionCard";
 import { DndContext, closestCenter, DragEndEvent } from "@dnd-kit/core";
 import {
 	SortableContext,
 	verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
-import { QuestionToolbar } from "../../ui/Input/QuestionToolbar";
-import { ImageUploader } from "../../ui/Input/ImageUploader";
-import { FormattedTextInput } from "../../ui/Input/FormattedTextInput";
-import { useTranslation } from "react-i18next";
+import { QuestionToolbar } from "../../modules/templates/components/questions/QuestionToolbar";
+import {
+	FormTemplate,
+	QuestionData,
+} from "../../modules/templates/types/types";
+import { TemplateEditorHeader } from "../../modules/templates/components/questions/TemplateEditorHeader";
 
-const mockQuestions: QuestionData[] = [
-	{
-		id: "1",
-		order: 0,
-		title: "What is your name?",
-		description: "Please enter your full name",
-		type: QuestionType.ShortText,
-		isRequired: true,
-		showInResults: true,
-		typeSpecificData: {
-			maxLength: 100,
-			placeholder: "Enter your name",
-		},
-	},
-	{
-		id: "2",
-		order: 1,
-		title: "Tell us about yourself",
-		description: "Share your background and interests",
-		type: QuestionType.LongText,
-		isRequired: false,
-		showInResults: true,
-		typeSpecificData: {
-			maxLength: 500,
-			placeholder: "Describe yourself...",
-		},
-	},
-	{
-		id: "3",
-		order: 2,
-		title: "What is your favorite color?",
-		description: "",
-		type: QuestionType.SingleChoice,
-		isRequired: true,
-		showInResults: true,
-		typeSpecificData: {
-			options: ["Red", "Blue", "Green", "Yellow", "Other"],
-		},
-	},
-	{
-		id: "4",
-		order: 3,
-		title: "Which programming languages do you know?",
-		description: "Select all that apply",
-		type: QuestionType.MultipleChoice,
-		isRequired: false,
-		showInResults: true,
-		typeSpecificData: {
-			options: ["JavaScript", "Python", "Java", "C#", "Go", "Rust"],
-			maxSelections: 3,
-		},
-	},
-	{
-		id: "5",
-		order: 4,
-		title: "Rate your experience with React",
-		description: "Scale from 1 (beginner) to 5 (expert)",
-		type: QuestionType.Scale,
-		isRequired: true,
-		showInResults: true,
-		typeSpecificData: {
-			minValue: 1,
-			maxValue: 5,
-			minLabel: "Beginner",
-			maxLabel: "Expert",
-		},
-	},
-];
+interface FormTemplateProps {
+	formTemplate: FormTemplate;
+}
 
-export const QuestionCardDemo: React.FC = () => {
-	const [questions, setQuestions] = useState<QuestionData[]>(mockQuestions);
+export const TemplateEditor: React.FC<FormTemplateProps> = ({
+	formTemplate,
+}) => {
+	const [formTemplateState, setFormTemplate] =
+		useState<FormTemplate>(formTemplate);
+
 	const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 	const toolbarRef = useRef<HTMLDivElement>(null);
 	const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-	const [formTitle, setFormTitle] = useState("");
-	const [formDescription, setFormDescription] = useState("");
-	const [formImage, setFormImage] = useState<File | null>(null);
-	const { t } = useTranslation();
-
-	const handleImageSelect = (file: File | null) => {
-		setFormImage(file);
-	};
 
 	const handleQuestionChange = (
 		questionId: string,
 		updatedQuestion: QuestionData
 	) => {
-		setQuestions((prev) =>
-			prev.map((q) => (q.id === questionId ? updatedQuestion : q))
-		);
+		setFormTemplate((p) => ({
+			...p,
+			questions: p.questions.map((q) =>
+				q.id === questionId ? updatedQuestion : q
+			),
+		}));
+	};
+
+	const updateQuestions = (
+		updater: (prev: QuestionData[]) => QuestionData[]
+	) => {
+		setFormTemplate((prev) => ({
+			...prev,
+			questions: updater(prev.questions),
+		}));
 	};
 
 	const setCardRef = (questionId: string, element: HTMLDivElement | null) => {
-		console.log("setCardRef called:", questionId, element);
 		if (element) {
 			cardRefs.current.set(questionId, element);
 		} else {
@@ -148,7 +89,7 @@ export const QuestionCardDemo: React.FC = () => {
 	const duplicateQuestion = () => {
 		if (!activeQuestionId) return;
 
-		const questionToDuplicate = questions.find(
+		const questionToDuplicate = formTemplateState.questions.find(
 			(q) => q.id === activeQuestionId
 		);
 		if (!questionToDuplicate) return;
@@ -156,13 +97,20 @@ export const QuestionCardDemo: React.FC = () => {
 		const newQuestion: QuestionData = {
 			...questionToDuplicate,
 			id: Date.now().toString(),
+			order: questionToDuplicate.order + 1,
 			title: questionToDuplicate.title + " (Copy)",
 		};
 
-		const activeIndex = questions.findIndex((q) => q.id === activeQuestionId);
-		const updatedQuestions = [...questions];
-		updatedQuestions.splice(activeIndex + 1, 0, newQuestion);
-		setQuestions(updatedQuestions);
+		const activeIndex = formTemplateState.questions.findIndex(
+			(q) => q.id === activeQuestionId
+		);
+
+		updateQuestions((prev) => {
+			const updatedQuestions = [...prev];
+			updatedQuestions.splice(activeIndex + 1, 0, newQuestion);
+			return reorderQuestions(updatedQuestions);
+		});
+
 		setActiveQuestionId(newQuestion.id);
 	};
 
@@ -173,7 +121,7 @@ export const QuestionCardDemo: React.FC = () => {
 	};
 
 	const handleDeleteQuestion = (questionId: string) => {
-		setQuestions((prev) => {
+		updateQuestions((prev) => {
 			const filtered = prev.filter((q) => q.id !== questionId);
 			return reorderQuestions(filtered);
 		});
@@ -181,12 +129,12 @@ export const QuestionCardDemo: React.FC = () => {
 
 	const addNewQuestion = () => {
 		const activeIndex = activeQuestionId
-			? questions.findIndex((q) => q.id === activeQuestionId)
+			? formTemplateState.questions.findIndex((q) => q.id === activeQuestionId)
 			: -1;
 		const newOrder =
 			activeIndex !== -1
-				? questions[activeIndex].order + 1
-				: questions.length + 1;
+				? formTemplateState.questions[activeIndex].order + 1
+				: formTemplateState.questions.length + 1;
 
 		const newQuestion: QuestionData = {
 			id: Date.now().toString(),
@@ -199,7 +147,7 @@ export const QuestionCardDemo: React.FC = () => {
 			typeSpecificData: {},
 		};
 
-		setQuestions((prev) => {
+		updateQuestions((prev) => {
 			const updatedQuestions = activeQuestionId
 				? insertQuestionAfterActive(prev, newQuestion, activeQuestionId)
 				: [...prev, newQuestion];
@@ -233,17 +181,16 @@ export const QuestionCardDemo: React.FC = () => {
 		const { active, over } = event;
 
 		if (over && active.id !== over.id) {
-			const oldIndex = questions.findIndex((q) => q.id === active.id);
-			const newIndex = questions.findIndex((q) => q.id === over.id);
+			updateQuestions((prev) => {
+				const oldIndex = prev.findIndex((q) => q.id === active.id);
+				const newIndex = prev.findIndex((q) => q.id === over.id);
 
-			const updatedQuestions = [...questions];
-			const [movedQuestion] = updatedQuestions.splice(oldIndex, 1);
-			updatedQuestions.splice(newIndex, 0, movedQuestion);
+				const updatedQuestions = [...prev];
+				const [movedQuestion] = updatedQuestions.splice(oldIndex, 1);
+				updatedQuestions.splice(newIndex, 0, movedQuestion);
 
-			updatedQuestions.forEach((question, index) => {
-				question.order = index + 1;
+				return reorderQuestions(updatedQuestions);
 			});
-			setQuestions(updatedQuestions);
 		}
 	};
 
@@ -254,51 +201,31 @@ export const QuestionCardDemo: React.FC = () => {
 			modifiers={[restrictToVerticalAxis]}
 		>
 			<SortableContext
-				items={questions.map((q) => q.id)}
+				items={formTemplateState.questions.map((q) => q.id)}
 				strategy={verticalListSortingStrategy}
 			>
 				<div className="min-h-screen bg-background p-8">
 					<div className="max-w-2xl mx-auto">
-						<div className="mb-8 p-6 bg-surface border border-border rounded-lg">
-							<h2 className="text-xl font-semibold text-text mb-4">
-								{t("formSettings") || "Form Settings"}
-							</h2>
-
-							<div className="space-y-3">
-								<div>
-									<ImageUploader
-										onImageSelect={handleImageSelect}
-										currentImage={null}
-									/>
-								</div>
-
-								<div>
-									<FormattedTextInput
-										value={formTitle || t("formTitle") || "Form Title"}
-										onChange={setFormTitle}
-										placeholder={t("enterFormTitle") || "Enter form title"}
-									/>
-								</div>
-
-								<div>
-									<FormattedTextInput
-										value={
-											formDescription ||
-											t("formDescription") ||
-											"Form Description"
-										}
-										onChange={setFormDescription}
-										placeholder={
-											t("enterFormDescription") || "Enter form description"
-										}
-										multiline
-									/>
-								</div>
-							</div>
-						</div>
+						<TemplateEditorHeader
+							data={{
+								title: formTemplateState.title,
+								description: formTemplateState.description,
+								image: formTemplateState.image,
+								topicId: formTemplateState.topicId,
+								accessType: formTemplateState.accessType,
+								tags: formTemplateState.tags,
+								allowedUserIds: formTemplateState.allowedUserIds,
+							}}
+							onDataChange={(headerData) => {
+								setFormTemplate((prev) => ({
+									...prev,
+									...headerData,
+								}));
+							}}
+						/>
 
 						<div className="space-y-2">
-							{questions.map((question, index) => (
+							{formTemplateState.questions.map((question, index) => (
 								<QuestionCard
 									key={question.id}
 									ref={(el) => setCardRef(question.id, el)}
@@ -330,14 +257,15 @@ export const QuestionCardDemo: React.FC = () => {
 									<strong>Active Question:</strong> {activeQuestionId || "None"}
 								</div>
 								<div>
-									<strong>Total Questions:</strong> {questions.length}
+									<strong>Total Questions:</strong>{" "}
+									{formTemplateState.questions.length}
 								</div>
 								<details className="mt-4">
 									<summary className="cursor-pointer text-primary">
 										View Questions Data (JSON)
 									</summary>
 									<pre className="mt-2 p-4 bg-background border border-border rounded text-xs overflow-auto">
-										{JSON.stringify(questions, null, 2)}
+										{JSON.stringify(formTemplateState.questions, null, 2)}
 									</pre>
 								</details>
 							</div>

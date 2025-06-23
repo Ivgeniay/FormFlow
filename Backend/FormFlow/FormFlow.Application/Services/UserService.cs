@@ -387,7 +387,7 @@ namespace FormFlow.Application.Services
         public async Task<List<UserDto>> SearchUsersAsync(string query, int limit = 10)
         {
             var users = await _userRepository.GetUsersForSearchAsync(query, limit);
-            return users.Select(DTOMapper.MapToUserSearchDto).Cast<UserDto>().ToList();
+            return users.Select(DTOMapper.MapToUserDto).Cast<UserDto>().ToList();
         }
 
         public async Task BlockUserAsync(Guid userId, Guid adminId)

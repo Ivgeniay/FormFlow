@@ -2,13 +2,14 @@ import { QuestionType } from "../../../../shared/domain_types";
 
 import React from "react";
 import { useTranslation } from "react-i18next";
-import { DragHandle } from "../../../../ui/Input/DragHandle";
+import { DragHandle } from "./DragHandle";
 import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
-import { QuestionTypeSelect } from "../../../../ui/Input/QuestionTypeSelect";
-import { QuestionSettings } from "../../../../ui/Input/QuestionSettings";
+import { QuestionTypeSelect } from "./QuestionTypeSelect";
+import { QuestionSettings } from "./QuestionSettings";
 import { RequiredToggle } from "../../../../ui/Input/RequiredToggle";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { QuestionData } from "../../types/types";
 
 interface QuestionCardProps {
 	question: QuestionData;
@@ -18,17 +19,6 @@ interface QuestionCardProps {
 	onActivate?: () => void;
 	dragHandleProps?: any;
 	className?: string;
-}
-
-export interface QuestionData {
-	id: string;
-	order: number;
-	title: string;
-	description: string;
-	type: QuestionType;
-	isRequired: boolean;
-	showInResults: boolean;
-	typeSpecificData: Record<string, any>;
 }
 
 export const QuestionCard = React.forwardRef<HTMLDivElement, QuestionCardProps>(

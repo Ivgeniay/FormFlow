@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
-import { QuestionData } from "../../modules/templates/components/questions/QuestionCard";
-import { QuestionType } from "../../shared/domain_types";
-import { FormattedTextInput } from "./FormattedTextInput";
+import { QuestionType } from "../../../../shared/domain_types";
+import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
+import { QuestionData } from "../../types/types";
 
 interface QuestionSettingsProps {
 	question: QuestionData;

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { useTheme } from "./useTheme";
 import { useLanguage } from "./useLanguage";
-import { userSettingsApi } from "../../api/userSettings";
+import { userSettingsApi } from "../../api/userSettingsApi";
 import { useAppStore } from "../../stores/appStore";
 import i18n from "../../config/i18n";
 

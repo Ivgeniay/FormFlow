@@ -3,12 +3,14 @@ import { useTranslation } from "react-i18next";
 
 interface ImageUploaderProps {
 	onImageSelect: (file: File | null) => void;
+	supportedFormats: string[];
 	currentImage?: string | null;
 	className?: string;
 }
 
 export const ImageUploader: React.FC<ImageUploaderProps> = ({
 	onImageSelect,
+	supportedFormats,
 	currentImage,
 	className = "",
 }) => {
@@ -17,7 +19,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 	const [preview, setPreview] = useState<string | null>(currentImage || null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
-	const supportedFormats = [".jpg", ".jpeg", ".png", ".gif", ".webp"];
 	const maxFileSize = 5 * 1024 * 1024; // 5MB
 
 	const validateFile = (file: File): boolean => {

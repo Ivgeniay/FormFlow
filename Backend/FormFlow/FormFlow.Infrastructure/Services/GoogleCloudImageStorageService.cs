@@ -88,10 +88,10 @@ namespace FormFlow.Infrastructure.Services
             var extension = Path.GetExtension(fileName).ToLower();
             return extension switch
             {
-                ".jpg" => "image/jpeg",
+                ".jpg"  => "image/jpeg",
                 ".jpeg" => "image/jpeg",
-                ".png" => "image/png",
-                ".gif" => "image/gif",
+                ".png"  => "image/png",
+                ".gif"  => "image/gif",
                 ".webp" => "image/webp",
                 _ => "application/octet-stream"
             };

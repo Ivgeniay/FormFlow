@@ -1,6 +1,6 @@
 import React from "react";
 import * as Select from "@radix-ui/react-select";
-import { QuestionType } from "../../shared/domain_types";
+import { QuestionType } from "../../../../shared/domain_types";
 import { useTranslation } from "react-i18next";
 
 interface QuestionTypeSelectProps {

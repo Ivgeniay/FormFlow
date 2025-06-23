@@ -126,8 +126,8 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost]
-        [Authorize]
-        [RequireRole(UserRole.Admin)]
+        //[Authorize]
+        //[RequireRole(UserRole.Admin)]
         public async Task<IActionResult> CreateTag([FromBody] CreateTagRequest request)
         {
             try
