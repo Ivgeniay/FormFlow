@@ -6,6 +6,7 @@ import {
 	DropdownMenu,
 	DropdownMenuItemType,
 } from "../ui/Dropdown/DropdownMenu";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
 	user: UserDto | null;
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
 	onSearch,
 }) => {
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		onSearch(e.target.value);
@@ -137,7 +139,10 @@ export const Header: React.FC<HeaderProps> = ({
 						</svg>
 					</button>
 
-					<div className="text-2xl font-bold text-primary cursor-pointer">
+					<div
+						onClick={() => navigate("/")}
+						className="text-2xl font-bold text-primary cursor-pointer"
+					>
 						{t("appName")}
 					</div>
 				</div>

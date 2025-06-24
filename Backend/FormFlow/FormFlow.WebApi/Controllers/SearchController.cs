@@ -25,7 +25,7 @@ namespace FormFlow.WebApi.Controllers
             [FromQuery] string[]? tags = null,
             [FromQuery] string? author = null,
             [FromQuery] string? topic = null,
-            [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
+            [FromQuery] int sortBy = 0,
             [FromQuery] int page = 1,
             [FromQuery] int pageSize = 20)
         {
@@ -35,13 +35,15 @@ namespace FormFlow.WebApi.Controllers
                 if (pageSize < 1) pageSize = 20;
                 if (page < 1) page = 1;
 
+                var sortByEnum = (SearchSortBy)sortBy;
+
                 var searchQuery = new SearchQuery
                 {
                     Query = q?.Trim() ?? "",
                     Topic = topic?.Trim(),
                     Tags = tags?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
                     AuthorName = author?.Trim(),
-                    SortBy = sortBy,
+                    SortBy = sortByEnum,
                     Page = page,
                     PageSize = pageSize,
                     IncludeDeleted = false,
@@ -165,16 +167,16 @@ namespace FormFlow.WebApi.Controllers
         [Authorize]
         [RequireRole(UserRole.Admin)]
         public async Task<IActionResult> AdminSearch(
-    [FromQuery] string q = "",
-    [FromQuery] string[]? tags = null,
-    [FromQuery] string? author = null,
-    [FromQuery] string? topic = null,
-    [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
-    [FromQuery] bool includeDeleted = false,
-    [FromQuery] bool includeArchived = true,
-    [FromQuery] bool includeUnpublished = true,
-    [FromQuery] int page = 1,
-    [FromQuery] int pageSize = 20)
+            [FromQuery] string q = "",
+            [FromQuery] string[]? tags = null,
+            [FromQuery] string? author = null,
+            [FromQuery] string? topic = null,
+            [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
+            [FromQuery] bool includeDeleted = false,
+            [FromQuery] bool includeArchived = true,
+            [FromQuery] bool includeUnpublished = true,
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 20)
         {
             try
             {

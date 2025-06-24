@@ -100,6 +100,27 @@ class TagsApi {
 		return response.data;
 	}
 
+	async updateTag(
+		id: string,
+		request: CreateTagRequest,
+		accessToken: string
+	): Promise<TagDto> {
+		const response = await axios.put<TagDto>(
+			`${API_BASE_URL}/tag/${id}`,
+			request,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async deleteTag(id: string, accessToken: string): Promise<void> {
+		await axios.delete(`${API_BASE_URL}/tag/${id}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+	}
+
 	async cleanupUnusedTags(accessToken: string): Promise<void> {
 		await axios.delete(`${API_BASE_URL}/tag/cleanup`, {
 			headers: { Authorization: `Bearer ${accessToken}` },

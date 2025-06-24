@@ -38,7 +38,11 @@ export const Layout: React.FC<LayoutProps> = ({ children }) => {
 	};
 
 	const handleSearch = (query: string) => {
-		console.log("Search query:", query);
+		if (query.trim()) {
+			navigate(`/search?q=${encodeURIComponent(query.trim())}`);
+		} else {
+			navigate("/search");
+		}
 	};
 
 	const handleNavigate = (path: string) => {

@@ -18,6 +18,7 @@ import i18n from "./config/i18n";
 import { UserSettings } from "./pages/settings/UserSettings";
 import { TemplatePage } from "./pages/templates/TemplatePage";
 import { Toaster } from "react-hot-toast";
+import { SearchPage } from "./pages/search/SearchPage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -52,6 +53,14 @@ function App() {
 										}
 									/>
 								</AuthOnlyRoute>
+							}
+						/>
+						<Route
+							path="/search"
+							element={
+								<Layout>
+									<SearchPage />
+								</Layout>
 							}
 						/>
 						<Route
