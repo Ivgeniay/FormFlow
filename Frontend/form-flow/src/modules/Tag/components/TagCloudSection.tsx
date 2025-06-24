@@ -21,7 +21,14 @@ export const TagCloudSection: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			const popularTags = await tagsApi.getTagCloud(30);
-			setTags(popularTags);
+			setTags(
+				popularTags.tags.map((e) => ({
+					id: e.id,
+					name: e.name,
+					usageCount: e.usageCount,
+					createdAt: e.createdAt,
+				}))
+			);
 		} catch (err: any) {
 			setError(err.message || "Failed to load tags");
 			console.error("Error loading tags:", err);

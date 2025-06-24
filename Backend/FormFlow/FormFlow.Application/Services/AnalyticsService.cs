@@ -111,7 +111,7 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can view version analytics");
 
-            var versions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var versions = await _templateRepository.GetAllVersionsByBaseAsync(baseTemplateId);
             if (!versions.Any())
                 throw new TemplateNotFoundException(baseTemplateId);
 
@@ -188,7 +188,7 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can compare versions");
 
-            var allVersions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var allVersions = await _templateRepository.GetAllVersionsByBaseAsync(baseTemplateId);
             var targetVersions = allVersions.Where(v => versions.Contains(v.Version)).ToList();
 
             var templateIds = targetVersions.Select(v => v.Id).ToList();
@@ -393,7 +393,7 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can export version data");
 
-            var versions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var versions = await _templateRepository.GetAllVersionsByBaseAsync(baseTemplateId);
             var allVersionData = new StringBuilder();
 
             allVersionData.AppendLine("Template Version,Template Title,User Name,Submitted At,Question Title,Answer");

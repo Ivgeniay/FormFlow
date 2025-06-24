@@ -1,9 +1,9 @@
-import React, { useRef, useLayoutEffect, useState } from 'react';
-import * as am5 from '@amcharts/amcharts5';
-import * as am5hierarchy from '@amcharts/amcharts5/hierarchy';
-import am5themes_Animated from '@amcharts/amcharts5/themes/Animated';
-import { TagDto } from '../../../shared/api_types';
-import { useTranslation } from 'react-i18next';
+import React, { useRef, useLayoutEffect, useState } from "react";
+import * as am5 from "@amcharts/amcharts5";
+import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
+import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
+import { TagDto } from "../../../shared/api_types";
+import { useTranslation } from "react-i18next";
 
 export interface TagCloudProps {
 	tags: TagDto[];
@@ -14,7 +14,7 @@ export interface TagCloudProps {
 export const TagCloud: React.FC<TagCloudProps> = ({
 	tags,
 	onTagClick,
-	className = '',
+	className = "",
 }) => {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const chartRef = useRef<HTMLDivElement>(null);
@@ -49,24 +49,25 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 
 	useLayoutEffect(() => {
 		if (!isExpanded || !chartRef.current) return;
+		if (!Array.isArray(tags) || tags.length === 0) return;
 
 		const prepareData = () => {
 			const colors = [
-				'#3b82f6',
-				'#ef4444',
-				'#10b981',
-				'#f59e0b',
-				'#8b5cf6',
-				'#ec4899',
-				'#06b6d4',
-				'#84cc16',
-				'#f97316',
-				'#6366f1',
+				"#3b82f6",
+				"#ef4444",
+				"#10b981",
+				"#f59e0b",
+				"#8b5cf6",
+				"#ec4899",
+				"#06b6d4",
+				"#84cc16",
+				"#f97316",
+				"#6366f1",
 			];
 
 			return {
-				name: 'Теги',
-				children: tags.map((tag, index) => ({
+				name: "Теги",
+				children: (tags || []).map((tag, index) => ({
 					name: tag.name,
 					value: tag.usageCount,
 					fill: am5.color(colors[index % colors.length]),
@@ -94,11 +95,11 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 				downDepth: 1,
 				topDepth: 1,
 				initialDepth: 1,
-				valueField: 'value',
-				categoryField: 'name',
-				childDataField: 'children',
-				idField: 'name',
-				linkWithField: 'linkWith',
+				valueField: "value",
+				categoryField: "name",
+				childDataField: "children",
+				idField: "name",
+				linkWithField: "linkWith",
 				manyBodyStrength: -15,
 				centerStrength: 0.8,
 				minRadius: 20,
@@ -107,25 +108,25 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 		);
 
 		series
-			.get('colors')
-			?.set('colors', [
-				am5.color('#3b82f6'),
-				am5.color('#ef4444'),
-				am5.color('#10b981'),
-				am5.color('#f59e0b'),
-				am5.color('#8b5cf6'),
-				am5.color('#ec4899'),
-				am5.color('#06b6d4'),
-				am5.color('#84cc16'),
-				am5.color('#f97316'),
-				am5.color('#6366f1'),
+			.get("colors")
+			?.set("colors", [
+				am5.color("#3b82f6"),
+				am5.color("#ef4444"),
+				am5.color("#10b981"),
+				am5.color("#f59e0b"),
+				am5.color("#8b5cf6"),
+				am5.color("#ec4899"),
+				am5.color("#06b6d4"),
+				am5.color("#84cc16"),
+				am5.color("#f97316"),
+				am5.color("#6366f1"),
 			]);
 
 		series.nodes.template.setAll({
-			cursorOverStyle: 'pointer',
+			cursorOverStyle: "pointer",
 		});
 
-		series.nodes.template.events.on('click', (e) => {
+		series.nodes.template.events.on("click", (e) => {
 			const dataItem = e.target.dataItem;
 			if (dataItem && dataItem.dataContext) {
 				const tagName = (dataItem.dataContext as any).name;
@@ -134,22 +135,22 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 			}
 		});
 
-		series.nodes.template.states.create('hover', {
+		series.nodes.template.states.create("hover", {
 			scale: 1.2,
 		});
 
 		series.labels.template.setAll({
 			centerX: am5.percent(50),
 			centerY: am5.percent(50),
-			fontSize: '0.8em',
-			fontWeight: '500',
-			fill: am5.color('#ffffff'),
+			fontSize: "0.8em",
+			fontWeight: "500",
+			fill: am5.color("#ffffff"),
 		});
 
 		const data = prepareData();
 		series.data.setAll([data]);
 
-		series.set('selectedDataItem', series.dataItems[0]);
+		series.set("selectedDataItem", series.dataItems[0]);
 
 		return () => {
 			root.dispose();
@@ -177,7 +178,7 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 						d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
 					/>
 				</svg>
-				<span className="text-text font-medium">{t('tagSearch')}</span>
+				<span className="text-text font-medium">{t("tagSearch")}</span>
 			</div>
 
 			{isExpanded && (
@@ -192,7 +193,7 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 						<div
 							ref={chartRef}
 							className="w-full h-full"
-							style={{ minHeight: '400px' }}
+							style={{ minHeight: "400px" }}
 						/>
 					</div>
 				</div>

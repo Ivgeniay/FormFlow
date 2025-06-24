@@ -275,7 +275,7 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can delete all versions");
 
-            var versions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var versions = await _templateRepository.GetAllVersionsByBaseAsync(baseTemplateId);
 
             await _templateRepository.DeleteAllVersionsAsync(baseTemplateId);
 
@@ -321,12 +321,9 @@ namespace FormFlow.Application.Services
             return await MapToTemplateDtoAsync(template, userId);
         }
 
-        public async Task<List<TemplateDto>> GetAllVersionsAsync(Guid baseTemplateId, Guid userId)
+        public async Task<List<TemplateDto>> GetAllVersionsAsync(Guid templateId, Guid userId)
         {
-            if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
-                throw new UnauthorizedAccessException("Only template author can view all versions");
-
-            var templates = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var templates = await _templateRepository.GetAllVersionsAsync(templateId);
             var templateDtos = new List<TemplateDto>();
 
             foreach (var template in templates)
@@ -572,7 +569,7 @@ namespace FormFlow.Application.Services
             if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplateId, userId))
                 throw new UnauthorizedAccessException("Only template author can view version info");
 
-            var versions = await _templateRepository.GetAllVersionsAsync(baseTemplateId);
+            var versions = await _templateRepository.GetAllVersionsByBaseAsync(baseTemplateId);
             if (!versions.Any())
                 throw new TemplateNotFoundException(baseTemplateId);
 

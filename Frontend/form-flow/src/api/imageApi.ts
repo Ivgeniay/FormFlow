@@ -51,6 +51,20 @@ class ImageApi {
 		return response.data;
 	}
 
+	async getImageProxy(imageUrl: string): Promise<File> {
+		const proxyUrl = `${API_BASE_URL}/image/proxy?imageUrl=${encodeURIComponent(
+			imageUrl
+		)}`;
+		const response = await axios.get(proxyUrl, {
+			responseType: "blob",
+		});
+
+		const filename = imageUrl.split("/").pop() || "template-image";
+		return new File([response.data], filename, {
+			type: response.headers["content-type"] || "image/jpeg",
+		});
+	}
+
 	async checkTemplateImageExists(
 		templateId: string
 	): Promise<ImageExistsResponse> {

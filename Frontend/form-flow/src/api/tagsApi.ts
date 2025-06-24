@@ -1,6 +1,11 @@
 import axios from "axios";
 import { ENV } from "../config/env";
-import { TagDto, PaginatedResponse, TemplateDto } from "../shared/api_types";
+import {
+	TagDto,
+	PaginatedResponse,
+	TemplateDto,
+	CloudTagDto,
+} from "../shared/api_types";
 
 const API_BASE_URL = ENV.API_URL;
 
@@ -37,8 +42,8 @@ class TagsApi {
 		return response.data;
 	}
 
-	async getTagCloud(maxTags: number = 50): Promise<TagDto[]> {
-		const response = await axios.get<TagDto[]>(`${API_BASE_URL}/tag/cloud`, {
+	async getTagCloud(maxTags: number = 50): Promise<CloudTagDto> {
+		const response = await axios.get<CloudTagDto>(`${API_BASE_URL}/tag/cloud`, {
 			params: { maxTags },
 		});
 		return response.data;

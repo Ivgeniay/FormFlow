@@ -3,6 +3,8 @@ using Microsoft.Extensions.Configuration;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Storage.V1;
 using System.Text.Json;
+using Google;
+using System.Net;
 
 namespace FormFlow.Infrastructure.Services
 {
@@ -71,6 +73,40 @@ namespace FormFlow.Infrastructure.Services
             catch
             {
                 return false;
+            }
+        }
+
+        public async Task<Stream?> GetImageStreamAsync(string imageUrl)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                    return null;
+
+                var bucketIndex = imageUrl.IndexOf(_bucketName);
+                if (bucketIndex == -1)
+                    return null;
+
+                var uri = new Uri(imageUrl);
+                var objectName = imageUrl.Substring(imageUrl.IndexOf(_bucketName) + _bucketName.Length + 1);
+
+                var storageObject = await _storageClient.GetObjectAsync(_bucketName, objectName);
+                if (storageObject == null)
+                    return null;
+
+                var memoryStream = new MemoryStream();
+                await _storageClient.DownloadObjectAsync(_bucketName, objectName, memoryStream);
+
+                memoryStream.Position = 0;
+                return memoryStream;
+            }
+            catch (GoogleApiException ex) when (ex.HttpStatusCode == HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
             }
         }
 

@@ -78,6 +78,21 @@ export interface TagDto {
 	createdAt: string;
 }
 
+export interface TagCloudItemDto {
+	id: string;
+	name: string;
+	usageCount: number;
+	weight: number;
+	createdAt: string;
+}
+
+export interface CloudTagDto {
+	tags: TagCloudItemDto[];
+	maxUsageCount: number;
+	minUsageCount: number;
+	generatedAt: string;
+}
+
 export interface UserSearchDto {
 	id: string;
 	userName: string;

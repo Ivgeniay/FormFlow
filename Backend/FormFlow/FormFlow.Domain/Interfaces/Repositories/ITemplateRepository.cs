@@ -7,7 +7,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<Template?> GetByIdAsync(Guid id);
         Task<Template?> GetCurrentVersionAsync(Guid baseTemplateId);
         Task<Template?> GetSpecificVersionAsync(Guid baseTemplateId, int version);
-        Task<List<Template>> GetAllVersionsAsync(Guid baseTemplateId);
+        Task<List<Template>> GetAllVersionsAsync(Guid templateId);
+        Task<List<Template>> GetAllVersionsByBaseAsync(Guid baseTemplateId);
         Task<Template> CreateAsync(Template template);
         Task<Template> CreateNewVersionAsync(Template oldVersion, Template newVersion);
         Task<Template> UpdateAsync(Template template);

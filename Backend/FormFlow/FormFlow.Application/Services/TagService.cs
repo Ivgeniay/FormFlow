@@ -166,7 +166,8 @@ namespace FormFlow.Application.Services
                 Id = tag.Id,
                 Name = tag.Name,
                 UsageCount = tag.UsageCount,
-                Weight = CalculateTagWeight(tag.UsageCount, minUsage, usageRange)
+                Weight = CalculateTagWeight(tag.UsageCount, minUsage, usageRange),
+                CreatedAt = tag.CreatedAt
             }).ToList();
 
             return new CloudTagDto

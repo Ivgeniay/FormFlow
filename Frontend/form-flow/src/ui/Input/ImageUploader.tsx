@@ -1,10 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
 interface ImageUploaderProps {
 	onImageSelect: (file: File | null) => void;
 	supportedFormats: string[];
-	currentImage?: string | null;
+	currentImage?: string | File | null;
 	className?: string;
 }
 
@@ -16,7 +16,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 }) => {
 	const { t } = useTranslation();
 	const [isDragOver, setIsDragOver] = useState(false);
-	const [preview, setPreview] = useState<string | null>(currentImage || null);
+	const [preview, setPreview] = useState<string | null>(null);
+	const [selectedFile, setSelectedFile] = useState<File | null>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 
 	const maxFileSize = 5 * 1024 * 1024; // 5MB
@@ -43,6 +44,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 	const handleFileSelect = (file: File) => {
 		if (!validateFile(file)) return;
 
+		setSelectedFile(file);
 		const reader = new FileReader();
 		reader.onload = (e) => {
 			const result = e.target?.result as string;
@@ -90,6 +92,21 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 			fileInputRef.current.value = "";
 		}
 	};
+
+	useEffect(() => {
+		if (currentImage) {
+			if (typeof currentImage === "string") {
+				setPreview(currentImage);
+				setSelectedFile(null);
+			} else {
+				setSelectedFile(currentImage);
+				setPreview(URL.createObjectURL(currentImage));
+			}
+		} else {
+			setPreview(null);
+			setSelectedFile(null);
+		}
+	}, [currentImage]);
 
 	return (
 		<div className={`relative ${className}`}>

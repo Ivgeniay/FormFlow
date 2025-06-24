@@ -60,6 +60,8 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+
+
         [HttpDelete("template/{templateId}/image")]
         [Authorize]
         public async Task<IActionResult> DeleteTemplateImage(Guid templateId)
@@ -128,6 +130,45 @@ namespace FormFlow.WebApi.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
+        }
+
+        [HttpGet("proxy")]
+        public async Task<IActionResult> ProxyImage([FromQuery] string imageUrl)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                    return BadRequest(new { message = "Image URL is required" });
+
+                if (!Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+                    return BadRequest(new { message = "Invalid image URL format" });
+
+                var imageStream = await _imageStorageService.GetImageStreamAsync(imageUrl);
+
+                if (imageStream == null)
+                    return NotFound(new { message = "Image not found" });
+
+                var contentType = GetContentTypeFromUrl(imageUrl);
+
+                return File(imageStream, contentType);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving image", error = ex.Message });
+            }
+        }
+
+        private static string GetContentTypeFromUrl(string imageUrl)
+        {
+            var extension = Path.GetExtension(imageUrl).ToLowerInvariant();
+            return extension switch
+            {
+                ".jpg" or ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                _ => "image/jpeg"
+            };
         }
 
         private bool IsValidImageFile(IFormFile file) =>

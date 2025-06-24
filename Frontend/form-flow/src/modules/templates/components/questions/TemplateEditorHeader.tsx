@@ -66,8 +66,11 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 			}
 		};
 
+		if (data.image) {
+		}
+
 		loadTopics();
-	}, []);
+	}, [data.image]);
 
 	const updateData = (updates: Partial<TemplateHeaderData>) => {
 		onDataChange({ ...data, ...updates });
@@ -222,7 +225,7 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 					<ImageUploader
 						onImageSelect={handleImageSelect}
 						supportedFormats={[".jpg", ".jpeg", ".png", ".gif", ".webp"]}
-						currentImage={null}
+						currentImage={data.image}
 					/>
 				</div>
 

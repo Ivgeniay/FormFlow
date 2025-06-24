@@ -28,6 +28,8 @@ export const QuestionToolbar = React.forwardRef<
 	) => {
 		const { t } = useTranslation();
 
+		const isOnlyView = mode === "readonly" || mode === "edit";
+		// const isReadOnly = mode === "readonly";
 		if (!isVisible) return null;
 
 		return (
@@ -37,8 +39,12 @@ export const QuestionToolbar = React.forwardRef<
 			>
 				<button
 					onClick={onAddQuestion}
-					disabled={mode === "readonly"}
-					className="p-3 text-text hover:bg-background rounded-lg transition-colors group"
+					disabled={isOnlyView}
+					className={`p-3 rounded-lg transition-colors group ${
+						isOnlyView
+							? "text-textMuted cursor-not-allowed opacity-50"
+							: "text-text hover:bg-background"
+					}`}
 					title={t("addQuestion") || "Add Question"}
 				>
 					<svg
@@ -57,9 +63,13 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
-					disabled={mode === "readonly"}
+					disabled={isOnlyView}
 					onClick={onDuplicateQuestion}
-					className="p-3 text-text hover:bg-background rounded-lg transition-colors group"
+					className={`p-3 rounded-lg transition-colors group ${
+						isOnlyView
+							? "text-textMuted cursor-not-allowed opacity-50"
+							: "text-text hover:bg-background"
+					}`}
 					title={t("duplicateQuestion") || "Duplicate Question"}
 				>
 					<svg
@@ -78,9 +88,13 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
-					disabled={binDisable || mode === "readonly"}
+					disabled={binDisable || isOnlyView}
 					onClick={onDeleteQuestion}
-					className="p-3 text-textMuted hover:text-error hover:bg-background rounded-lg transition-colors group"
+					className={`p-3 rounded-lg transition-colors group ${
+						binDisable || isOnlyView
+							? "text-textMuted cursor-not-allowed opacity-50"
+							: "text-textMuted hover:text-error hover:bg-background"
+					}`}
 					title={t("deleteQuestion") || "Delete Question"}
 				>
 					<svg

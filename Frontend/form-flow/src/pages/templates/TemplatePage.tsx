@@ -7,6 +7,7 @@ import { AppLoader } from "../../components/AppLoader";
 import { TemplateCreatorPage } from "./TemplateCreatorPage";
 import axios from "axios";
 import { ENV } from "../../config/env";
+import { TemplateEditorPage } from "./TemplateEditorPage";
 
 export const TemplatePage: React.FC = () => {
 	const { id } = useParams<{ id?: string }>();
@@ -108,71 +109,7 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (canViewAsEditor()) {
-		return (
-			<div className="space-y-6">
-				<div className="flex items-center justify-between">
-					<div>
-						<h1 className="text-3xl font-bold text-text">{template.title}</h1>
-						<p className="text-textMuted mt-2">
-							{t("editTemplate", "Edit Template")} • {template.authorName}
-						</p>
-					</div>
-					<div className="flex items-center gap-3">
-						<span
-							className={`px-3 py-1 rounded-full text-sm ${
-								template.isPublished
-									? "bg-success/10 text-success"
-									: "bg-warning/10 text-warning"
-							}`}
-						>
-							{template.isPublished
-								? t("published", "Published")
-								: t("draft", "Draft")}
-						</span>
-					</div>
-				</div>
-
-				<div className="bg-surface border border-border rounded-lg">
-					<div className="border-b border-border px-6 py-4">
-						<nav className="flex space-x-8">
-							<button className="text-primary border-b-2 border-primary pb-2 font-medium">
-								{t("questions", "Questions")}
-							</button>
-							<button className="text-textMuted hover:text-text pb-2">
-								{t("responses", "Responses")} ({template.formsCount})
-							</button>
-							<button className="text-textMuted hover:text-text pb-2">
-								{t("versions", "Versions")}
-							</button>
-							<button className="text-textMuted hover:text-text pb-2">
-								{t("analytics", "Analytics")}
-							</button>
-						</nav>
-					</div>
-
-					<div className="p-6">
-						<div className="text-textMuted">
-							Template editor component will be here (TemplateEditor in edit
-							mode)
-							<div className="mt-4 pt-4 border-t border-border">
-								<p className="text-xs text-textMuted">
-									Template ID: {template.id}
-								</p>
-								<p className="text-xs text-textMuted">
-									Author: {template.authorName}
-								</p>
-								<p className="text-xs text-textMuted">
-									Published: {template.isPublished ? "Yes" : "No"}
-								</p>
-								<p className="text-xs text-textMuted">
-									Can Edit: {template.canUserEdit ? "Yes" : "No"}
-								</p>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+		return <TemplateEditorPage template={template} />;
 	}
 
 	if (canViewAsReader()) {

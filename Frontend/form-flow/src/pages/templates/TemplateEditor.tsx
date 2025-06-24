@@ -20,15 +20,15 @@ interface FormTemplateProps {
 	formTemplate: FormTemplate;
 	onFormTemplateChange: (template: FormTemplate) => void;
 	mode: mode;
+	isDebug?: boolean;
 }
 
 export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	formTemplate,
 	onFormTemplateChange,
 	mode,
+	isDebug = true,
 }) => {
-	// const [formTemplateState, setFormTemplate] = useState<FormTemplate>(formTemplate);
-
 	const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 	const toolbarRef = useRef<HTMLDivElement>(null);
 	const cardRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -270,28 +270,31 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 							binDisable={formTemplate.questions.length < 2}
 						/>
 
-						<div className="mt-12 p-6 bg-surface border border-border rounded-lg">
-							<h2 className="text-xl font-semibold text-text mb-4">
-								Debug Info
-							</h2>
-							<div className="space-y-4">
-								<div>
-									<strong>Active Question:</strong> {activeQuestionId || "None"}
+						{isDebug && (
+							<div className="mt-12 p-6 bg-surface border border-border rounded-lg">
+								<h2 className="text-xl font-semibold text-text mb-4">
+									Debug Info
+								</h2>
+								<div className="space-y-4">
+									<div>
+										<strong>Active Question:</strong>{" "}
+										{activeQuestionId || "None"}
+									</div>
+									<div>
+										<strong>Total Questions:</strong>{" "}
+										{formTemplate.questions.length}
+									</div>
+									<details className="mt-4">
+										<summary className="cursor-pointer text-primary">
+											View Questions Data (JSON)
+										</summary>
+										<pre className="mt-2 p-4 bg-background border border-border rounded text-xs overflow-auto">
+											{JSON.stringify(formTemplate.questions, null, 2)}
+										</pre>
+									</details>
 								</div>
-								<div>
-									<strong>Total Questions:</strong>{" "}
-									{formTemplate.questions.length}
-								</div>
-								<details className="mt-4">
-									<summary className="cursor-pointer text-primary">
-										View Questions Data (JSON)
-									</summary>
-									<pre className="mt-2 p-4 bg-background border border-border rounded text-xs overflow-auto">
-										{JSON.stringify(formTemplate.questions, null, 2)}
-									</pre>
-								</details>
 							</div>
-						</div>
+						)}
 					</div>
 				</div>
 			</SortableContext>
