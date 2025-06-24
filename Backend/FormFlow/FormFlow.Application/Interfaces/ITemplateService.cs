@@ -1,6 +1,7 @@
 ﻿using FormFlow.Application.DTOs.Templates;
 using FormFlow.Application.DTOs.Users;
 using FormFlow.Domain.Models.General;
+using System.Numerics;
 
 namespace FormFlow.Application.Interfaces
 {
@@ -12,7 +13,10 @@ namespace FormFlow.Application.Interfaces
         
         Task<TemplateDto> PublishTemplateAsync(Guid templateId, Guid userId);
         Task<TemplateDto> ArchiveTemplateAsync(Guid templateId, Guid userId);
+        Task<bool> ArchiveTemplatesAsync(Guid[] templateIds, Guid userId);
+        Task<bool> UnarchiveTemplatesAsync(Guid[] templateIds, Guid userId);
         Task DeleteTemplateAsync(Guid templateId, Guid userId);
+        Task<bool> DeleteTemplatesAsync(Guid[] templateIds, Guid userId);
         Task DeleteAllVersionsAsync(Guid baseTemplateId, Guid userId);
 
         Task<TemplateDto> GetTemplateByIdAsync(Guid id, Guid? userId = null);

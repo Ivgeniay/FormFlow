@@ -49,7 +49,7 @@ export const convertQuestionDtoToQuestionData = (
 	};
 };
 
-const downloadImageFromUrl = async (
+export const downloadImageFromUrl = async (
 	imageUrl?: string
 ): Promise<File | null> => {
 	if (!imageUrl) return null;

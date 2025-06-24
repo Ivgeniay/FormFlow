@@ -116,6 +116,16 @@ class TemplateApi {
 		});
 	}
 
+	async deleteTemplates(ids: string[], accessToken: string): Promise<void> {
+		await axios.delete(`${API_BASE_URL}/template/delete-multiple`, {
+			data: ids,
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+		});
+	}
+
 	async publishTemplate(id: string, accessToken: string): Promise<TemplateDto> {
 		const response = await axios.post<TemplateDto>(
 			`${API_BASE_URL}/template/${id}/publish`,
@@ -245,7 +255,7 @@ class TemplateApi {
 		accessToken: string
 	): Promise<TemplateDto> {
 		const response = await axios.post<TemplateDto>(
-			`${API_BASE_URL}/template/${id}/create-version`,
+			`${API_BASE_URL}/template/${id}/new-version`,
 			request,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
@@ -265,6 +275,30 @@ class TemplateApi {
 			}
 		);
 		return response.data;
+	}
+
+	async patchArchiveVersions(
+		ids: string[],
+		accessToken: string
+	): Promise<void> {
+		await axios.patch(`${API_BASE_URL}/template/archive/`, ids, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+		});
+	}
+
+	async patchUnarchiveTemplates(
+		ids: string[],
+		accessToken: string
+	): Promise<void> {
+		await axios.patch(`${API_BASE_URL}/template/unarchive`, ids, {
+			headers: {
+				Authorization: `Bearer ${accessToken}`,
+				"Content-Type": "application/json",
+			},
+		});
 	}
 
 	async updateTemplateTags(

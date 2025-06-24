@@ -92,6 +92,25 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+        [HttpDelete("delete-multiple")]
+        [Authorize]
+        public async Task<IActionResult> DeleteTemplates([FromBody] Guid[] templateGuids)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var result = await _templateService.DeleteTemplatesAsync(templateGuids, userId.Value);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("{id}/publish")]
         [Authorize]
         public async Task<IActionResult> PublishTemplate(Guid id)
@@ -104,6 +123,25 @@ namespace FormFlow.WebApi.Controllers
 
                 var template = await _templateService.PublishTemplateAsync(id, userId.Value);
                 return Ok(template);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPatch("unarchive")]
+        [Authorize]
+        public async Task<IActionResult> UnarchiveTemplates([FromBody] Guid[] templateGuids)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var result = await _templateService.UnarchiveTemplatesAsync(templateGuids, userId.Value);
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -129,6 +167,27 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPatch("archive")]
+        [Authorize]
+        public async Task<IActionResult> ArchiveTemplates([FromBody]Guid[] templateGuids)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user contex" });
+
+                var result = await _templateService.ArchiveTemplatesAsync(templateGuids, userId.Value);
+                return Ok();
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new{ message = ex.Message });
+            }
+        }
+
 
         [HttpGet("popular")]
         public async Task<IActionResult> GetPopularTemplates(

@@ -5,7 +5,11 @@ namespace FormFlow.Domain.Interfaces.Repositories
     public interface ITemplateRepository
     {
         Task<Template?> GetByIdAsync(Guid id);
+        Task<List<Template>> GetByIdsAsync(Guid[] id);
+        Task<List<Guid>> GetUserEditableTemplateIdsAsync(Guid[] templateIds, Guid userId);
         Task<Template?> GetCurrentVersionAsync(Guid baseTemplateId);
+        Task ArchiveTemplatesAsync(Guid[] templateIds);
+        Task UnarchiveTemplatesAsync(Guid[] templateIds);
         Task<Template?> GetSpecificVersionAsync(Guid baseTemplateId, int version);
         Task<List<Template>> GetAllVersionsAsync(Guid templateId);
         Task<List<Template>> GetAllVersionsByBaseAsync(Guid baseTemplateId);
@@ -15,6 +19,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid id);
         Task<bool> BaseTemplateExistsAsync(Guid baseTemplateId);
         Task DeleteAsync(Guid id);
+        Task DeleteTemplatesAsync(Guid[] templateIds);
         Task DeleteAllVersionsAsync(Guid baseTemplateId);
 
         Task<List<Guid>> GetTemplateTagIdsAsync(Guid templateId);

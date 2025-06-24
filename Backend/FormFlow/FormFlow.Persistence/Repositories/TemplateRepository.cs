@@ -20,6 +20,40 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
         }
 
+        public async Task<List<Template>?> GetByIdsAsync(Guid[] ids)
+        {
+            return await _context
+                .Templates
+                .Include(t => t.Author)
+                .Where(t => ids.Contains(t.Id))
+                .ToListAsync();
+        }
+
+        public async Task<List<Guid>> GetUserEditableTemplateIdsAsync(Guid[] templateIds, Guid userId)
+        {
+            return await _context
+                .Templates
+                .Include(t => t.Author)
+                .Where(t => templateIds.Contains(t.Id) && t.Author.Id == userId)
+                .Select(t => t.Id)
+                .ToListAsync();
+        }
+
+        public async Task ArchiveTemplatesAsync(Guid[] templateIds)
+        {
+            var templates = await _context
+                .Templates
+                .Where(t => templateIds.Contains(t.Id))
+                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsArchived, true));
+        }
+
+        public async Task UnarchiveTemplatesAsync(Guid[] templateIds)
+        {
+            await _context.Templates
+                .Where(t => templateIds.Contains(t.Id))
+                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsArchived, false));
+        }
+
         public async Task<Template?> GetCurrentVersionAsync(Guid baseTemplateId)
         {
             return await _context.Templates
@@ -127,6 +161,13 @@ namespace FormFlow.Persistence.Repositories
                 template.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
+        }
+
+        public async Task DeleteTemplatesAsync(Guid[] templateIds)
+        {
+            await _context.Templates
+                .Where(t => templateIds.Contains(t.Id))
+                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsDeleted, true));
         }
 
         public async Task<Dictionary<Guid, string>> GetTemplateTopicsAsync(List<Guid> templateIds)
@@ -579,6 +620,7 @@ namespace FormFlow.Persistence.Repositories
                 .GroupBy(t => t.CreatedAt.ToString("yyyy-MM"))
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }
+
     }
 
 }

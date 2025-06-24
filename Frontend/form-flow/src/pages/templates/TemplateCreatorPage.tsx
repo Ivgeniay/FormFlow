@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
@@ -9,105 +9,141 @@ import {
 	templateApi,
 	CreateTemplateRequest,
 	QuestionCreateRequest,
+	CreateNewVersionRequest,
 } from "../../api/templateApi";
 import toast from "react-hot-toast";
 import { imageApi } from "../../api/imageApi";
+import { TemplateDto } from "../../shared/api_types";
+import {
+	convertQuestionDtoToQuestionData,
+	downloadImageFromUrl,
+} from "../../modules/templates/components/editorPageTabs/QuestionsTab";
 
-export const TemplateCreatorPage: React.FC = () => {
+interface TemplateCreatorProp {
+	sourceTemplate?: TemplateDto;
+}
+
+export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
+	sourceTemplate = null,
+}) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { accessToken } = useAuth();
 
-	const [formTemplate, setFormTemplate] = useState<FormTemplate>({
-		title: "",
-		description: "",
-		image: null,
-		topicId: "",
-		accessType: TemplateAccess.Public,
-		tags: [],
-		allowedUserIds: [],
-		questions: [
-			{
-				id: "0",
-				order: 0,
-				title: "",
-				description: "",
-				type: QuestionType.ShortText,
-				isRequired: true,
-				showInResults: true,
-				typeSpecificData: {
-					maxLength: 100,
-					placeholder: "",
+	const [formTemplate, setFormTemplate] = useState<FormTemplate>(() => {
+		if (sourceTemplate) {
+			return {
+				title: `${sourceTemplate.title}`,
+				description: sourceTemplate.description,
+				image: null,
+				topicId: sourceTemplate.topicId || "",
+				accessType: sourceTemplate.accessType,
+				tags: sourceTemplate.tags.map((t) => t.name),
+				allowedUserIds: sourceTemplate.allowedUsers.map((u) => u.id),
+				questions: sourceTemplate.questions.map(
+					convertQuestionDtoToQuestionData
+				),
+			};
+		}
+		return {
+			title: "",
+			description: "",
+			image: null,
+			topicId: "",
+			accessType: TemplateAccess.Public,
+			tags: [],
+			allowedUserIds: [],
+			questions: [
+				{
+					id: "0",
+					order: 0,
+					title: "",
+					description: "",
+					type: QuestionType.ShortText,
+					isRequired: true,
+					showInResults: true,
+					typeSpecificData: {
+						maxLength: 100,
+						placeholder: "",
+					},
 				},
-			},
-			{
-				id: "1",
-				order: 1,
-				title: "What is your name?",
-				description: "Please enter your full name",
-				type: QuestionType.ShortText,
-				isRequired: true,
-				showInResults: true,
-				typeSpecificData: {
-					maxLength: 100,
-					placeholder: "Enter your name",
+				{
+					id: "1",
+					order: 1,
+					title: "What is your name?",
+					description: "Please enter your full name",
+					type: QuestionType.ShortText,
+					isRequired: true,
+					showInResults: true,
+					typeSpecificData: {
+						maxLength: 100,
+						placeholder: "Enter your name",
+					},
 				},
-			},
-			{
-				id: "2",
-				order: 2,
-				title: "Tell us about yourself",
-				description: "Share your background and interests",
-				type: QuestionType.LongText,
-				isRequired: false,
-				showInResults: true,
-				typeSpecificData: {
-					maxLength: 500,
-					placeholder: "Describe yourself...",
+				{
+					id: "2",
+					order: 2,
+					title: "Tell us about yourself",
+					description: "Share your background and interests",
+					type: QuestionType.LongText,
+					isRequired: false,
+					showInResults: true,
+					typeSpecificData: {
+						maxLength: 500,
+						placeholder: "Describe yourself...",
+					},
 				},
-			},
-			{
-				id: "3",
-				order: 3,
-				title: "What is your favorite color?",
-				description: "",
-				type: QuestionType.SingleChoice,
-				isRequired: true,
-				showInResults: true,
-				typeSpecificData: {
-					options: ["Red", "Blue", "Green", "Yellow", "Other"],
+				{
+					id: "3",
+					order: 3,
+					title: "What is your favorite color?",
+					description: "",
+					type: QuestionType.SingleChoice,
+					isRequired: true,
+					showInResults: true,
+					typeSpecificData: {
+						options: ["Red", "Blue", "Green", "Yellow", "Other"],
+					},
 				},
-			},
-			{
-				id: "4",
-				order: 4,
-				title: "Which programming languages do you know?",
-				description: "Select all that apply",
-				type: QuestionType.MultipleChoice,
-				isRequired: false,
-				showInResults: true,
-				typeSpecificData: {
-					options: ["JavaScript", "Python", "Java", "C#", "Go", "Rust"],
-					maxSelections: 3,
+				{
+					id: "4",
+					order: 4,
+					title: "Which programming languages do you know?",
+					description: "Select all that apply",
+					type: QuestionType.MultipleChoice,
+					isRequired: false,
+					showInResults: true,
+					typeSpecificData: {
+						options: ["JavaScript", "Python", "Java", "C#", "Go", "Rust"],
+						maxSelections: 3,
+					},
 				},
-			},
-			{
-				id: "5",
-				order: 5,
-				title: "Rate your experience with React",
-				description: "Scale from 1 (beginner) to 5 (expert)",
-				type: QuestionType.Scale,
-				isRequired: true,
-				showInResults: true,
-				typeSpecificData: {
-					minValue: 1,
-					maxValue: 5,
-					minLabel: "Beginner",
-					maxLabel: "Expert",
+				{
+					id: "5",
+					order: 5,
+					title: "Rate your experience with React",
+					description: "Scale from 1 (beginner) to 5 (expert)",
+					type: QuestionType.Scale,
+					isRequired: true,
+					showInResults: true,
+					typeSpecificData: {
+						minValue: 1,
+						maxValue: 5,
+						minLabel: "Beginner",
+						maxLabel: "Expert",
+					},
 				},
-			},
-		],
+			],
+		};
 	});
+
+	useEffect(() => {
+		if (sourceTemplate?.imageUrl) {
+			downloadImageFromUrl(sourceTemplate.imageUrl).then((imageFile) => {
+				setFormTemplate((prev) => ({ ...prev, image: imageFile }));
+			});
+		}
+	}, [sourceTemplate]);
 
 	const [publishImmediately, setPublishImmediately] = useState(false);
 	const [isCreating, setIsCreating] = useState(false);
@@ -148,6 +184,7 @@ export const TemplateCreatorPage: React.FC = () => {
 			toast.error("Authentication required");
 			return;
 		}
+		console.log("KEK");
 
 		const validationError = validateTemplate();
 		if (validationError) {
@@ -160,24 +197,42 @@ export const TemplateCreatorPage: React.FC = () => {
 		try {
 			if (!formTemplate.topicId) return;
 
-			const createRequest: CreateTemplateRequest = {
-				title: formTemplate.title,
-				description: formTemplate.description,
-				topicId: formTemplate.topicId,
-				accessType: formTemplate.accessType,
-				tags: formTemplate.tags,
-				allowedUserIds: formTemplate.allowedUserIds,
-				questions: convertQuestionsToCreateRequests(),
-			};
+			let template: TemplateDto;
 
-			const createdTemplate = await templateApi.createTemplate(
-				createRequest,
-				accessToken
-			);
+			if (sourceTemplate) {
+				const createNewVersionRequest: CreateNewVersionRequest = {
+					baseTemplateId: sourceTemplate.id,
+					title: formTemplate.title,
+					description: formTemplate.description,
+					topicId: formTemplate.topicId,
+					accessType: formTemplate.accessType,
+					tags: formTemplate.tags,
+					allowedUserIds: formTemplate.allowedUserIds,
+					questions: convertQuestionsToCreateRequests(),
+				};
+
+				template = await templateApi.createNewVersion(
+					sourceTemplate.id,
+					createNewVersionRequest,
+					accessToken
+				);
+			} else {
+				const createRequest: CreateTemplateRequest = {
+					title: formTemplate.title,
+					description: formTemplate.description,
+					topicId: formTemplate.topicId,
+					accessType: formTemplate.accessType,
+					tags: formTemplate.tags,
+					allowedUserIds: formTemplate.allowedUserIds,
+					questions: convertQuestionsToCreateRequests(),
+				};
+
+				template = await templateApi.createTemplate(createRequest, accessToken);
+			}
 
 			if (formTemplate.image) {
 				const response = await imageApi.uploadTemplateImage(
-					createdTemplate.id,
+					template.id,
 					formTemplate.image,
 					accessToken
 				);
@@ -185,13 +240,13 @@ export const TemplateCreatorPage: React.FC = () => {
 			}
 
 			if (publishImmediately) {
-				await templateApi.publishTemplate(createdTemplate.id, accessToken);
+				await templateApi.publishTemplate(template.id, accessToken);
 				toast.success("Template created and published successfully!");
 			} else {
 				toast.success("Template created successfully!");
 			}
 
-			navigate(`/template/${createdTemplate.id}`);
+			navigate(`/template/${template.id}`);
 		} catch (error: any) {
 			const errorMessage =
 				error.response?.data?.message || "Failed to create template";

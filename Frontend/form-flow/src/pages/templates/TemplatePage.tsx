@@ -8,9 +8,10 @@ import { TemplateCreatorPage } from "./TemplateCreatorPage";
 import axios from "axios";
 import { ENV } from "../../config/env";
 import { TemplateEditorPage } from "./TemplateEditorPage";
+import { templateApi } from "../../api/templateApi";
 
 export const TemplatePage: React.FC = () => {
-	const { id } = useParams<{ id?: string }>();
+	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
 	const { t } = useTranslation();
 	const { isAuthenticated, user, accessToken, isAdmin, isModerator } =
 		useAuth();
@@ -22,6 +23,8 @@ export const TemplatePage: React.FC = () => {
 	useEffect(() => {
 		if (id) {
 			fetchTemplate(id);
+		} else if (sourceId) {
+			fetchTemplate(sourceId);
 		} else {
 			if (!isAuthenticated) {
 				setError("Access denied. Please log in to create templates.");
@@ -39,15 +42,10 @@ export const TemplatePage: React.FC = () => {
 
 			const headers: any = {};
 			if (accessToken) {
-				headers.Authorization = `Bearer ${accessToken}`;
+				const response = await templateApi.getTemplate(templateId, accessToken);
+				console.log(response);
+				setTemplate(response);
 			}
-
-			const response = await axios.get<TemplateDto>(
-				`${ENV.API_URL}/template/${templateId}`,
-				{ headers }
-			);
-
-			setTemplate(response.data);
 		} catch (err: any) {
 			setError(err.response?.data?.message || "Failed to load template");
 		} finally {
@@ -90,6 +88,10 @@ export const TemplatePage: React.FC = () => {
 				</div>
 			</div>
 		);
+	}
+
+	if (sourceId && template) {
+		return <TemplateCreatorPage sourceTemplate={template} />;
 	}
 
 	if (!id) {

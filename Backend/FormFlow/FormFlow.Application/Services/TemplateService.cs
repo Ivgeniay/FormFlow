@@ -104,6 +104,7 @@ namespace FormFlow.Application.Services
                 Title = request.Title,
                 Description = request.Description,
                 AccessType = request.AccessType,
+                TopicId = request.TopicId,
                 AuthorId = userId,
                 IsPublished = false
             };
@@ -228,6 +229,16 @@ namespace FormFlow.Application.Services
             if (!await CanUserEditTemplateAsync(templateId, userId))
                 throw new UnauthorizedAccessException("User cannot publish this template");
 
+            var allVersions = await _templateRepository.GetAllVersionsAsync(templateId);
+            foreach (var version in allVersions)
+            {
+                if (version.Id != templateId && version.IsPublished)
+                {
+                    version.IsPublished = false;
+                    await _templateRepository.UpdateAsync(version);
+                }
+            }
+
             template.IsPublished = true;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
 
@@ -245,12 +256,75 @@ namespace FormFlow.Application.Services
             if (!await CanUserEditTemplateAsync(templateId, userId))
                 throw new UnauthorizedAccessException("User cannot archive this template");
 
-            template.IsArchived = true;
+            template.IsPublished = false;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
 
             await IndexTemplateAsync(updatedTemplate.Id);
 
             return await MapToTemplateDtoAsync(updatedTemplate, userId);
+        }
+
+        public async Task<bool> ArchiveTemplatesAsync(Guid[] templateIds, Guid userId)
+        {
+            var templates = await _templateRepository.GetByIdsAsync(templateIds);
+
+            var foundId = templates.Select(e => e.Id).ToHashSet();
+            var notFound = templateIds.Except(foundId);
+            if (notFound.Any())
+            {
+                throw new TemplateNotFoundException(notFound.First());
+            }
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null) 
+                throw new UserNotFoundException(userId);
+
+            if (!user.Role.HasFlag(UserRole.Admin))
+            {
+                var editableTemplateIds = await _templateRepository.GetUserEditableTemplateIdsAsync(templateIds, userId);
+                var nonEditableIds = templateIds.Except(editableTemplateIds).ToList();
+                if (nonEditableIds.Any())
+                    throw new UnauthorizedAccessException($"Cannot edit templates: {string.Join(", ", nonEditableIds)}");
+            }
+
+            await _templateRepository.ArchiveTemplatesAsync(templateIds);
+
+            foreach (var templateId in templateIds)
+            {
+                await IndexTemplateAsync(templateId);
+            }
+            return true;
+        }
+
+        public async Task<bool> UnarchiveTemplatesAsync(Guid[] templateIds, Guid userId)
+        {
+            var templates = await _templateRepository.GetByIdsAsync(templateIds);
+
+            var foundIds = templates.Select(t => t.Id).ToHashSet();
+            var notFound = templateIds.Except(foundIds);
+            if (notFound.Any())
+                throw new TemplateNotFoundException(notFound.First());
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+
+            if (!user.Role.HasFlag(UserRole.Admin))
+            {
+                var editableTemplateIds = await _templateRepository.GetUserEditableTemplateIdsAsync(templateIds, userId);
+                var nonEditableIds = templateIds.Except(editableTemplateIds).ToList();
+                if (nonEditableIds.Any())
+                    throw new UnauthorizedAccessException($"Cannot edit templates: {string.Join(", ", nonEditableIds)}");
+            }
+
+            await _templateRepository.UnarchiveTemplatesAsync(templateIds);
+
+            foreach (var templateId in templateIds)
+            {
+                await IndexTemplateAsync(templateId);
+            }
+
+            return true;
         }
 
         public async Task DeleteTemplateAsync(Guid templateId, Guid userId)
@@ -265,6 +339,37 @@ namespace FormFlow.Application.Services
             await _templateRepository.DeleteAsync(templateId);
 
             await IndexTemplateAsync(templateId);
+        }
+
+        public async Task<bool> DeleteTemplatesAsync(Guid[] templateIds, Guid userId)
+        {
+            var templates = await _templateRepository.GetByIdsAsync(templateIds);
+
+            var foundIds = templates.Select(t => t.Id).ToHashSet();
+            var notFound = templateIds.Except(foundIds);
+            if (notFound.Any())
+                throw new TemplateNotFoundException(notFound.First());
+
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+
+            if (!user.Role.HasFlag(UserRole.Admin))
+            {
+                var editableTemplateIds = await _templateRepository.GetUserEditableTemplateIdsAsync(templateIds, userId);
+                var nonEditableIds = templateIds.Except(editableTemplateIds).ToList();
+                if (nonEditableIds.Any())
+                    throw new UnauthorizedAccessException($"Cannot edit templates: {string.Join(", ", nonEditableIds)}");
+            }
+
+            await _templateRepository.DeleteTemplatesAsync(templateIds);
+
+            foreach (var templateId in templateIds)
+            {
+                await IndexTemplateAsync(templateId);
+            }
+
+            return true;
         }
 
         public async Task DeleteAllVersionsAsync(Guid baseTemplateId, Guid userId)

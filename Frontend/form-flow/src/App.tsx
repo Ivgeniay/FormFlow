@@ -81,7 +81,14 @@ function App() {
 								</Layout>
 							}
 						/>
-
+						<Route
+							path="/template/from/:sourceId"
+							element={
+								<Layout>
+									<TemplatePage />
+								</Layout>
+							}
+						/>
 						<Route
 							path="/template/:id"
 							element={

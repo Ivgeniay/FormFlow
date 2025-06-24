@@ -38,6 +38,7 @@ const defaultColumns: ColumnConfig[] = [
 	{ key: "formsCount", label: "Forms", visible: false, sortable: true },
 	{ key: "likesCount", label: "Likes", visible: false, sortable: true },
 	{ key: "commentsCount", label: "Comments", visible: false, sortable: true },
+	{ key: "archived", label: "Archived", visible: false, sortable: true },
 ];
 
 export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
@@ -97,8 +98,8 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 						bValue = b.version;
 						break;
 					case "current":
-						aValue = a.isCurrentVersion ? 1 : 0;
-						bValue = b.isCurrentVersion ? 1 : 0;
+						aValue = a.id === template.id ? 1 : 0;
+						bValue = b.id === template.id ? 1 : 0;
 						break;
 					case "published":
 						aValue = a.isPublished ? 1 : 0;
@@ -148,16 +149,105 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 			);
 		};
 
-		const handleCreateNewVersion = () => {
-			console.log("Create new version");
+		const handleCreateNewVersion = (version: TemplateDto) => {
+			window.location.href = `/template/from/${version.id}`;
 		};
 
-		const handleArchiveSelected = () => {
+		const handlePublish = async (version: TemplateDto) => {
+			if (!accessToken) return;
+			try {
+				setLoading(true);
+				await templateApi.publishTemplate(version.id, accessToken);
+				toast.success(
+					t("publishSuccess", "Template published successfully") ||
+						"Template published successfully"
+				);
+				loadVersions();
+			} catch (error: any) {
+				toast.error(error.message || "Failed to publish template");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		const handleUnpublish = async (version: TemplateDto) => {
+			if (!accessToken) return;
+			try {
+				setLoading(true);
+				await templateApi.unpublishTemplate(version.id, accessToken);
+				toast.success(
+					t("unpublishSuccess", "Template unpublished successfully") ||
+						"Template unpublished successfully"
+				);
+				loadVersions();
+			} catch (error: any) {
+				toast.error(error.message || "Failed to unpublish template");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		const handleArchiveSelected = async () => {
 			console.log("Archive selected versions:", Array.from(selectedVersions));
+			try {
+				if (accessToken) {
+					setLoading(true);
+					await templateApi.patchArchiveVersions(
+						Array.from(selectedVersions),
+						accessToken
+					);
+					toast.success(
+						t("archiveSuccess", "Templates archieved successfully")
+					);
+					loadVersions();
+				}
+			} catch (error: any) {
+				toast.error(error.message || "Failed to archieve template");
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		const handleUnarchiveSelected = async () => {
+			console.log("Archive selected versions:", Array.from(selectedVersions));
+			try {
+				if (accessToken) {
+					setLoading(true);
+					await templateApi.patchUnarchiveTemplates(
+						Array.from(selectedVersions),
+						accessToken
+					);
+					toast.success(
+						t("archiveSuccess", "Templates unarchieved successfully")
+					);
+					loadVersions();
+				}
+			} catch (error: any) {
+				toast.error(error.message || "Failed to unarchieve template");
+			} finally {
+				setLoading(false);
+			}
 		};
 
 		const handleDeleteSelected = () => {
 			console.log("Delete selected versions:", Array.from(selectedVersions));
+			try {
+				if (accessToken) {
+					setLoading(true);
+					templateApi.deleteTemplates(
+						Array.from(selectedVersions),
+						accessToken
+					);
+				}
+				toast.success(
+					t("deletehSuccess", "Delete successfully") || "Delete successfully"
+				);
+				loadVersions();
+			} catch (error: any) {
+				toast.error(error.message || "Failed to delete template");
+			} finally {
+				setLoading(false);
+			}
 		};
 
 		const handleViewVersion = (version: TemplateDto) => {
@@ -166,10 +256,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 
 		const handleEditVersion = (version: TemplateDto) => {
 			window.location.href = `/template/${version.id}`;
-		};
-
-		const handleCloneVersion = (version: TemplateDto) => {
-			console.log("Clone version:", version.id);
 		};
 
 		const handleDeleteVersion = (version: TemplateDto) => {
@@ -190,11 +276,29 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 				onClick: () => handleEditVersion(version),
 			},
 			{
-				id: "clone",
+				id: "createNewVersion",
 				icon: "📋",
-				label: t("clone", "Clone") || "Clone",
-				onClick: () => handleCloneVersion(version),
+				label:
+					t("createNewVersion", "Create New Version") || "Create New Version",
+				onClick: () => handleCreateNewVersion(version),
 			},
+			...(version.isPublished
+				? [
+						{
+							id: "unpublish",
+							icon: "📤",
+							label: t("unpublish", "Unpublish") || "Unpublish",
+							onClick: () => handleUnpublish(version),
+						},
+				  ]
+				: [
+						{
+							id: "publish",
+							icon: "📢",
+							label: t("publish", "Publish") || "Publish",
+							onClick: () => handlePublish(version),
+						},
+				  ]),
 			{
 				id: "delete",
 				icon: "🗑️",
@@ -215,13 +319,19 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 						case "version":
 							return `v${version.version}`;
 						case "current":
-							return version.isCurrentVersion ? (
+							return version.id === template.id ? (
 								<span className="text-success">✅</span>
 							) : (
 								""
 							);
 						case "published":
 							return version.isPublished ? (
+								<span className="text-primary">🔵</span>
+							) : (
+								""
+							);
+						case "archived":
+							return version.isArchived ? (
 								<span className="text-primary">🔵</span>
 							) : (
 								""
@@ -258,14 +368,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 			<div className="space-y-4">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
-						<button
-							onClick={handleCreateNewVersion}
-							className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
-						>
-							{t("createNewVersion", "Create New Version") ||
-								"Create New Version"}
-						</button>
-
 						{selectedVersions.size > 0 && (
 							<>
 								<button
@@ -274,6 +376,14 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 								>
 									{t("archiveSelected", "Archive Selected") ||
 										"Archive Selected"}{" "}
+									({selectedVersions.size})
+								</button>
+								<button
+									onClick={handleUnarchiveSelected}
+									className="px-4 py-2 bg-warning text-white rounded-lg hover:opacity-90 transition-opacity"
+								>
+									{t("unarchiveSelected", "Unarchive Selected") ||
+										"Unarchive Selected"}{" "}
 									({selectedVersions.size})
 								</button>
 								<button
