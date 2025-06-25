@@ -100,7 +100,6 @@
             public const string IsArchived = "is_archived";
             public const string IsPublished = "is_published";
             public const string Version = "version";
-            public const string IsCurrentVersion = "is_current_version";
             public const string BaseTemplateId = "base_template_id";
             public const string PreviousVersionId = "previous_version_id";
             public const string QuestionOrder = "order";
@@ -124,7 +123,6 @@
             public const bool IsDeletedDefault = false;
             public const bool IsArchivedDefault = false;
             public const bool IsPublishedDefault = false;
-            public const bool IsCurrentVersionDefault = true;
             public const bool ShowInResultsDefault = false;
             public const bool IsRequiredDefault = false;
             public const bool IsPrimaryDefault = false;

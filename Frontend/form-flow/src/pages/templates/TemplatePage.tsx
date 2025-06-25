@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { TemplateDto } from "../../shared/api_types";
 import { AppLoader } from "../../components/AppLoader";
 import { TemplateCreatorPage } from "./TemplateCreatorPage";
-import axios from "axios";
-import { ENV } from "../../config/env";
 import { TemplateEditorPage } from "./TemplateEditorPage";
 import { templateApi } from "../../api/templateApi";
+import { FormRenderer } from "../../modules/forms/components/FormRenderer";
+import { TemplateHeader } from "../../modules/templates/components/editorPageTabs/TemplateHeader";
+import { LikeButton } from "../../ui/Button/LikeButton";
+import { CommentsSection } from "../../components/CommentsSection";
 
 export const TemplatePage: React.FC = () => {
 	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
 	const { t } = useTranslation();
+	const navigate = useNavigate();
 	const { isAuthenticated, user, accessToken, isAdmin, isModerator } =
 		useAuth();
 
@@ -40,7 +43,6 @@ export const TemplatePage: React.FC = () => {
 			setLoading(true);
 			setError(null);
 
-			const headers: any = {};
 			if (accessToken) {
 				const response = await templateApi.getTemplate(templateId, accessToken);
 				console.log(response);
@@ -71,6 +73,16 @@ export const TemplatePage: React.FC = () => {
 	const canViewAsReader = () => {
 		if (!id || !template) return false;
 		return !canEdit();
+	};
+
+	const handleFillForm = (templateid: string) => {
+		navigate(`/form/${templateid}`);
+	};
+
+	const handleSubmitComment = () => {};
+
+	const handleLikeToggle = () => {
+		console.log("Toogle like");
 	};
 
 	if (loading) {
@@ -111,97 +123,57 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (canViewAsEditor()) {
-		return <TemplateEditorPage template={template} />;
+		return (
+			<>
+				<TemplateEditorPage template={template} />;
+				<CommentsSection
+					commentsCount={template.commentsCount}
+					isAuthenticated={isAuthenticated}
+					onSubmitComment={handleSubmitComment}
+				/>
+			</>
+		);
 	}
 
 	if (canViewAsReader()) {
 		return (
 			<div className="space-y-6">
 				<div className="bg-surface border border-border rounded-lg p-6">
-					<h1 className="text-3xl font-bold text-text mb-4">
-						{template.title}
-					</h1>
-					<p className="text-textMuted mb-4">{template.description}</p>
-					<div className="flex items-center gap-4 text-sm text-textMuted">
-						<span>By: {template.authorName}</span>
-						<span>
-							Created: {new Date(template.createdAt).toLocaleDateString()}
-						</span>
-						<span>Forms: {template.formsCount}</span>
+					<div className="flex flex-col sm:flex-row gap-4">
+						<button
+							onClick={() => handleFillForm(template.id)}
+							disabled={!isAuthenticated}
+							className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+						>
+							{t("fillTheForm", "Fill the Form")}
+						</button>
 					</div>
 				</div>
 
 				<div className="bg-surface border border-border rounded-lg p-6">
 					<h2 className="text-xl font-semibold text-text mb-4">
-						Template Preview
+						{t("templatePreview", "Template Preview")}
 					</h2>
-					<div className="text-textMuted">
-						Template preview component will be here (read-only view of
-						questions)
+					<TemplateHeader template={template}></TemplateHeader>
+					<FormRenderer template={template} mode="readonly" />
+					<div className="flex justify-between">
+						<div></div>
+						<div className="flex items-center gap-3">
+							<LikeButton
+								likesCount={template.likesCount}
+								isUserLiked={template.isUserLiked}
+								isAuthenticated={isAuthenticated}
+								onLikeToggle={handleLikeToggle}
+							/>
+						</div>
 					</div>
 				</div>
 
-				<div className="bg-surface border border-border rounded-lg p-6">
-					<div className="flex items-center justify-between mb-4">
-						<h2 className="text-xl font-semibold text-text">
-							Likes ({template.likesCount})
-						</h2>
-						{isAuthenticated && (
-							<div className="flex items-center gap-2">
-								<button className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity">
-									{template.isUserLiked ? "Unlike" : "Like"}
-								</button>
-								<span className="text-sm text-textMuted">
-									Fill form:{" "}
-									<a
-										href={`/form/${template.id}`}
-										className="text-primary hover:underline"
-									>
-										Click here
-									</a>
-								</span>
-							</div>
-						)}
-					</div>
-					{!isAuthenticated && (
-						<p className="text-textMuted">
-							<a href="/login" className="text-primary hover:underline">
-								Log in
-							</a>{" "}
-							to like this template or{" "}
-							<a
-								href={`/form/${template.id}`}
-								className="text-primary hover:underline"
-							>
-								fill the form
-							</a>
-						</p>
-					)}
-				</div>
-
-				<div className="bg-surface border border-border rounded-lg p-6">
-					<h2 className="text-xl font-semibold text-text mb-4">
-						Comments ({template.commentsCount})
-					</h2>
-					<div className="text-textMuted">Comments component will be here</div>
-					{isAuthenticated && (
-						<div className="mt-4 pt-4 border-t border-border">
-							<div className="text-textMuted">
-								Comment form will be here (for authenticated users)
-							</div>
-						</div>
-					)}
-					{!isAuthenticated && (
-						<div className="mt-4 pt-4 border-t border-border">
-							<p className="text-textMuted">
-								<a href="/login" className="text-primary hover:underline">
-									Log in
-								</a>{" "}
-								to leave a comment
-							</p>
-						</div>
-					)}
-				</div>
+				<CommentsSection
+					commentsCount={template.commentsCount}
+					isAuthenticated={isAuthenticated}
+					onSubmitComment={handleSubmitComment}
+				/>
 			</div>
 		);
 	}

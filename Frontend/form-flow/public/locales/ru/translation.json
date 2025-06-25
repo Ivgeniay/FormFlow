@@ -232,5 +232,13 @@
 	"legacyAnswers": "Прежние ответы",
 	"deleteSelected": "Удалить выделеное",
 	"archiveSelected": "Заархивировать выделенные",
-	"unarchiveSelected": "Разархивировать выделеное"
+	"unarchiveSelected": "Разархивировать выделеное",
+	"templateActions": "Действия с шаблоном",
+	"loginRequiredMessage": "чтобы поставить лайк и заполнить форму",
+	"previewMode": "Режим предпросмотра",
+	"previewModeDescription": "Так будет выглядеть ваша форма для пользователей. Данные не сохраняются.",
+	"backToTemplate": "Назад к шаблону",
+	"invalidTemplateId": "Неверный ID шаблона",
+	"noAccessToPreview": "У вас нет доступа к предпросмотру этого шаблона",
+	"failedToLoadTemplate": "Не удалось загрузить шаблон"
 }

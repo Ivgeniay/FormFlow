@@ -213,7 +213,7 @@
 	"unlike": "Unlike",
 	"like": "Like",
 	"logInToLike": "Log in to like this template",
-	"fillTheForm": "fill the form",
+	"fillTheForm": "Fill the form",
 	"logInToComment": "Log in to leave a comment",
 	"back": "Back",
 	"interfaceSettings": "Interface Settings",
@@ -231,5 +231,13 @@
 	"legacyAnswers": "Legacy answers",
 	"deleteSelected": "Delete selected",
 	"archiveSelected": "Archive selected",
-	"unarchiveSelected": "Unarchive selected"
+	"unarchiveSelected": "Unarchive selected",
+	"templateActions": "Template Actions",
+	"loginRequiredMessage": "to like this template and fill the form",
+	"previewMode": "Preview Mode",
+	"previewModeDescription": "This is how your form will look to users. No data will be saved.",
+	"backToTemplate": "Back to Template",
+	"invalidTemplateId": "Invalid template ID",
+	"noAccessToPreview": "You don't have access to preview this template",
+	"failedToLoadTemplate": "Failed to load template"
 }

@@ -16,7 +16,6 @@
         public bool IsPublished { get; set; } = false;
 
         public int Version { get; set; } = 1;
-        public bool IsCurrentVersion { get; set; } = true;
         public Guid? BaseTemplateId { get; set; }
         public Guid? PreviousVersionId { get; set; }
 

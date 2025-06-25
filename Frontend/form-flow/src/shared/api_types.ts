@@ -45,7 +45,6 @@ export interface TemplateDto {
 	createdAt: string;
 	updatedAt: string;
 	version: number;
-	isCurrentVersion: boolean;
 	isPublished: boolean;
 	isArchived: boolean;
 	baseTemplateId?: string;

@@ -338,8 +338,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 			{(mode === "fillable" || mode === "preview") && (
 				<div className="bg-surface border border-border rounded-lg p-6">
 					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							{/* <label className="flex items-center gap-2 cursor-pointer">
+						{/* <div className="flex items-center gap-3">
+							<label className="flex items-center gap-2 cursor-pointer">
 								<input
 									type="checkbox"
 									checked={sendCopyToEmail}
@@ -349,8 +349,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 								<span className="text-text">
 									{t("sendCopyToEmail", "Send copy to my email")}
 								</span>
-							</label> */}
-						</div>
+							</label>
+						</div> */}
 
 						<button
 							onClick={mode === "preview" ? undefined : handleSubmit}

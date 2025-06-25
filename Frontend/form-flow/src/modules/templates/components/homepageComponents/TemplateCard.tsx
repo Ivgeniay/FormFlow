@@ -1,6 +1,8 @@
 import React from "react";
 import { TemplateDto } from "../../../../shared/api_types";
 import { Tag } from "../../../Tag/components/Tag";
+import { FormattedTextDisplay } from "../../../../ui/Input/FormattedTextDisplay";
+import { TemplatePlaceholder } from "../editorPageTabs/TemplateImagePlaceholder";
 
 export interface TemplateCardProps {
 	template: TemplateDto;
@@ -92,23 +94,25 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 					.replace(/\s+/g, " ")}
 				onClick={handleCardClick}
 			>
-				{template.imageUrl && (
-					<div
-						className={`mb-3 ${imageClasses[size]} overflow-hidden rounded-lg`}
-					>
+				<div
+					className={`mb-3 ${imageClasses[size]} overflow-hidden rounded-lg`}
+				>
+					{template.imageUrl ? (
 						<img
 							src={template.imageUrl}
 							alt={template.title}
 							className="w-full h-full object-cover"
 						/>
-					</div>
-				)}
+					) : (
+						<TemplatePlaceholder />
+					)}
+				</div>
 
 				<div className="space-y-2">
 					<h3
 						className={`font-semibold text-text line-clamp-2 ${titleClasses[size]}`}
 					>
-						{template.title}
+						<FormattedTextDisplay value={template.title} />
 					</h3>
 
 					{showTopic && template.topic && (
@@ -183,16 +187,14 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 				.replace(/\s+/g, " ")}
 			onClick={handleCardClick}
 		>
-			{template.imageUrl && (
-				<div
-					className={`mb-4 ${imageClasses[size]} overflow-hidden rounded-lg`}
-				>
-					<img
-						src={template.imageUrl}
-						alt={template.title}
-						className="w-full h-full object-cover"
-					/>
-				</div>
+			{template.imageUrl ? (
+				<img
+					src={template.imageUrl}
+					alt={template.title}
+					className="w-full h-full object-cover"
+				/>
+			) : (
+				<TemplatePlaceholder />
 			)}
 
 			<div className="space-y-3">
@@ -200,10 +202,10 @@ export const TemplateCard: React.FC<TemplateCardProps> = ({
 					<h3
 						className={`font-semibold text-text mb-2 line-clamp-2 ${titleClasses[size]}`}
 					>
-						{template.title}
+						<FormattedTextDisplay value={template.title} />
 					</h3>
 					<p className="text-textMuted text-sm line-clamp-3">
-						{template.description}
+						<FormattedTextDisplay value={template.description} />
 					</p>
 				</div>
 

@@ -19,6 +19,7 @@ namespace FormFlow.WebApi.Common.Extensions
                 try
                 {
                     Console.WriteLine("Ensuring database is created and up to date...");
+                    //await dbContext.Database.EnsureDeletedAsync();
                     await dbContext.Database.EnsureCreatedAsync();
                 }
                 catch (Exception ex)
