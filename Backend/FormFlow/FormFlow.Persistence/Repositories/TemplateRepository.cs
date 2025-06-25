@@ -44,7 +44,10 @@ namespace FormFlow.Persistence.Repositories
             var templates = await _context
                 .Templates
                 .Where(t => templateIds.Contains(t.Id))
-                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsArchived, true));
+                .ExecuteUpdateAsync(t => 
+                    t.SetProperty(x => x.IsArchived, true)
+                    .SetProperty(x => x.IsPublished, false)
+                );
         }
 
         public async Task UnarchiveTemplatesAsync(Guid[] templateIds)
@@ -58,7 +61,7 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Templates
                 .Include(t => t.Author)
-                .FirstOrDefaultAsync(t => t.BaseTemplateId == baseTemplateId && t.IsCurrentVersion && !t.IsDeleted);
+                .FirstOrDefaultAsync(t => t.BaseTemplateId == baseTemplateId && t.IsPublished && !t.IsDeleted);
         }
 
         public async Task<Template?> GetSpecificVersionAsync(Guid baseTemplateId, int version)
@@ -103,13 +106,12 @@ namespace FormFlow.Persistence.Repositories
                 .ToListAsync();
         }
 
+            //await _context.Templates
+            //    .Where(t => t.BaseTemplateId == oldVersion.BaseTemplateId)
+            //    .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsCurrentVersion, false));
         public async Task<Template> CreateNewVersionAsync(Template oldVersion, Template newVersion)
         {
-            await _context.Templates
-                .Where(t => t.BaseTemplateId == oldVersion.BaseTemplateId)
-                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsCurrentVersion, false));
 
-            newVersion.IsCurrentVersion = true;
             newVersion.Version = await GetLatestVersionNumberAsync(oldVersion.BaseTemplateId ?? oldVersion.Id) + 1;
             newVersion.BaseTemplateId = oldVersion.BaseTemplateId ?? oldVersion.Id;
             newVersion.PreviousVersionId = oldVersion.Id;
@@ -216,7 +218,7 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion &&
+                .Where(t => !t.IsDeleted && t.IsPublished &&
                     _context.TemplateTags.Any(tt => tt.TemplateId == t.Id && tt.Tag.Name.ToLower() == tagName.ToLower()))
                 .OrderByDescending(t => t.CreatedAt);
             var totalCount = await query.CountAsync();
@@ -231,7 +233,7 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
+                .Where(t => !t.IsDeleted && t.IsPublished)
                 .OrderByDescending(t => t.Likes.Count(l => !l.IsDeleted));
             var totalCount = await query.CountAsync();
             var templates = await query
@@ -245,7 +247,7 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished && t.IsCurrentVersion)
+                .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished)
                 .OrderByDescending(t => t.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -261,7 +263,7 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
-                .Where(t => t.AuthorId == authorId && !t.IsDeleted && t.IsCurrentVersion)
+                .Where(t => t.AuthorId == authorId && !t.IsDeleted)
                 .OrderByDescending(t => t.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -278,7 +280,7 @@ namespace FormFlow.Persistence.Repositories
             var query = _context.Templates
                 .Include(t => t.Author)
                 .Include(t => t.AllowedUsers)
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion &&
+                .Where(t => !t.IsDeleted && t.IsPublished &&
                     (t.AccessType == TemplateAccess.Public ||
                      t.AuthorId == userId ||
                      t.AllowedUsers.Any(au => au.UserId == userId)))
@@ -297,7 +299,7 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished && t.IsCurrentVersion)
+                .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished)
                 .OrderByDescending(t => t.CreatedAt)
                 .Take(count)
                 .ToListAsync();
@@ -350,7 +352,7 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion &&
+                .Where(t => !t.IsDeleted && t.IsPublished &&
                     _context.TemplateTags.Any(tt => tt.TemplateId == t.Id && tt.TagId == tagId))
                 .OrderByDescending(t => t.CreatedAt)
                 .ToListAsync();
@@ -361,7 +363,7 @@ namespace FormFlow.Persistence.Repositories
             var normalizedQuery = query.ToLower();
             return await _context.Templates
                 .Include(t => t.Author)
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion &&
+                .Where(t => !t.IsDeleted && t.IsPublished &&
                     (t.Title.ToLower().Contains(normalizedQuery) ||
                      t.Description.ToLower().Contains(normalizedQuery)))
                 .OrderByDescending(t => t.CreatedAt)
@@ -466,17 +468,6 @@ namespace FormFlow.Persistence.Repositories
                 .MaxAsync(t => (int?)t.Version);
 
             return latestVersion ?? 0;
-        }
-
-        public async Task SetCurrentVersionAsync(Guid baseTemplateId, int version)
-        {
-            await _context.Templates
-                .Where(t => t.BaseTemplateId == baseTemplateId)
-                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsCurrentVersion, false));
-
-            await _context.Templates
-                .Where(t => t.BaseTemplateId == baseTemplateId && t.Version == version)
-                .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsCurrentVersion, true));
         }
 
         public async Task AddTagToTemplateAsync(Guid templateId, Guid tagId)
@@ -608,7 +599,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<Dictionary<Guid, int>> GetTemplatesCountByTopicsAsync()
         {
             return await _context.Templates
-                .Where(t => !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
+                .Where(t => !t.IsDeleted && t.IsPublished)
                 .GroupBy(t => t.TopicId)
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }
@@ -616,7 +607,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<Dictionary<string, int>> GetTemplatesCountByMonthAsync()
         {
             return await _context.Templates
-                .Where(t => !t.IsDeleted && t.IsCurrentVersion)
+                .Where(t => !t.IsDeleted && t.IsPublished)
                 .GroupBy(t => t.CreatedAt.ToString("yyyy-MM"))
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }

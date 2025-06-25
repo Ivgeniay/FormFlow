@@ -228,5 +228,8 @@
 
 	"questionMayHaveChanged": "Question may have been changed",
 	"legacyAnswer": "Legacy answer",
-	"legacyAnswers": "Legacy answers"
+	"legacyAnswers": "Legacy answers",
+	"deleteSelected": "Delete selected",
+	"archiveSelected": "Archive selected",
+	"unarchiveSelected": "Unarchive selected"
 }

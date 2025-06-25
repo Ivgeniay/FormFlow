@@ -229,5 +229,8 @@
 
 	"questionMayHaveChanged": "Вопрос возможно был изменен",
 	"legacyAnswer": "Прежний ответ",
-	"legacyAnswers": "Прежние ответы"
+	"legacyAnswers": "Прежние ответы",
+	"deleteSelected": "Удалить выделеное",
+	"archiveSelected": "Заархивировать выделенные",
+	"unarchiveSelected": "Разархивировать выделеное"
 }

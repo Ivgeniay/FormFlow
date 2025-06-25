@@ -20,6 +20,7 @@ import { TemplatePage } from "./pages/templates/TemplatePage";
 import { Toaster } from "react-hot-toast";
 import { SearchPage } from "./pages/search/SearchPage";
 import { FormPage } from "./pages/forms/FormPage";
+import { PreviewFormPage } from "./pages/forms/PreviewFormPage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -87,6 +88,14 @@ function App() {
 							element={
 								<Layout>
 									<TemplatePage />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/template/:templateId/preview"
+							element={
+								<Layout>
+									<PreviewFormPage />
 								</Layout>
 							}
 						/>

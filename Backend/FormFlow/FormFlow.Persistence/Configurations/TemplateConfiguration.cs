@@ -76,11 +76,6 @@ namespace FormFlow.Persistence.Configurations
                 .HasColumnName(ColumnNames.Version)
                 .HasDefaultValue(DefaultValues.VersionDefault);
 
-            builder.Property(t => t.IsCurrentVersion)
-                .IsRequired()
-                .HasColumnName(ColumnNames.IsCurrentVersion)
-                .HasDefaultValue(DefaultValues.IsCurrentVersionDefault);
-
             builder.Property(t => t.BaseTemplateId)
                 .HasColumnName(ColumnNames.BaseTemplateId);
 

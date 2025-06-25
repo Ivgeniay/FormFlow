@@ -6,6 +6,7 @@ import { formApi, FormAccessResponse } from "../../api/formApi";
 import toast from "react-hot-toast";
 import { AppLoader } from "../../components/AppLoader";
 import { FormRenderer } from "../../modules/forms/components/FormRenderer";
+import { TemplateHeader } from "../../modules/templates/components/editorPageTabs/TemplateHeader";
 
 interface FormPageProps {}
 
@@ -27,7 +28,7 @@ export const FormPage: React.FC<FormPageProps> = () => {
 		}
 
 		if (!id || !accessToken) {
-			setError("Invalid template ID");
+			setError(t("invalidTemplateId", "Invalid template ID"));
 			setLoading(false);
 			return;
 		}
@@ -211,54 +212,7 @@ export const FormPage: React.FC<FormPageProps> = () => {
 						{t("back", "Back")}
 					</button>
 
-					<div className="bg-surface border border-border rounded-lg mb-2">
-						<div className="w-full h-48 mb-4 rounded-lg overflow-hidden">
-							{formAccess.template.imageUrl ? (
-								<img
-									src={formAccess.template.imageUrl}
-									alt={formAccess.template.title}
-									className="w-full h-full object-cover"
-									onError={() => setImageError(true)}
-								/>
-							) : (
-								<div className="w-full h-full bg-gradient-to-b from-primary to-primary/70 flex items-center justify-center">
-									<svg
-										className="w-16 h-16 text-white/70"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={1.5}
-											d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-										/>
-									</svg>
-								</div>
-							)}
-						</div>
-					</div>
-
-					<div className="bg-surface border border-border rounded-lg p-6 mb-6">
-						<h1 className="text-2xl font-bold text-text mb-2">
-							{formAccess.template.title}
-						</h1>
-						{formAccess.template.description && (
-							<p className="text-textMuted mb-4">
-								{formAccess.template.description}
-							</p>
-						)}
-						<div className="flex items-center gap-4 text-sm text-textMuted">
-							<span>
-								{t("author", "Author")}: {formAccess.template.authorName}
-							</span>
-							<span>
-								{t("topic", "Topic")}: {formAccess.template.topic}
-							</span>
-						</div>
-					</div>
-
+					<TemplateHeader template={formAccess.template} />
 					<FormRenderer
 						template={formAccess.template}
 						mode="fillable"

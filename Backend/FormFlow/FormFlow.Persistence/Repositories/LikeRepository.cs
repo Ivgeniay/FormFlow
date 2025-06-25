@@ -158,7 +158,7 @@ namespace FormFlow.Persistence.Repositories
 
             return await _context.Templates
                 .Include(t => t.Author)
-                .Where(t => templateIds.Contains(t.Id) && !t.IsDeleted && t.IsPublished && t.IsCurrentVersion)
+                .Where(t => templateIds.Contains(t.Id) && !t.IsDeleted && t.IsPublished)
                 .ToListAsync();
         }
 

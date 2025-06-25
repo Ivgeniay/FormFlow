@@ -19,7 +19,6 @@ namespace FormFlow.Application.DTOs.Templates
         public DateTime UpdatedAt { get; set; }
 
         public int Version { get; set; }
-        public bool IsCurrentVersion { get; set; }
         public bool IsPublished { get; set; }
         public bool IsArchived { get; set; }
         public Guid? BaseTemplateId { get; set; }

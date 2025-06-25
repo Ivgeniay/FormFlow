@@ -13,7 +13,7 @@ import { TimeQuestion } from "./TimeQuestion";
 import { SingleChoiceQuestion } from "./SingleChoiceQuestion";
 import { MultipleChoiceQuestion } from "./MultipleChoiceQuestion";
 
-export type FormMode = "fillable" | "readonly";
+export type FormMode = "fillable" | "readonly" | "preview";
 
 interface FormRendererProps {
 	template: TemplateDto;
@@ -335,7 +335,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 		<div className="space-y-4">
 			{template.questions.sort((a, b) => a.order - b.order).map(renderQuestion)}
 
-			{mode === "fillable" && (
+			{(mode === "fillable" || mode === "preview") && (
 				<div className="bg-surface border border-border rounded-lg p-6">
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-3">
@@ -353,8 +353,8 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 						</div>
 
 						<button
-							onClick={handleSubmit}
-							disabled={isSubmitting}
+							onClick={mode === "preview" ? undefined : handleSubmit}
+							disabled={isSubmitting || mode === "preview"}
 							className="px-6 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 flex items-center gap-2"
 						>
 							{isSubmitting && (

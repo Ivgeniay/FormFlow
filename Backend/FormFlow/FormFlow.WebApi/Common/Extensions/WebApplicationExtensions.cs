@@ -5,6 +5,7 @@ using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.General.QuestionDetailsModels;
 using FormFlow.Persistence;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace FormFlow.WebApi.Common.Extensions
 {
@@ -529,6 +530,11 @@ namespace FormFlow.WebApi.Common.Extensions
         {
             var questions = new List<QuestionDto>();
             var questionCount = random.Next(3, 8);
+            var jsonSettings = new JsonSerializerSettings
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+
 
             for (var i = 0; i < questionCount; i++)
             {
@@ -541,7 +547,7 @@ namespace FormFlow.WebApi.Common.Extensions
                     Order = i + 1,
                     ShowInResults = random.Next(100) < 70,
                     IsRequired = random.Next(100) < 60,
-                    Data = JsonConvert.SerializeObject(questionData),
+                    Data = JsonConvert.SerializeObject(questionData, jsonSettings),
                     CreatedAt = DateTime.UtcNow
                 });
             }

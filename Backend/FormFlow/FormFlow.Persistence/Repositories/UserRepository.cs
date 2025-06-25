@@ -205,7 +205,7 @@ namespace FormFlow.Persistence.Repositories
                 {
                     UserId = u.Id,
                     UserName = u.UserName,
-                    TemplatesCount = u.Templates.Count(t => !t.IsDeleted && t.IsCurrentVersion),
+                    TemplatesCount = u.Templates.Count(t => !t.IsDeleted && t.IsPublished),
                     FormsCount = u.Forms.Count(f => !f.IsDeleted),
                     CommentsCount = u.Comments.Count(c => !c.IsDeleted),
                     LikesGivenCount = u.Likes.Count(l => !l.IsDeleted)

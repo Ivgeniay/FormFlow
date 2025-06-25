@@ -58,7 +58,6 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<int> GetCommentsCountAsync(Guid templateId);
 
         Task<int> GetLatestVersionNumberAsync(Guid baseTemplateId);
-        Task SetCurrentVersionAsync(Guid baseTemplateId, int version);
 
         Task AddTagToTemplateAsync(Guid templateId, Guid tagId);
         Task AddTagsToTemplateAsync(Guid templateId, List<Guid> tagIds);

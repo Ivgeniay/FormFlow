@@ -137,7 +137,7 @@ namespace FormFlow.WebApi
                 Task.Run(async () =>
                 {
                     await app.EnsureDB();
-                    //await TestDataSeeder.ExecuteTestData(app, userCount: 10, templateCount: 15, likeProbability: 0.5f);
+                    await TestDataSeeder.ExecuteTestData(app, userCount: 10, templateCount: 15, likeProbability: 0.5f);
                 });
             }
             catch(Exception e)

@@ -53,7 +53,6 @@ namespace FormFlow.Application.Services
                 AccessType = request.AccessType,
                 AuthorId = authorId,
                 IsPublished = false,
-                IsCurrentVersion = true,
                 Version = 1
             };
 
@@ -257,6 +256,7 @@ namespace FormFlow.Application.Services
                 throw new UnauthorizedAccessException("User cannot archive this template");
 
             template.IsPublished = false;
+            template.IsArchived = true;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
 
             await IndexTemplateAsync(updatedTemplate.Id);
@@ -685,7 +685,6 @@ namespace FormFlow.Application.Services
                 BaseTemplateId = baseTemplateId,
                 TemplateName = firstTemplate.Title,
                 AuthorName = firstTemplate.Author?.UserName ?? string.Empty,
-                CurrentVersion = versions.First(v => v.IsCurrentVersion).Version,
                 TotalVersions = versions.Count,
                 FirstCreated = versions.Min(v => v.CreatedAt),
                 LastUpdated = versions.Max(v => v.UpdatedAt),
@@ -694,7 +693,6 @@ namespace FormFlow.Application.Services
                     Id = v.Id,
                     Version = v.Version,
                     Title = v.Title,
-                    IsCurrentVersion = v.IsCurrentVersion,
                     IsPublished = v.IsPublished,
                     IsArchived = v.IsArchived,
                     CreatedAt = v.CreatedAt,
@@ -730,7 +728,6 @@ namespace FormFlow.Application.Services
                 CreatedAt = template.CreatedAt,
                 UpdatedAt = template.UpdatedAt,
                 Version = template.Version,
-                IsCurrentVersion = template.IsCurrentVersion,
                 IsPublished = template.IsPublished,
                 IsArchived = template.IsArchived,
                 BaseTemplateId = template.BaseTemplateId,

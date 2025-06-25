@@ -169,7 +169,6 @@ namespace FormFlow.Application.Interfaces
         public Guid TemplateId { get; set; }
         public int Version { get; set; }
         public string Title { get; set; } = string.Empty;
-        public bool IsCurrentVersion { get; set; }
         public int FormsCount { get; set; }
         public int UniqueUsers { get; set; }
         public DateTime CreatedAt { get; set; }

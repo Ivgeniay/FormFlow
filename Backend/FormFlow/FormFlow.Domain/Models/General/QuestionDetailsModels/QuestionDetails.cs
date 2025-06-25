@@ -1,4 +1,6 @@
-﻿namespace FormFlow.Domain.Models.General.QuestionDetailsModels
+﻿using System.Text.Json.Serialization;
+
+namespace FormFlow.Domain.Models.General.QuestionDetailsModels
 {
     public abstract class QuestionDetails
     {

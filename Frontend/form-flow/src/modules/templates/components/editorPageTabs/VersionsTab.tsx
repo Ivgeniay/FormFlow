@@ -230,7 +230,7 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleDeleteSelected = () => {
-			console.log("Delete selected versions:", Array.from(selectedVersions));
+			// console.log("Delete selected versions:", Array.from(selectedVersions));
 			try {
 				if (accessToken) {
 					setLoading(true);
@@ -251,7 +251,7 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleViewVersion = (version: TemplateDto) => {
-			window.open(`/template/${version.id}`, "_blank");
+			window.open(`/template/${version.id}/preview`, "_blank");
 		};
 
 		const handleEditVersion = (version: TemplateDto) => {
@@ -259,7 +259,21 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleDeleteVersion = (version: TemplateDto) => {
-			console.log("Delete version:", version.id);
+			// console.log("Delete version:", version.id);
+			try {
+				if (accessToken) {
+					setLoading(true);
+					templateApi.deleteTemplates([version.id], accessToken);
+				}
+				toast.success(
+					t("deletehSuccess", "Delete successfully") || "Delete successfully"
+				);
+				loadVersions();
+			} catch (error: any) {
+				toast.error(error.message || "Failed to delete template");
+			} finally {
+				setLoading(false);
+			}
 		};
 
 		const getVersionActions = (version: TemplateDto): ActionItem[] => [
