@@ -705,7 +705,7 @@ namespace FormFlow.Application.Services
             };
         }
 
-        private async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
+        public async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
         {
             var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
 

@@ -19,6 +19,7 @@ import { UserSettings } from "./pages/settings/UserSettings";
 import { TemplatePage } from "./pages/templates/TemplatePage";
 import { Toaster } from "react-hot-toast";
 import { SearchPage } from "./pages/search/SearchPage";
+import { FormPage } from "./pages/forms/FormPage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -94,6 +95,14 @@ function App() {
 							element={
 								<Layout>
 									<TemplatePage />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/form/:id"
+							element={
+								<Layout>
+									<FormPage />
 								</Layout>
 							}
 						/>

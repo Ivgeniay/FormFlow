@@ -1,4 +1,5 @@
 ﻿using FormFlow.Application.DTOs.Forms;
+using FormFlow.Application.DTOs.Templates;
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Models.General;
 using FormFlow.WebApi.Common.Extensions;
@@ -12,11 +13,13 @@ namespace FormFlow.WebApi.Controllers
     public class FormController : ControllerBase
     {
         private readonly IFormService _formService;
+        private readonly ITemplateService _templateService;
         private readonly IFormSubscribeService _formSubscribeService;
 
-        public FormController(IFormService formService, IFormSubscribeService formSubscribeService)
+        public FormController(IFormService formService, ITemplateService templateService, IFormSubscribeService formSubscribeService)
         {
             _formService = formService;
+            this._templateService = templateService;
             _formSubscribeService = formSubscribeService;
         }
 
@@ -253,6 +256,40 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+        [HttpGet("template/{templateId}/access")]
+        [Authorize]
+        public async Task<IActionResult> GetFormAccess(Guid templateId)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var formAccess = await _formService.GetFormAccessAsync(templateId, userId.Value);
+                
+                var response = new FormAccessResponse
+                {
+                    CanFillForm = formAccess.CanFillForm,
+                    HasAlreadySubmitted = formAccess.HasAlreadySubmitted,
+                    DenialReason = formAccess.DenialReason,
+                    ExistingForm = formAccess.ExistingForm,
+                    Template = null
+                };
+
+                if (formAccess.CanFillForm)
+                {
+                    response.Template = await _templateService.GetTemplateByIdAsync(templateId, userId.Value);
+                }
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpGet("my")]
         [Authorize]
         public async Task<IActionResult> GetMyForms(
@@ -275,5 +312,14 @@ namespace FormFlow.WebApi.Controllers
         }
 
 
+    }
+
+    public class FormAccessResponse
+    {
+        public bool CanFillForm { get; set; }
+        public bool HasAlreadySubmitted { get; set; }
+        public string? DenialReason { get; set; }
+        public TemplateDto? Template { get; set; }
+        public FormDto? ExistingForm { get; set; }
     }
 }

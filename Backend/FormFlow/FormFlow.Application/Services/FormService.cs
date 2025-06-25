@@ -267,5 +267,71 @@ namespace FormFlow.Application.Services
             return dto;
         }
 
+        public async Task<FormAccessDto> GetFormAccessAsync(Guid templateId, Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+
+            var template = await _templateRepository.GetWithQuestionsAsync(templateId);
+            if (template == null)
+                throw new TemplateNotFoundException(templateId);
+
+            var formAccess = new FormAccessDto
+            {
+                CanFillForm = false,
+                HasAlreadySubmitted = false,
+                DenialReason = null,
+                ExistingForm = null
+            };
+
+            if (template.IsDeleted)
+            {
+                formAccess.DenialReason = "Template has been deleted";
+                return formAccess;
+            }
+
+            if (template.IsArchived)
+            {
+                formAccess.DenialReason = "Template has been archived";
+                return formAccess;
+            }
+
+            if (!template.IsPublished)
+            {
+                formAccess.DenialReason = "Template is not published";
+                return formAccess;
+            }
+
+            if (user.IsBlocked)
+            {
+                formAccess.DenialReason = "User account is blocked";
+                return formAccess;
+            }
+
+            var hasAccess = await _templateRepository.HasUserAccessAsync(templateId, userId);
+            if (!hasAccess)
+            {
+                formAccess.DenialReason = "User does not have access to this template";
+                return formAccess;
+            }
+
+            var hasSubmitted = await _formRepository.HasUserSubmittedAsync(templateId, userId);
+            formAccess.HasAlreadySubmitted = hasSubmitted;
+
+            if (hasSubmitted)
+            {
+                var existingForm = await GetUserFormForTemplateAsync(templateId, userId);
+                formAccess.ExistingForm = existingForm;
+                formAccess.DenialReason = "User has already submitted a form for this template";
+            }
+            else
+            {
+                formAccess.CanFillForm = true;
+            }
+
+            return formAccess;
+        }
+
     }
 }

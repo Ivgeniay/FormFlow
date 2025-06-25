@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import ContentEditable from "react-contenteditable";
+import ContentEditable, { ContentEditableEvent } from "react-contenteditable";
 import { MarkdownToolbar } from "./MarkdownToolbar";
 
 interface FormattedTextInputProps {
@@ -9,6 +9,7 @@ interface FormattedTextInputProps {
 	multiline?: boolean;
 	className?: string;
 	isReadOnly?: boolean;
+	maxLength?: number;
 }
 
 export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
@@ -18,11 +19,12 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	multiline = false,
 	className = "",
 	isReadOnly = false,
+	maxLength,
 }) => {
 	const [showToolbar, setShowToolbar] = useState(false);
 	const contentRef = useRef<HTMLElement | null>(null);
 
-	const handleChange = (evt: any) => {
+	const handleChange = (evt: ContentEditableEvent) => {
 		onChange(evt.target.value);
 	};
 
@@ -34,20 +36,18 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
-		if (e.ctrlKey || e.metaKey) {
-			switch (e.key.toLowerCase()) {
-				case "b":
-					e.preventDefault();
-					formatText("bold");
-					break;
-				case "i":
-					e.preventDefault();
-					formatText("italic");
-					break;
-				case "u":
-					e.preventDefault();
-					formatText("underline");
-					break;
+		if (maxLength) {
+			const textContent = contentRef.current?.textContent || "";
+			if (
+				textContent.length >= maxLength &&
+				!["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+					e.key
+				) &&
+				!e.ctrlKey &&
+				!e.metaKey
+			) {
+				e.preventDefault();
+				return;
 			}
 		}
 	};
@@ -63,11 +63,16 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 	};
 
 	const baseClasses = multiline
-		? "w-full bg-transparent text-text border-0 focus:outline-none resize-none p-1.5 -ml-1.5 min-h-[40px]"
-		: "w-full text-lg font-medium bg-transparent text-text border-0 focus:outline-none p-1.5 -ml-1.5";
+		? "w-full bg-transparent text-text border-0 focus:outline-none resize-none p-1.5 -ml-1.5 min-h-[40px] break-words overflow-wrap-anywhere"
+		: "w-full text-lg font-medium bg-transparent text-text border-0 focus:outline-none p-1.5 -ml-1.5 break-words overflow-wrap-anywhere";
 
 	return (
-		<div className={`relative ${className}`}>
+		<div
+			className={
+				className ||
+				`relative p-1.5 border border-gray-300/0 rounded-lg hover:border hover:border-gray-300/50 transition-all duration-200`
+			}
+		>
 			<ContentEditable
 				contentEditable={!isReadOnly}
 				suppressContentEditableWarning={true}
@@ -80,9 +85,13 @@ export const FormattedTextInput: React.FC<FormattedTextInputProps> = ({
 				onBlur={handleBlur}
 				tagName={multiline ? "div" : "span"}
 				className={baseClasses}
+				maxLength={maxLength}
 				style={{
-					whiteSpace: multiline ? "pre-wrap" : "nowrap",
+					whiteSpace: multiline ? "pre-wrap" : "normal",
 					overflow: multiline ? "auto" : "hidden",
+					wordBreak: "break-word",
+					overflowWrap: "break-word",
+					maxWidth: "100%",
 				}}
 			/>
 

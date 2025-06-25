@@ -19,5 +19,7 @@ namespace FormFlow.Application.Interfaces
         Task<bool> HasUserSubmittedFormAsync(Guid templateId, Guid userId);
         Task<bool> CanUserViewFormAsync(Guid formId, Guid userId);
         Task<bool> CanUserEditFormAsync(Guid formId, Guid userId);
+
+        Task<FormAccessDto> GetFormAccessAsync(Guid templateId, Guid userId);
     }
 }
