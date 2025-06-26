@@ -5,6 +5,9 @@ using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.General.QuestionDetailsModels;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Serialization;
 using System.Text.Json;
 
 namespace FormFlow.Application.Services
@@ -15,6 +18,12 @@ namespace FormFlow.Application.Services
         private readonly ITemplateRepository _templateRepository;
         private readonly IUserRepository _userRepository;
         private readonly IFormSubscribeService _formSubscribeService;
+        private JsonSerializerSettings _jsonSettings = new JsonSerializerSettings
+        {
+            //TypeNameHandling = TypeNameHandling.Auto,
+            ContractResolver = new CamelCasePropertyNamesContractResolver(),
+            Converters = { new QuestionDetailsConverter() }
+        };
 
         public FormService(
             IFormRepository formRepository,
@@ -55,7 +64,7 @@ namespace FormFlow.Application.Services
             {
                 TemplateId = request.TemplateId,
                 UserId = userId,
-                AnswersData = JsonSerializer.Serialize(request.Answers),
+                AnswersData = JsonConvert.SerializeObject(request.Answers),
                 SubmittedAt = DateTime.UtcNow,
                 TemplateVersion = template.Version,
                 IsDeleted = false,
@@ -81,7 +90,7 @@ namespace FormFlow.Application.Services
             if (template == null)
                 throw new TemplateNotFoundException(form.TemplateId);
 
-            form.AnswersData = JsonSerializer.Serialize(request.Answers);
+            form.AnswersData = JsonConvert.SerializeObject(request.Answers);
             form.UpdatedAt = DateTime.UtcNow;
 
             var updatedForm = await _formRepository.UpdateAsync(form);
@@ -227,7 +236,7 @@ namespace FormFlow.Application.Services
         private async Task<FormDto> MapToFormDtoAsync(Form form, Guid userId)
         {
             var template = await _templateRepository.GetWithQuestionsAsync(form.TemplateId);
-            var answers = JsonSerializer.Deserialize<Dictionary<Guid, object>>(form.AnswersData) ?? new Dictionary<Guid, object>();
+            var answers = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(form.AnswersData) ?? new Dictionary<Guid, object>();
 
             var dto = new FormDto
             {
@@ -247,8 +256,15 @@ namespace FormFlow.Application.Services
             {
                 foreach (var question in template.Questions.Where(q => !q.IsDeleted).OrderBy(q => q.Order))
                 {
-                    var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(question.Data);
+                    var questionDetails = JsonConvert.DeserializeObject<QuestionDetails>(question.Data, _jsonSettings);
                     var answerValue = answers.ContainsKey(question.Id) ? answers[question.Id] : null;
+                    //var answersJson = JObject.Parse(form.AnswersData);
+                    //var answerValue = answersJson[question.Id.ToString()]?.ToObject<object>();
+
+                    if (questionDetails.Type != null && questionDetails.Type == QuestionType.MultipleChoice)
+                    {
+
+                    }
 
                     dto.Questions.Add(new FormQuestionDto
                     {
@@ -263,7 +279,6 @@ namespace FormFlow.Application.Services
                     });
                 }
             }
-
             return dto;
         }
 
@@ -333,5 +348,34 @@ namespace FormFlow.Application.Services
             return formAccess;
         }
 
+    }
+
+    public class QuestionDetailsConverter : JsonConverter<QuestionDetails>
+    {
+        public override QuestionDetails ReadJson(JsonReader reader, Type objectType, QuestionDetails existingValue, bool hasExistingValue, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            var jsonObject = JObject.Load(reader);
+            var type = jsonObject["type"]?.Value<int>();
+
+            return (QuestionType?)type switch
+            {
+                QuestionType.ShortText => jsonObject.ToObject<ShortTextDetails>(),
+                QuestionType.LongText => jsonObject.ToObject<LongTextDetails>(),
+                QuestionType.SingleChoice => jsonObject.ToObject<SingleChoiceDetails>(),
+                QuestionType.MultipleChoice => jsonObject.ToObject<MultipleChoiceDetails>(),
+                QuestionType.Dropdown => jsonObject.ToObject<DropdownDetails>(),
+                QuestionType.Scale => jsonObject.ToObject<ScaleDetails>(),
+                QuestionType.Rating => jsonObject.ToObject<RatingDetails>(),
+                QuestionType.Date => jsonObject.ToObject<DateDetails>(),
+                QuestionType.Time => jsonObject.ToObject<TimeDetails>(),
+                _ => throw new JsonSerializationException($"Unknown question type: {type}")
+            };
+        }
+
+
+        public override void WriteJson(JsonWriter writer, QuestionDetails value, Newtonsoft.Json.JsonSerializer serializer)
+        {
+            serializer.Serialize(writer, value);
+        }
     }
 }

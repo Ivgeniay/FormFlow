@@ -239,6 +239,7 @@ namespace FormFlow.Application.Services
             }
 
             template.IsPublished = true;
+            template.IsArchived = false;
             var updatedTemplate = await _templateRepository.UpdateAsync(template);
 
             await IndexTemplateAsync(updatedTemplate.Id);

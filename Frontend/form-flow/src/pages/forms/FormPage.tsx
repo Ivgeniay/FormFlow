@@ -60,7 +60,23 @@ export const FormPage: React.FC<FormPageProps> = () => {
 		answers: Record<string, any>,
 		sendCopyToEmail: boolean
 	): Promise<void> => {
-		console.log(answers, sendCopyToEmail);
+		if (!formAccess?.template || !accessToken) return;
+
+		try {
+			const submitRequest = {
+				templateId: formAccess.template.id,
+				answers: answers,
+				sendCopyToEmail: sendCopyToEmail,
+			};
+
+			await formApi.submitForm(submitRequest, accessToken);
+			navigate(`/form/success/${formAccess.template.id}`);
+		} catch (error: any) {
+			const errorMessage =
+				error.response?.data?.message ||
+				t("formSubmissionFailed", "Failed to submit form");
+			toast.error(errorMessage);
+		}
 	};
 
 	const handleGoBack = () => {
@@ -177,12 +193,19 @@ export const FormPage: React.FC<FormPageProps> = () => {
 						</div>
 					</div>
 
-					<div className="text-textMuted text-center">
-						{t(
-							"formRendererReadonlyPlaceholder",
-							"FormRenderer component will be here in readonly mode"
-						)}
-					</div>
+					{formAccess.template && formAccess.existingForm ? (
+						<>
+							<TemplateHeader template={formAccess.template} />
+
+							<FormRenderer
+								template={formAccess.template}
+								mode="readonly"
+								existingForm={formAccess.existingForm}
+							/>
+						</>
+					) : (
+						<></>
+					)}
 				</div>
 			</div>
 		);

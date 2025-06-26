@@ -104,10 +104,21 @@ export interface FormDto {
 	template: TemplateDto;
 	userId: string;
 	user: UserDto;
-	answersData: string;
+	questions: FormQuestionDto[];
 	submittedAt: string;
 	canEdit: boolean;
 	canView: boolean;
+}
+
+export interface FormQuestionDto {
+	questionId: string;
+	title: string;
+	description: string;
+	type: number;
+	order: number;
+	isRequired: boolean;
+	questionData: string;
+	answer: any;
 }
 
 export interface CommentDto {

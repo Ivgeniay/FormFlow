@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { TemplateDto, FormDto } from "../../../shared/api_types";
 import { QuestionType } from "../../../shared/domain_types";
-import { FormattedTextInput } from "../../../ui/Input/FormattedTextInput";
 import toast from "react-hot-toast";
 import { TextQuestion } from "./TextQuestion";
 import { DropdownQuestion } from "./DropdownQuestion";
@@ -81,6 +80,20 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 		return errors;
 	};
 
+	const getDefaultValueForQuestion = (question: any) => {
+		const questionData =
+			typeof question.data === "string"
+				? JSON.parse(question.data)
+				: question.data;
+
+		switch (questionData.type) {
+			case QuestionType.MultipleChoice:
+				return [];
+			default:
+				return "";
+		}
+	};
+
 	const handleSubmit = async () => {
 		if (mode === "readonly" || !onSubmit) return;
 
@@ -91,9 +104,16 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 			return;
 		}
 
+		const completeAnswers: Record<string, any> = { ...answers };
+		template.questions.forEach((question) => {
+			if (!(question.id in completeAnswers)) {
+				completeAnswers[question.id] = getDefaultValueForQuestion(question);
+			}
+		});
+
 		try {
 			setIsSubmitting(true);
-			await onSubmit(answers, sendCopyToEmail);
+			await onSubmit(completeAnswers, sendCopyToEmail);
 			toast.success(
 				t("formSubmittedSuccessfully", "Form submitted successfully!")
 			);
@@ -105,19 +125,19 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 	};
 
 	const getAnswerValue = (questionId: string) => {
-		if (answers[questionId] !== undefined) {
+		if (mode === "fillable" && answers[questionId] !== undefined) {
 			return answers[questionId];
 		}
 
-		if (existingForm?.answersData) {
-			try {
-				const parsedAnswers = JSON.parse(existingForm.answersData);
-				return parsedAnswers[questionId] || null;
-			} catch (error) {
-				return null;
-			}
+		if (existingForm?.questions && Array.isArray(existingForm.questions)) {
+			const questionData = existingForm.questions.find(
+				(q) => q.questionId === questionId
+			);
+			const answer = questionData?.answer || null;
+			return answer;
 		}
 
+		console.log("No answer found for:", questionId);
 		return null;
 	};
 
@@ -202,6 +222,13 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 				);
 
 			case QuestionType.MultipleChoice:
+				const multipleChoiceValue = getAnswerValue(question.id);
+				console.log(
+					"MultipleChoice value:",
+					multipleChoiceValue,
+					typeof multipleChoiceValue
+				);
+
 				return (
 					<MultipleChoiceQuestion
 						key={question.id}
@@ -338,7 +365,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 			{(mode === "fillable" || mode === "preview") && (
 				<div className="bg-surface border border-border rounded-lg p-6">
 					<div className="flex items-center justify-between">
-						{/* <div className="flex items-center gap-3">
+						<div className="flex items-center gap-3">
 							<label className="flex items-center gap-2 cursor-pointer">
 								<input
 									type="checkbox"
@@ -350,7 +377,7 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 									{t("sendCopyToEmail", "Send copy to my email")}
 								</span>
 							</label>
-						</div> */}
+						</div>
 
 						<button
 							onClick={mode === "preview" ? undefined : handleSubmit}

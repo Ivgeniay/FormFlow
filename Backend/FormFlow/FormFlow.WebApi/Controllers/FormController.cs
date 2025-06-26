@@ -276,11 +276,7 @@ namespace FormFlow.WebApi.Controllers
                     ExistingForm = formAccess.ExistingForm,
                     Template = null
                 };
-
-                if (formAccess.CanFillForm)
-                {
-                    response.Template = await _templateService.GetTemplateByIdAsync(templateId, userId.Value);
-                }
+                response.Template = await _templateService.GetTemplateByIdAsync(templateId, userId.Value);
 
                 return Ok(response);
             }

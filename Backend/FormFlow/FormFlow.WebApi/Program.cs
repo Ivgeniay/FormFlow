@@ -13,6 +13,7 @@ using Microsoft.IdentityModel.Tokens;
 using Nest;
 using Scalar.AspNetCore;
 using System.Text;
+using Newtonsoft.Json.Serialization;
 
 namespace FormFlow.WebApi
 {
@@ -21,7 +22,10 @@ namespace FormFlow.WebApi
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Services.AddControllers();
+            builder.Services.AddControllers().AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
             builder.Services.AddOpenApi();
 
             builder.Services.AddCors(options =>
