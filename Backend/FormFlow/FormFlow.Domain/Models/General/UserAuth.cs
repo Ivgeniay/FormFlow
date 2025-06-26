@@ -18,6 +18,7 @@
         public Guid UserId { get; set; }
         public string GoogleId { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
+        public string PictureUrl { get;set; } = string.Empty;
         public string RefreshToken { get; set; } = string.Empty;
         public DateTime RefreshTokenExpiresAt { get; set; }
         public DateTime? RefreshTokenRevokedAt { get; set; }

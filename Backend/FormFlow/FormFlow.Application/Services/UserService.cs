@@ -15,16 +15,26 @@ namespace FormFlow.Application.Services
         private readonly IJwtService _jwtService;
         private readonly IGoogleAuthService _googleAuthService;
         private readonly IUserSettingsRepository _userSettingsRepository;
+        private readonly IGoogleAuthRepository _googleAuthRepository;
+        private readonly IUserContactRepository _userContactRepository;
+        private readonly IEmailAuthRepository _emailAuthRepository;
 
         public UserService(IUserRepository userRepository, 
             IJwtService jwtService, 
             IGoogleAuthService googleAuthService,
-            IUserSettingsRepository userSettingsRepository)
+            IUserSettingsRepository userSettingsRepository, 
+            IGoogleAuthRepository googleAuthRepository,
+            IUserContactRepository userContactRepository,
+        IEmailAuthRepository emailAuthRepository
+            )
         {
             _userRepository = userRepository;
             _jwtService = jwtService;
             _googleAuthService = googleAuthService;
             _userSettingsRepository = userSettingsRepository;
+            _googleAuthRepository = googleAuthRepository;
+            _userContactRepository = userContactRepository;
+            _emailAuthRepository = emailAuthRepository;
         }
 
         public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
@@ -34,50 +44,84 @@ namespace FormFlow.Application.Services
                 if (await _userRepository.EmailExistsAsync(request.Email))
                     return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Email already exists" };
 
-                if (await _userRepository.UserNameExistsAsync(request.UserName))
-                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Username already exists" };
+                var existingGoogleAuth = await _googleAuthRepository.GetByEmailAsync(request.Email);
+                if (existingGoogleAuth != null)
+                {
+                    var existingUser = await _userRepository.GetByIdAsync(existingGoogleAuth.UserId);
+                    if (existingUser == null)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User not found" };
+
+                    if (existingUser.IsBlocked)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User account is blocked" };
+
+                    await _emailAuthRepository.CreateAsync(new EmailPasswordAuth
+                    {
+                        UserId = existingUser.Id,
+                        Email = request.Email,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                    });
+
+                    var emailAuth = new EmailPasswordAuth
+                    {
+                        UserId = existingUser.Id,
+                        Email = request.Email,
+                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                    };
+
+                    var tokenResult = await _jwtService.GenerateTokenAsync(existingUser, AuthType.Internal);
+
+                    return new AuthenticationResult
+                    {
+                        User = DTOMapper.MapToUserDto(existingUser),
+                        AccessToken = tokenResult.AccessToken,
+                        RefreshToken = tokenResult.RefreshToken,
+                        AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                        RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                        AuthType = AuthType.Internal,
+                        IsSuccess = true
+                    };
+                }
+
+                //if (await _userRepository.UserNameExistsAsync(request.UserName))
+                //    return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Username already exists" };
 
                 var user = new User
                 {
                     UserName = request.UserName,
                     Role = UserRole.User
                 };
+                User userInDb = await _userRepository.CreateAsync(user);
 
-                var emailAuth = new EmailPasswordAuth
+                await _emailAuthRepository.CreateAsync(new EmailPasswordAuth
                 {
-                    UserId = user.Id,
+                    UserId = userInDb.Id,
                     Email = request.Email,
                     PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-                };
+                });
 
-                user.EmailAuth = emailAuth;
 
-                var primaryContact = new UserContact
+                await _userContactRepository.CreateAsync(new UserContact
                 {
                     UserId = user.Id,
                     Type = ContactType.Email,
                     Value = request.Email,
                     IsPrimary = true
-                };
+                });
 
-                user.Contacts.Add(primaryContact);
+                if (!await _userSettingsRepository.ExistsByUserIdAsync(userInDb.Id))
+                {
+                    await _userSettingsRepository.CreateDefaultForUserAsync(userInDb.Id);
+                }
 
-                User userInDb = await _userRepository.CreateUserWithAuthAsync(user);
-
-                if (await _userSettingsRepository.ExistsByUserIdAsync(userInDb.Id))
-                    throw new ArgumentException($"User settings for user '{userInDb.Id}' already exist");
-
-                await _userSettingsRepository.CreateDefaultForUserAsync(userInDb.Id);
-
-                var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
+                var newUserTokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
 
                 return new AuthenticationResult
                 {
                     User = DTOMapper.MapToUserDto(user),
-                    AccessToken = tokenResult.AccessToken,
-                    RefreshToken = tokenResult.RefreshToken,
-                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
-                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    AccessToken = newUserTokenResult.AccessToken,
+                    RefreshToken = newUserTokenResult.RefreshToken,
+                    AccessTokenExpiry = newUserTokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = newUserTokenResult.RefreshTokenExpiry,
                     AuthType = AuthType.Internal,
                     IsSuccess = true
                 };
@@ -87,6 +131,66 @@ namespace FormFlow.Application.Services
                 return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
             }
         }
+
+        //public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
+        //{
+        //    try
+        //    {
+        //        if (await _userRepository.EmailExistsAsync(request.Email))
+        //            return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Email already exists" };
+
+        //        if (await _userRepository.UserNameExistsAsync(request.UserName))
+        //            return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Username already exists" };
+
+        //        var user = new User
+        //        {
+        //            UserName = request.UserName,
+        //            Role = UserRole.User
+        //        };
+
+        //        var emailAuth = new EmailPasswordAuth
+        //        {
+        //            UserId = user.Id,
+        //            Email = request.Email,
+        //            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+        //        };
+
+        //        user.EmailAuth = emailAuth;
+
+        //        User userInDb = await _userRepository.CreateUserWithAuthAsync(user);
+
+        //        await _userContactRepository.CreateAsync(new UserContact
+        //        {
+        //            UserId = user.Id,
+        //            Type = ContactType.Email,
+        //            Value = request.Email,
+        //            IsPrimary = true
+        //        });
+
+
+        //        if (!await _userSettingsRepository.ExistsByUserIdAsync(userInDb.Id))
+        //        {
+        //            await _userSettingsRepository.CreateDefaultForUserAsync(userInDb.Id);
+        //        }
+
+        //        var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
+
+        //        return new AuthenticationResult
+        //        {
+        //            User = DTOMapper.MapToUserDto(user),
+        //            AccessToken = tokenResult.AccessToken,
+        //            RefreshToken = tokenResult.RefreshToken,
+        //            AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+        //            RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+        //            AuthType = AuthType.Internal,
+        //            IsSuccess = true
+        //        };
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
+        //    }
+        //}
 
         public async Task<AuthenticationResult> AuthenticateWithEmailAsync(EmailLoginRequest request)
         {
@@ -127,6 +231,39 @@ namespace FormFlow.Application.Services
             try
             {
                 var googleUserInfo = await _googleAuthService.GetUserInfoAsync(request.Code);
+                var existingGoogleAuth = await _googleAuthRepository.GetByGoogleIdAsync(googleUserInfo.GoogleId);
+
+                if (existingGoogleAuth != null)
+                {
+                    var user = await _userRepository.GetByIdAsync(existingGoogleAuth.UserId);
+
+                    if (user == null)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User not found" };
+
+                    if (user.IsBlocked)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User account is blocked" };
+
+                    if (existingGoogleAuth.Email != googleUserInfo.Email || 
+                        existingGoogleAuth.PictureUrl != googleUserInfo.Picture)
+                    {
+                        existingGoogleAuth.Email = googleUserInfo.Email;
+                        existingGoogleAuth.PictureUrl = googleUserInfo.Picture;
+                        await _googleAuthRepository.UpdateAsync(existingGoogleAuth);
+                    }
+
+                    var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Google);
+
+                    return new AuthenticationResult
+                    {
+                        User = DTOMapper.MapToUserDto(user),
+                        AccessToken = tokenResult.AccessToken,
+                        RefreshToken = tokenResult.RefreshToken,
+                        AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                        RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                        AuthType = AuthType.Google,
+                        IsSuccess = true
+                    };
+                }
 
                 var existingUser = await _userRepository.GetByEmailAsync(googleUserInfo.Email);
 
@@ -135,23 +272,17 @@ namespace FormFlow.Application.Services
                     if (existingUser.IsBlocked)
                         return new AuthenticationResult { IsSuccess = false, ErrorMessage = "User account is blocked" };
 
-                    if (existingUser.GoogleAuth == null)
-                    {
-                        existingUser.GoogleAuth = new GoogleAuth
-                        {
-                            UserId = existingUser.Id,
-                            GoogleId = googleUserInfo.GoogleId,
-                            Email = googleUserInfo.Email
-                        };
-                    }
-                    else
-                    {
-                        existingUser.GoogleAuth.GoogleId = googleUserInfo.GoogleId;
-                        existingUser.GoogleAuth.Email = googleUserInfo.Email;
-                        existingUser.GoogleAuth.UpdatedAt = DateTime.UtcNow;
-                    }
+                    var existingGoogleByEmail = await _googleAuthRepository.GetByEmailAsync(googleUserInfo.Email);
+                    if (existingGoogleByEmail != null)
+                        return new AuthenticationResult { IsSuccess = false, ErrorMessage = "This Google account is already linked to another user" };
 
-                    await _userRepository.UpdateAsync(existingUser);
+                    await _googleAuthRepository.CreateAsync(new GoogleAuth
+                    {
+                        UserId = existingUser.Id,
+                        GoogleId = googleUserInfo.GoogleId,
+                        Email = googleUserInfo.Email,
+                        PictureUrl = googleUserInfo.Picture
+                    });
 
                     var tokenResult = await _jwtService.GenerateTokenAsync(existingUser, AuthType.Google);
 
@@ -166,48 +297,43 @@ namespace FormFlow.Application.Services
                         IsSuccess = true
                     };
                 }
-                else
+
+                var newUser = new User
                 {
-                    var newUser = new User
-                    {
-                        UserName = googleUserInfo.Name,
-                        Role = UserRole.User
-                    };
+                    UserName = googleUserInfo.Name,
+                    Role = UserRole.User
+                };
 
-                    var googleAuth = new GoogleAuth
-                    {
-                        UserId = newUser.Id,
-                        GoogleId = googleUserInfo.GoogleId,
-                        Email = googleUserInfo.Email
-                    };
+                var userDb = await _userRepository.CreateUserWithAuthAsync(newUser);
 
-                    newUser.GoogleAuth = googleAuth;
+                await _userContactRepository.CreateAsync(new UserContact
+                {
+                    UserId = userDb.Id,
+                    Type = ContactType.Email,
+                    Value = googleUserInfo.Email,
+                    IsPrimary = true
+                });
 
-                    var primaryContact = new UserContact
-                    {
-                        UserId = newUser.Id,
-                        Type = ContactType.Email,
-                        Value = googleUserInfo.Email,
-                        IsPrimary = true
-                    };
+                await _googleAuthRepository.CreateAsync(new GoogleAuth
+                {
+                    UserId = userDb.Id,
+                    GoogleId = googleUserInfo.GoogleId,
+                    Email = googleUserInfo.Email,
+                    PictureUrl = googleUserInfo.Picture,
+                });
 
-                    newUser.Contacts.Add(primaryContact);
+                var newUserTokenResult = await _jwtService.GenerateTokenAsync(userDb, AuthType.Google);
 
-                    await _userRepository.CreateUserWithAuthAsync(newUser);
-
-                    var tokenResult = await _jwtService.GenerateTokenAsync(newUser, AuthType.Google);
-
-                    return new AuthenticationResult
-                    {
-                        User = DTOMapper.MapToUserDto(newUser),
-                        AccessToken = tokenResult.AccessToken,
-                        RefreshToken = tokenResult.RefreshToken,
-                        AccessTokenExpiry = tokenResult.AccessTokenExpiry,
-                        RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
-                        AuthType = AuthType.Google,
-                        IsSuccess = true
-                    };
-                }
+                return new AuthenticationResult
+                {
+                    User = DTOMapper.MapToUserDto(userDb),
+                    AccessToken = newUserTokenResult.AccessToken,
+                    RefreshToken = newUserTokenResult.RefreshToken,
+                    AccessTokenExpiry = newUserTokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = newUserTokenResult.RefreshTokenExpiry,
+                    AuthType = AuthType.Google,
+                    IsSuccess = true
+                };
             }
             catch (Exception ex)
             {
@@ -439,15 +565,17 @@ namespace FormFlow.Application.Services
 
         public async Task<UserDto> AddUserContactAsync(Guid userId, AddContactRequest request)
         {
-            var user = await _userRepository.GetWithContactsAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 throw new UserNotFoundException(userId);
 
             if (request.IsPrimary)
             {
-                foreach (var contact in user.Contacts.Where(c => c.Type == request.Type))
+                var consact = await _userContactRepository.GetPrimaryContactAsync(userId);
+                if (consact != null)
                 {
-                    contact.IsPrimary = false;
+                    consact.IsPrimary = false;
+                    await _userContactRepository.UpdateAsync(consact);
                 }
             }
 
@@ -459,8 +587,7 @@ namespace FormFlow.Application.Services
                 IsPrimary = request.IsPrimary
             };
 
-            user.Contacts.Add(newContact);
-            await _userRepository.UpdateAsync(user);
+            await _userContactRepository.CreateAsync(newContact);
 
             return DTOMapper.MapToUserDto(user);
         }
@@ -472,37 +599,37 @@ namespace FormFlow.Application.Services
                 throw new UserNotFoundException(userId);
 
             var contact = user.Contacts.FirstOrDefault(c => c.Id == contactId);
-            if (contact != null)
-            {
-                user.Contacts.Remove(contact);
-                await _userRepository.UpdateAsync(user);
-            }
+            if (contact == null || contact.UserId != userId)
+                throw new ArgumentException("Contact not found or doesn't belong to user");
+
+            await _userContactRepository.DeleteAsync(contactId);
         }
 
         public async Task<UserDto> UpdateUserContactAsync(Guid userId, UpdateContactRequest request)
         {
-            var user = await _userRepository.GetWithContactsAsync(userId);
+            var user = await _userRepository.GetByIdAsync(userId);
             if (user == null)
                 throw new UserNotFoundException(userId);
 
-            var contact = user.Contacts.FirstOrDefault(c => c.Id == request.Id);
-            if (contact == null)
-                throw new ArgumentException("Contact not found");
+            var contact = await _userContactRepository.GetByIdAsync(request.Id);
+            if (contact == null || contact.UserId != userId)
+                throw new ArgumentException("Contact not found or doesn't belong to user");
 
-            if (request.IsPrimary && contact.Type != request.Type)
+            if (request.IsPrimary)
             {
-                foreach (var c in user.Contacts.Where(c => c.Type == request.Type))
+                var consact = await _userContactRepository.GetPrimaryContactAsync(userId);
+                if (consact != null)
                 {
-                    c.IsPrimary = false;
+                    consact.IsPrimary = false;
+                    await _userContactRepository.UpdateAsync(consact);
                 }
             }
 
             contact.Type = request.Type;
             contact.Value = request.Value;
             contact.IsPrimary = request.IsPrimary;
-            contact.UpdatedAt = DateTime.UtcNow;
 
-            await _userRepository.UpdateAsync(user);
+            await _userContactRepository.UpdateAsync(contact);
 
             return DTOMapper.MapToUserDto(user);
         }

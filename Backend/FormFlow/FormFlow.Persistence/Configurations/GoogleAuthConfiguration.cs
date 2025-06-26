@@ -30,6 +30,11 @@ namespace FormFlow.Persistence.Configurations
                 .HasMaxLength(Validation.EmailMaxLength)
                 .HasColumnName(ColumnNames.Email);
 
+            builder.Property(g => g.PictureUrl)
+                .IsRequired()
+                .HasMaxLength(Validation.QuestionDescriptionMaxLength)
+                .HasColumnName(ColumnNames.PictureUrl);
+
             builder.Property(g => g.RefreshToken)
                 .IsRequired()
                 .HasMaxLength(Validation.RefreshTokenMaxLength)
@@ -57,6 +62,10 @@ namespace FormFlow.Persistence.Configurations
             builder.HasIndex(g => g.UserId)
                 .IsUnique()
                 .HasDatabaseName(IndexNames.GoogleAuthsUserIndex);
+
+            builder.HasIndex(g => g.Email)
+                .IsUnique()
+                .HasDatabaseName(IndexNames.GoogleAuthsEmailIndex);
 
             builder.HasIndex(g => g.RefreshToken)
                 .HasDatabaseName(IndexNames.GoogleAuthsRefreshTokenIndex);

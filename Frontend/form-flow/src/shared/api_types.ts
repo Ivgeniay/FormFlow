@@ -14,6 +14,28 @@ export interface RefreshTokenResponse {
 	refreshTokenExpiry: string;
 }
 
+export interface UserContactDto {
+	id: string;
+	type: number;
+	value: string;
+	isPrimary: boolean;
+	createdAt: string;
+}
+
+export interface AuthMethodDto {
+	type: string;
+	isActive: boolean;
+}
+
+export interface EmailAuthMethodDto extends AuthMethodDto {
+	email: string;
+}
+
+export interface GoogleAuthMethodDto extends AuthMethodDto {
+	googleId: string;
+	email: string;
+}
+
 export interface UserDto {
 	id: string;
 	userName: string;
@@ -22,7 +44,8 @@ export interface UserDto {
 	createdAt: string;
 	updatedAt: string;
 	primaryEmail?: string;
-	contacts?: ContactDto[];
+	contacts: UserContactDto[];
+	authMethods: AuthMethodDto[];
 }
 
 export interface ContactDto {

@@ -36,7 +36,7 @@ namespace FormFlow.Infrastructure.Services
             });
 
             var tokenResponse = await flow.ExchangeCodeForTokenAsync(
-                userId: "user",
+                userId: "user_" + Guid.NewGuid().ToString(),
                 code: code,
                 redirectUri: _redirectUri,
                 CancellationToken.None);
@@ -55,7 +55,8 @@ namespace FormFlow.Infrastructure.Services
             {
                 GoogleId = userInfo.Id,
                 Email = userInfo.Email,
-                Name = userInfo.Name ?? userInfo.Email
+                Name = userInfo.Name ?? userInfo.Email,
+                Picture = userInfo.Picture,
             };
         }
     }

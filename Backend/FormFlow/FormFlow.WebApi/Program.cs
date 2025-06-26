@@ -54,6 +54,9 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<ILanguageRepository, LanguageRepository>();
             builder.Services.AddScoped<IUserSettingsRepository, UserSettingsRepository>();
             builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+            builder.Services.AddScoped<IGoogleAuthRepository, GoogleAuthRepository>();
+            builder.Services.AddScoped<IUserContactRepository, UserContactRepository>();
+            builder.Services.AddScoped<IEmailAuthRepository, EmailAuthRepository>();
 
 
             builder.Services.AddScoped<IUserService, UserService>();

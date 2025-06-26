@@ -14,6 +14,44 @@ export interface AddContactRequest {
 	value: string;
 	isPrimary: boolean;
 }
+export interface UpdateContactRequest {
+	id: string;
+	type: number;
+	value: string;
+	isPrimary: boolean;
+}
+
+export interface AuthMethodDto {
+	type: string;
+	isActive: boolean;
+}
+
+export interface EmailAuthMethodDto extends AuthMethodDto {
+	email: string;
+}
+
+export interface GoogleAuthMethodDto extends AuthMethodDto {
+	googleId: string;
+	email: string;
+}
+
+export interface AuthMethodsResponse {
+	authMethods: AuthMethodDto[];
+}
+
+export interface UserSettingsDto {
+	id: string;
+	userId: string;
+	languageCode: string;
+	themeId: string;
+	createdAt: string;
+	updatedAt: string;
+}
+
+export interface UpdateUserSettingsRequest {
+	languageCode?: string;
+	themeId?: string;
+}
 
 export interface UserStatsResponse {
 	totalUsers: number;
@@ -85,6 +123,87 @@ class UsersApi {
 	async getUserStats(accessToken: string): Promise<UserStatsResponse> {
 		const response = await axios.get<UserStatsResponse>(
 			`${API_BASE_URL}/user/stats`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async getUserContacts(accessToken: string): Promise<ContactDto[]> {
+		const response = await axios.get<ContactDto[]>(
+			`${API_BASE_URL}/user/me/contacts`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async updateUserContact(
+		contactId: string,
+		request: UpdateContactRequest,
+		accessToken: string
+	): Promise<ContactDto> {
+		const response = await axios.put<ContactDto>(
+			`${API_BASE_URL}/user/contacts/${contactId}`,
+			request,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async deleteUserContact(
+		contactId: string,
+		accessToken: string
+	): Promise<void> {
+		await axios.delete(`${API_BASE_URL}/user/contacts/${contactId}`, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+	}
+
+	async setUserPrimaryContact(
+		contactId: string,
+		accessToken: string
+	): Promise<void> {
+		await axios.post(
+			`${API_BASE_URL}/user/contacts/${contactId}/set-primary`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+	}
+
+	async getUserAuthMethods(accessToken: string): Promise<AuthMethodsResponse> {
+		const response = await axios.get<AuthMethodsResponse>(
+			`${API_BASE_URL}/user/me/auth-methods`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async getUserSettings(accessToken: string): Promise<UserSettingsDto> {
+		const response = await axios.get<UserSettingsDto>(
+			`${API_BASE_URL}/user/me/settings`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async updateUserSettings(
+		request: UpdateUserSettingsRequest,
+		accessToken: string
+	): Promise<UserSettingsDto> {
+		const response = await axios.put<UserSettingsDto>(
+			`${API_BASE_URL}/user/me/settings`,
+			request,
 			{
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}

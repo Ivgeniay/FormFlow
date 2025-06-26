@@ -76,6 +76,7 @@
             public const string TemplateAllowedUserId = "template_allowed_user_id";
 
             public const string Email = "email";
+            public const string PictureUrl = "picture_url";
             public const string PasswordHash = "password_hash";
             public const string RefreshToken = "refresh_token";
             public const string RefreshTokenExpiresAt = "refresh_token_expires_at";
@@ -163,6 +164,7 @@
 
             public const string GoogleAuthsGoogleIdIndex = "idx_google_auths_google_id";
             public const string GoogleAuthsUserIndex = "idx_google_auths_user";
+            public const string GoogleAuthsEmailIndex = "idx_google_auths_email";
             public const string GoogleAuthsRefreshTokenIndex = "idx_google_auths_refresh_token";
 
             public const string TemplateAllowedUsersTemplateUserIndex = "idx_template_allowed_users_template_user";
