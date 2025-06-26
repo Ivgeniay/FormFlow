@@ -21,6 +21,7 @@ import { Toaster } from "react-hot-toast";
 import { SearchPage } from "./pages/search/SearchPage";
 import { FormPage } from "./pages/forms/FormPage";
 import { PreviewFormPage } from "./pages/forms/PreviewFormPage";
+import { FormView } from "./pages/forms/FormView";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -108,14 +109,21 @@ function App() {
 							}
 						/>
 						<Route
-							path="/form/:id"
+							path="/form/view/:formId"
+							element={
+								<Layout>
+									<FormView />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/form/from/:templateId"
 							element={
 								<Layout>
 									<FormPage />
 								</Layout>
 							}
 						/>
-						{/* <Route path="/form/:id" element={<FormPage />} /> */}
 						<Route path="/settings" element={<UserSettings />} />
 						<Route
 							path="/auth/google/callback"

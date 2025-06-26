@@ -26,6 +26,8 @@ interface SortableTableProps<T> {
 	emptyMessage?: string;
 	className?: string;
 	onRowHover?: (itemId: string | null) => void;
+	maxColumnLabelLength?: number;
+	maxColumnsWithoutScroll?: number;
 }
 
 export function SortableTable<T>({
@@ -40,10 +42,13 @@ export function SortableTable<T>({
 	emptyMessage = "No data available",
 	className = "",
 	onRowHover,
+	maxColumnLabelLength = 15,
+	maxColumnsWithoutScroll = 6,
 }: SortableTableProps<T>) {
 	const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
 
 	const visibleColumns = columns.filter((col) => col.visible !== false);
+	const needsHorizontalScroll = visibleColumns.length > maxColumnsWithoutScroll;
 
 	const handleSort = (columnKey: string) => {
 		const column = columns.find((col) => col.key === columnKey);
@@ -61,6 +66,11 @@ export function SortableTable<T>({
 		const newSortConfig = { key: columnKey, direction };
 		setSortConfig(newSortConfig);
 		onSort?.(newSortConfig);
+	};
+
+	const truncateLabel = (label: string) => {
+		if (label.length <= maxColumnLabelLength) return label;
+		return label.substring(0, maxColumnLabelLength) + "...";
 	};
 
 	const toggleSelectAll = () => {
@@ -113,8 +123,12 @@ export function SortableTable<T>({
 		<div
 			className={`bg-surface border border-border rounded-lg overflow-hidden ${className}`}
 		>
-			<div className="overflow-x-auto">
-				<table className="w-full">
+			<div
+				className={`${
+					needsHorizontalScroll ? "overflow-x-auto" : "overflow-x-hidden"
+				}`}
+			>
+				<table className={`${needsHorizontalScroll ? "min-w-max" : "w-full"}`}>
 					<thead className="bg-background border-b border-border">
 						<tr>
 							{selectable && (
@@ -140,12 +154,16 @@ export function SortableTable<T>({
 										<button
 											onClick={() => handleSort(String(column.key))}
 											className="flex items-center hover:text-primary transition-colors"
+											title={column.label}
 										>
-											{column.label}
+											{truncateLabel(column.label)}
+											{/* {column.label} */}
 											{getSortIcon(String(column.key))}
 										</button>
 									) : (
-										column.label
+										<span title={column.label}>
+											{truncateLabel(column.label)}
+										</span>
 									)}
 								</th>
 							))}
@@ -174,7 +192,9 @@ export function SortableTable<T>({
 									{visibleColumns.map((column) => (
 										<td
 											key={String(column.key)}
-											className="px-4 py-3 text-sm text-text"
+											className={`px-4 py-3 text-sm text-text ${
+												needsHorizontalScroll ? "min-w-32 max-w-48" : ""
+											}`}
 										>
 											{defaultRenderCell(item, column)}
 										</td>

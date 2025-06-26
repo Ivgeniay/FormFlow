@@ -239,5 +239,15 @@
 	"backToTemplate": "Back to Template",
 	"invalidTemplateId": "Invalid template ID",
 	"noAccessToPreview": "You don't have access to preview this template",
-	"failedToLoadTemplate": "Failed to load template"
+	"failedToLoadTemplate": "Failed to load template",
+
+	"invalidFormId": "Invalid form ID",
+	"formNotFound": "Form not found",
+	"submittedBy": "Submitted by",
+	"noAnswer": "No answer",
+	"noResponsesYet": "No responses yet",
+	"loadingResponses": "Loading responses...",
+	"viewResponse": "View Response",
+	"legacyResponse": "Legacy response",
+	"responseContainsLegacyAnswers": "This response contains answers to questions that may have been modified or deleted"
 }

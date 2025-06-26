@@ -76,7 +76,7 @@ export const TemplatePage: React.FC = () => {
 	};
 
 	const handleFillForm = (templateid: string) => {
-		navigate(`/form/${templateid}`);
+		navigate(`/form/from/${templateid}`);
 	};
 
 	const handleSubmitComment = () => {};
@@ -103,11 +103,19 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (sourceId && template) {
-		return <TemplateCreatorPage sourceTemplate={template} />;
+		return (
+			<>
+				<TemplateCreatorPage sourceTemplate={template} />;
+			</>
+		);
 	}
 
 	if (!id) {
-		return <TemplateCreatorPage />;
+		return (
+			<>
+				<TemplateCreatorPage />
+			</>
+		);
 	}
 
 	if (!template) {
@@ -125,7 +133,7 @@ export const TemplatePage: React.FC = () => {
 	if (canViewAsEditor()) {
 		return (
 			<>
-				<TemplateEditorPage template={template} />;
+				<TemplateEditorPage className="mb-6" template={template} />
 				<CommentsSection
 					commentsCount={template.commentsCount}
 					isAuthenticated={isAuthenticated}

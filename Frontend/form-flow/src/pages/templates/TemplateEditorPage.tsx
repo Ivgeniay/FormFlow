@@ -13,12 +13,14 @@ import * as Dialog from "@radix-ui/react-dialog";
 
 interface TemplateEditorPageProps {
 	template: TemplateDto;
+	className?: string;
 }
 
 type TabType = "questions" | "responses" | "versions" | "analytics";
 
 export const TemplateEditorPage: React.FC<TemplateEditorPageProps> = ({
 	template,
+	className,
 }) => {
 	const { t } = useTranslation();
 	const questionsTabRef = useRef<QuestionsTabRef>(null);
@@ -83,7 +85,7 @@ export const TemplateEditorPage: React.FC<TemplateEditorPageProps> = ({
 	const isTabActive = (tab: TabType) => activeTab === tab;
 
 	return (
-		<div className="space-y-6">
+		<div className={`space-y-6 ${className}`}>
 			<div className="bg-surface border border-border rounded-lg p-6">
 				<div className="flex items-center justify-between mb-4">
 					<div className="flex items-center gap-4">

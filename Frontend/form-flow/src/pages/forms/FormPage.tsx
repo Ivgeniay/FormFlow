@@ -12,7 +12,7 @@ interface FormPageProps {}
 
 export const FormPage: React.FC<FormPageProps> = () => {
 	const { t } = useTranslation();
-	const { id } = useParams<{ id: string }>();
+	const { templateId } = useParams<{ templateId: string }>();
 	const navigate = useNavigate();
 	const { accessToken, isAuthenticated } = useAuth();
 
@@ -27,23 +27,23 @@ export const FormPage: React.FC<FormPageProps> = () => {
 			return;
 		}
 
-		if (!id || !accessToken) {
+		if (!templateId || !accessToken) {
 			setError(t("invalidTemplateId", "Invalid template ID"));
 			setLoading(false);
 			return;
 		}
 
 		loadFormAccess();
-	}, [id, accessToken, isAuthenticated]);
+	}, [templateId, accessToken, isAuthenticated]);
 
 	const loadFormAccess = async () => {
-		if (!id || !accessToken) return;
+		if (!templateId || !accessToken) return;
 
 		try {
 			setLoading(true);
 			setError(null);
 
-			const access = await formApi.getFormAccess(id, accessToken);
+			const access = await formApi.getFormAccess(templateId, accessToken);
 			console.log(access);
 			setFormAccess(access);
 		} catch (error: any) {
@@ -70,7 +70,7 @@ export const FormPage: React.FC<FormPageProps> = () => {
 			};
 
 			await formApi.submitForm(submitRequest, accessToken);
-			navigate(`/form/success/${formAccess.template.id}`);
+			navigate(`/form/${formAccess.template.id}`);
 		} catch (error: any) {
 			const errorMessage =
 				error.response?.data?.message ||

@@ -240,5 +240,15 @@
 	"backToTemplate": "Назад к шаблону",
 	"invalidTemplateId": "Неверный ID шаблона",
 	"noAccessToPreview": "У вас нет доступа к предпросмотру этого шаблона",
-	"failedToLoadTemplate": "Не удалось загрузить шаблон"
+	"failedToLoadTemplate": "Не удалось загрузить шаблон",
+
+	"invalidFormId": "Недействительный шаблон",
+	"formNotFound": "Форма не найдена",
+	"submittedBy": "Отправил",
+	"noAnswer": "Нет ответа",
+	"noResponsesYet": "Ответов пока нет",
+	"loadingResponses": "Загрузка ответов...",
+	"viewResponse": "Просмотр ответа",
+	"legacyResponse": "Устаревший ответ",
+	"responseContainsLegacyAnswers": "Этот ответ содержит ответы на вопросы, которые могли быть изменены или удалены"
 }

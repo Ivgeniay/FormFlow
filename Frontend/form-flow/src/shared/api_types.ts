@@ -98,16 +98,29 @@ export interface UserSearchDto {
 	primaryEmail: string;
 }
 
+// export interface FormDto {
+// 	id: string;
+// 	templateId: string;
+// 	template: TemplateDto;
+// 	userId: string;
+// 	user: UserDto;
+// 	questions: FormQuestionDto[];
+// 	submittedAt: string;
+// 	canEdit: boolean;
+// 	canView: boolean;
+// }
+
 export interface FormDto {
 	id: string;
 	templateId: string;
-	template: TemplateDto;
+	templateName: string;
 	userId: string;
-	user: UserDto;
-	questions: FormQuestionDto[];
+	userName: string;
 	submittedAt: string;
+	updatedAt: string;
+	questions: FormQuestionDto[];
 	canEdit: boolean;
-	canView: boolean;
+	canDelete: boolean;
 }
 
 export interface FormQuestionDto {
