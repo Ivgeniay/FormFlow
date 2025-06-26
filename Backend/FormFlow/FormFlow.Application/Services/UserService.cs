@@ -6,6 +6,7 @@ using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.Domain.Models.General;
+using System.Collections.Generic;
 
 namespace FormFlow.Application.Services
 {
@@ -61,12 +62,12 @@ namespace FormFlow.Application.Services
                         PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
                     });
 
-                    var emailAuth = new EmailPasswordAuth
-                    {
-                        UserId = existingUser.Id,
-                        Email = request.Email,
-                        PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-                    };
+                    //var emailAuth = new EmailPasswordAuth
+                    //{
+                    //    UserId = existingUser.Id,
+                    //    Email = request.Email,
+                    //    PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
+                    //};
 
                     var tokenResult = await _jwtService.GenerateTokenAsync(existingUser, AuthType.Internal);
 
@@ -443,6 +444,11 @@ namespace FormFlow.Application.Services
             }
         }
 
+        public async Task<List<UserContactDto>> GetUserContactsAsync(Guid userId)
+        {
+            return await Task.FromResult<List<UserContactDto>>(new List<UserContactDto>()); 
+        }
+
         public async Task<UserDto> GetUserByIdAsync(Guid id)
         {
             var user = await _userRepository.GetWithContactsAsync(id);
@@ -634,24 +640,6 @@ namespace FormFlow.Application.Services
             return DTOMapper.MapToUserDto(user);
         }
 
-        public async Task SetPrimaryContactAsync(Guid userId, Guid contactId)
-        {
-            var user = await _userRepository.GetWithContactsAsync(userId);
-            if (user == null)
-                throw new UserNotFoundException(userId);
-
-            var contact = user.Contacts.FirstOrDefault(c => c.Id == contactId);
-            if (contact == null)
-                throw new ArgumentException("Contact not found");
-
-            foreach (var c in user.Contacts.Where(c => c.Type == contact.Type))
-            {
-                c.IsPrimary = false;
-            }
-
-            contact.IsPrimary = true;
-            await _userRepository.UpdateAsync(user);
-        }
     }
 
     public class AuthenticationResult

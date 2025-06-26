@@ -46,7 +46,7 @@ namespace FormFlow.Persistence.Repositories
         {
             if (contact.IsPrimary)
             {
-                await ClearPrimaryContactsAsync(contact.UserId, contact.Type);
+                await ClearPrimaryContactsAsync(contact.UserId);
             }
 
             _context.UserContacts.Add(contact);
@@ -58,7 +58,7 @@ namespace FormFlow.Persistence.Repositories
         {
             if (contact.IsPrimary)
             {
-                await ClearPrimaryContactsAsync(contact.UserId, contact.Type);
+                await ClearPrimaryContactsAsync(contact.UserId);
             }
 
             contact.UpdatedAt = DateTime.UtcNow;
@@ -93,10 +93,10 @@ namespace FormFlow.Persistence.Repositories
                 .AnyAsync(c => c.UserId == userId && c.Value == value && c.Type == type);
         }
 
-        private async Task ClearPrimaryContactsAsync(Guid userId, ContactType type)
+        private async Task ClearPrimaryContactsAsync(Guid userId)
         {
             var primaryContacts = await _context.UserContacts
-                .Where(c => c.UserId == userId && c.Type == type && c.IsPrimary)
+                .Where(c => c.UserId == userId && c.IsPrimary)
                 .ToListAsync();
 
             foreach (var contact in primaryContacts)

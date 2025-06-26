@@ -253,6 +253,24 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+        [HttpGet("me/contacts")]
+        public async Task<IActionResult> GetContacts()
+        {
+            try
+            {
+                var currentUserId = this.GetCurrentUserId();
+                if (currentUserId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var contacts = await _userService.GetUserContactsAsync(currentUserId.Value);
+                return Ok(contacts);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpPost("{id}/contacts")]
         public async Task<IActionResult> AddUserContact(Guid id, [FromBody] AddContactRequest request)
         {

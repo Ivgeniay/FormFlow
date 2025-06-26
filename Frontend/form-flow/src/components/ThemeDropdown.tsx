@@ -8,11 +8,13 @@ import { useAppStore } from "../stores/appStore";
 interface ThemeDropdownProps {
 	availableThemes: ColorTheme[];
 	className?: string;
+	onThemeChange?: (theme: ColorTheme) => void;
 }
 
 export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 	availableThemes,
 	className,
+	onThemeChange,
 }) => {
 	const { t } = useTranslation();
 	const { currentTheme } = useAppStore();
@@ -42,6 +44,7 @@ export const ThemeDropdown: React.FC<ThemeDropdownProps> = ({
 		const selectedTheme = availableThemes.find((theme) => theme.id === item.id);
 		if (selectedTheme) {
 			setThemeById(selectedTheme.id);
+			if (onThemeChange) onThemeChange(selectedTheme);
 		}
 	};
 

@@ -22,6 +22,14 @@ export interface UserContactDto {
 	createdAt: string;
 }
 
+export enum ContactType {
+	Email = 1,
+	Phone = 2,
+	Address = 3,
+	FacebookLink = 4,
+	InstagramLink = 5,
+}
+
 export interface AuthMethodDto {
 	type: string;
 	isActive: boolean;

@@ -177,16 +177,6 @@ class UsersApi {
 		);
 	}
 
-	async getUserAuthMethods(accessToken: string): Promise<AuthMethodsResponse> {
-		const response = await axios.get<AuthMethodsResponse>(
-			`${API_BASE_URL}/user/me/auth-methods`,
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		return response.data;
-	}
-
 	async getUserSettings(accessToken: string): Promise<UserSettingsDto> {
 		const response = await axios.get<UserSettingsDto>(
 			`${API_BASE_URL}/user/me/settings`,

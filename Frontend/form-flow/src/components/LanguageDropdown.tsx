@@ -7,11 +7,13 @@ import { useAppStore } from "../stores/appStore";
 interface LanguageDropdownProps {
 	availableLanguages: Language[];
 	className?: string;
+	onLanguageChange?: (language: Language) => void;
 }
 
 export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 	availableLanguages,
 	className,
+	onLanguageChange,
 }) => {
 	const { t } = useTranslation();
 	const { currentLanguage } = useAppStore();
@@ -43,6 +45,7 @@ export const LanguageDropdown: React.FC<LanguageDropdownProps> = ({
 		);
 		if (selectedLanguage) {
 			setLanguageById(selectedLanguage.id);
+			if (onLanguageChange) onLanguageChange(selectedLanguage);
 		}
 	};
 

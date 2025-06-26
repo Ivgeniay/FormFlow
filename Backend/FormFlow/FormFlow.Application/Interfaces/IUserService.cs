@@ -14,6 +14,8 @@ namespace FormFlow.Application.Interfaces
         Task<ValidateTokenResult> ValidateTokenAsync(ValidateTokenRequest request);
         Task<ChangeRoleResult> ChangeUserRoleAsync(ChangeRoleRequest request, Guid promotingUserId);
 
+        Task<List<UserContactDto>> GetUserContactsAsync(Guid userId);
+
         Task<UserDto> GetUserByIdAsync(Guid id);
         Task<UserDto> GetUserByEmailAsync(string email);
         Task<UserDto> UpdateUserProfileAsync(UpdateUserProfileRequest request);
@@ -31,7 +33,6 @@ namespace FormFlow.Application.Interfaces
         Task<UserDto> AddUserContactAsync(Guid userId, AddContactRequest request);
         Task RemoveUserContactAsync(Guid userId, Guid contactId);
         Task<UserDto> UpdateUserContactAsync(Guid userId, UpdateContactRequest request);
-        Task SetPrimaryContactAsync(Guid userId, Guid contactId);
     }
 
     
