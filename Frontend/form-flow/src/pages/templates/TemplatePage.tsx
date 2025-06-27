@@ -10,7 +10,7 @@ import { templateApi } from "../../api/templateApi";
 import { FormRenderer } from "../../modules/forms/components/FormRenderer";
 import { TemplateHeader } from "../../modules/templates/components/editorPageTabs/TemplateHeader";
 import { LikeButton } from "../../ui/Button/LikeButton";
-import { CommentsSection } from "../../components/CommentsSection";
+import { CommentsSection } from "../../modules/comments/CommentsSection";
 
 export const TemplatePage: React.FC = () => {
 	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
@@ -43,11 +43,8 @@ export const TemplatePage: React.FC = () => {
 			setLoading(true);
 			setError(null);
 
-			if (accessToken) {
-				const response = await templateApi.getTemplate(templateId, accessToken);
-				console.log(response);
-				setTemplate(response);
-			}
+			const response = await templateApi.getTemplate(templateId);
+			setTemplate(response);
 		} catch (err: any) {
 			setError(err.response?.data?.message || "Failed to load template");
 		} finally {
@@ -78,8 +75,6 @@ export const TemplatePage: React.FC = () => {
 	const handleFillForm = (templateid: string) => {
 		navigate(`/form/from/${templateid}`);
 	};
-
-	const handleSubmitComment = () => {};
 
 	const handleLikeToggle = () => {
 		console.log("Toogle like");
@@ -119,6 +114,7 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (!template) {
+		console.log(template);
 		return (
 			<div className="flex items-center justify-center py-16">
 				<div className="text-center">
@@ -135,9 +131,8 @@ export const TemplatePage: React.FC = () => {
 			<>
 				<TemplateEditorPage className="mb-6" template={template} />
 				<CommentsSection
-					commentsCount={template.commentsCount}
+					templateId={template.id}
 					isAuthenticated={isAuthenticated}
-					onSubmitComment={handleSubmitComment}
 				/>
 			</>
 		);
@@ -178,9 +173,8 @@ export const TemplatePage: React.FC = () => {
 				</div>
 
 				<CommentsSection
-					commentsCount={template.commentsCount}
+					templateId={template.id}
 					isAuthenticated={isAuthenticated}
-					onSubmitComment={handleSubmitComment}
 				/>
 			</div>
 		);

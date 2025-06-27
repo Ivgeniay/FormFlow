@@ -13,6 +13,8 @@ import {
 import { ColorTheme } from "../../shared/types/color-theme";
 import { Language } from "../../shared/types/language";
 import toast from "react-hot-toast";
+import { useTheme } from "../../shared/hooks/useTheme";
+import { useLanguage } from "../../shared/hooks/useLanguage";
 
 const mapColorThemeDtoToColorTheme = (dto: ColorThemeDto): ColorTheme => ({
 	id: dto.id,
@@ -36,12 +38,19 @@ const mapLanguageDtoToLanguage = (dto: LanguageDto): Language => ({
 
 export const UserSettings: React.FC = () => {
 	const { t } = useTranslation();
-	const { getSaftyThemes, getSaftyLanguages } = useAppStore();
+	const { getSaftyThemes, getSaftyLanguages, currentLanguage, currentTheme } =
+		useAppStore();
 	const { accessToken } = useAuth();
+	const { setThemeById } = useTheme();
+	const { setLanguageById } = useLanguage();
 	const navigate = useNavigate();
 
-	const [currentLanguage, setCurrentLanguage] = useState<Language | null>(null);
-	const [currentTheme, setCurrentTheme] = useState<ColorTheme | null>(null);
+	const [initialLanguage, setInitialLanguage] = useState<Language | null>(null);
+	const [initialTheme, setInitialTheme] = useState<ColorTheme | null>(null);
+	const [currentSettedLanguage, setCurrentSettedLanguage] =
+		useState<Language | null>(null);
+	const [currentSettedTheme, setCurrentSettedTheme] =
+		useState<ColorTheme | null>(null);
 	const [selectedLanguage, setSelectedLanguage] = useState<Language | null>(
 		null
 	);
@@ -54,8 +63,10 @@ export const UserSettings: React.FC = () => {
 	}, []);
 
 	const loadCurrentSettings = async () => {
-		if (!accessToken) return;
+		setInitialLanguage(currentLanguage);
+		setInitialTheme(currentTheme);
 
+		if (!accessToken) return;
 		try {
 			setIsLoading(true);
 			const settings = await userSettingsApi.getMySettings(accessToken);
@@ -63,8 +74,8 @@ export const UserSettings: React.FC = () => {
 			const mappedLanguage = mapLanguageDtoToLanguage(settings.language);
 			const mappedTheme = mapColorThemeDtoToColorTheme(settings.colorTheme);
 
-			setCurrentLanguage(mappedLanguage);
-			setCurrentTheme(mappedTheme);
+			setCurrentSettedLanguage(mappedLanguage);
+			setCurrentSettedTheme(mappedTheme);
 			setSelectedLanguage(mappedLanguage);
 			setSelectedTheme(mappedTheme);
 		} catch (error) {
@@ -77,8 +88,8 @@ export const UserSettings: React.FC = () => {
 
 	const hasChanges = () => {
 		return (
-			selectedLanguage?.id !== currentLanguage?.id ||
-			selectedTheme?.id !== currentTheme?.id
+			selectedLanguage?.id !== currentSettedLanguage?.id ||
+			selectedTheme?.id !== currentSettedTheme?.id
 		);
 	};
 
@@ -89,13 +100,16 @@ export const UserSettings: React.FC = () => {
 			setIsSaving(true);
 			const promises = [];
 
-			if (selectedLanguage?.id !== currentLanguage?.id && selectedLanguage) {
+			if (
+				selectedLanguage?.id !== currentSettedLanguage?.id &&
+				selectedLanguage
+			) {
 				promises.push(
 					userSettingsApi.setLanguage(selectedLanguage.id, accessToken)
 				);
 			}
 
-			if (selectedTheme?.id !== currentTheme?.id && selectedTheme) {
+			if (selectedTheme?.id !== currentSettedTheme?.id && selectedTheme) {
 				promises.push(
 					userSettingsApi.setColorTheme(selectedTheme.id, accessToken)
 				);
@@ -103,8 +117,8 @@ export const UserSettings: React.FC = () => {
 
 			await Promise.all(promises);
 
-			setCurrentLanguage(selectedLanguage);
-			setCurrentTheme(selectedTheme);
+			setCurrentSettedLanguage(selectedLanguage);
+			setCurrentSettedTheme(selectedTheme);
 
 			toast.success(t("settingsSaved") || "Settings saved successfully");
 		} catch (error) {
@@ -116,8 +130,15 @@ export const UserSettings: React.FC = () => {
 	};
 
 	const handleDiscardChanges = () => {
-		setSelectedLanguage(currentLanguage);
-		setSelectedTheme(currentTheme);
+		if (initialTheme) {
+			setThemeById(initialTheme.id);
+		}
+		if (initialLanguage) {
+			setLanguageById(initialLanguage.id);
+		}
+
+		setSelectedLanguage(currentSettedLanguage);
+		setSelectedTheme(currentSettedTheme);
 	};
 
 	const handleLanguageChange = (language: Language) => {

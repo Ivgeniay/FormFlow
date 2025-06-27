@@ -82,15 +82,9 @@ class TemplateApi {
 		return response.data;
 	}
 
-	async getTemplate(id: string, accessToken?: string): Promise<TemplateDto> {
-		const headers = accessToken
-			? { Authorization: `Bearer ${accessToken}` }
-			: {};
+	async getTemplate(id: string): Promise<TemplateDto> {
 		const response = await axios.get<TemplateDto>(
-			`${API_BASE_URL}/template/${id}`,
-			{
-				headers,
-			}
+			`${API_BASE_URL}/template/${id}`
 		);
 		return response.data;
 	}

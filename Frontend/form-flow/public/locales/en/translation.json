@@ -56,6 +56,7 @@
 	"unsavedChanges": "You have unsaved changes",
 	"discard": "Discard",
 	"saveChanges": "Save Changes",
+	"viewAllTags": "View all tags",
 
 	"createTemplate": "Create Template",
 	"editTemplate": "Edit Template",
@@ -284,5 +285,13 @@
 	"loadingResponses": "Loading responses...",
 	"viewResponse": "View Response",
 	"legacyResponse": "Legacy response",
-	"responseContainsLegacyAnswers": "This response contains answers to questions that may have been modified or deleted"
+	"responseContainsLegacyAnswers": "This response contains answers to questions that may have been modified or deleted",
+
+	"addComment": "Add a comment...",
+	"submitting": "Submitting...",
+	"noCommentsYet": "No comments yet",
+	"beFirstToComment": "Be the first to leave a comment!",
+	"loadMore": "Load more comments",
+	"failedToLoadComments": "Failed to load comments",
+	"failedToAddComment": "Failed to add comment"
 }

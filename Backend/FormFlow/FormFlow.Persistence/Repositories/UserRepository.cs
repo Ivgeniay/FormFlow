@@ -24,8 +24,10 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Users
                 .Include(u => u.EmailAuth)
-                .Include(u => u.Contacts)
-                .FirstOrDefaultAsync(u => u.EmailAuth != null && u.EmailAuth.Email == email && !u.IsDeleted);
+                .Include(u => u.GoogleAuth)
+                .FirstOrDefaultAsync(u => !u.IsDeleted && (
+                    (u.EmailAuth != null && u.EmailAuth.Email == email) ||
+                    (u.GoogleAuth != null && u.GoogleAuth.Email == email)));
         }
 
         public async Task<User?> GetByUserNameAsync(string userName)

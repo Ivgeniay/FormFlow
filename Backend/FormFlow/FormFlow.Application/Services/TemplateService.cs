@@ -395,10 +395,7 @@ namespace FormFlow.Application.Services
         {
             var template = await _templateRepository.GetWithAllDetailsAsync(id);
             if (template == null)
-                throw new TemplateNotFoundException(id);
-
-            if (userId.HasValue && !await HasUserAccessToTemplateAsync(id, userId.Value))
-                throw new TemplateAccessDeniedException(id, userId.Value);
+                throw new TemplateNotFoundException(id);;
 
             return await MapToTemplateDtoAsync(template, userId);
         }

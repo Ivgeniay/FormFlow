@@ -41,10 +41,7 @@ export const PreviewFormPage: React.FC = () => {
 			setLoading(true);
 			setError(null);
 
-			const templateData = await templateApi.getTemplate(
-				templateId,
-				accessToken
-			);
+			const templateData = await templateApi.getTemplate(templateId);
 
 			if (!templateData.canUserEdit) {
 				setError(

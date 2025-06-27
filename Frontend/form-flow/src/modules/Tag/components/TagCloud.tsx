@@ -3,38 +3,24 @@ import * as am5 from "@amcharts/amcharts5";
 import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import { TagDto } from "../../../shared/api_types";
-import { useTranslation } from "react-i18next";
 
 export interface TagCloudProps {
 	tags: TagDto[];
 	onTagClick: (tagName: string) => void;
 	className?: string;
+	isExpandedDefault?: boolean;
 }
 
 export const TagCloud: React.FC<TagCloudProps> = ({
 	tags,
 	onTagClick,
 	className = "",
+	isExpandedDefault = false,
 }) => {
 	const [isExpanded, setIsExpanded] = useState(false);
 	const chartRef = useRef<HTMLDivElement>(null);
 	const rootRef = useRef<am5.Root | null>(null);
 	const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-	const { t } = useTranslation();
-
-	const handleMouseClick = () => {
-		if (timeoutRef.current) {
-			clearTimeout(timeoutRef.current);
-			timeoutRef.current = null;
-		}
-		setIsExpanded(true);
-	};
-
-	const handleMouseLeave = () => {
-		timeoutRef.current = setTimeout(() => {
-			setIsExpanded(false);
-		}, 300);
-	};
 
 	const handleCloudMouseEnter = () => {
 		if (timeoutRef.current) {
@@ -43,11 +29,10 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 		}
 	};
 
-	const handleCloudMouseLeave = () => {
-		setIsExpanded(false);
-	};
-
 	useLayoutEffect(() => {
+		if (isExpandedDefault !== undefined) {
+			setIsExpanded(isExpandedDefault);
+		}
 		if (!isExpanded || !chartRef.current) return;
 		if (!Array.isArray(tags) || tags.length === 0) return;
 
@@ -66,7 +51,7 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 			];
 
 			return {
-				name: "Теги",
+				name: "Tags",
 				children: (tags || []).map((tag, index) => ({
 					name: tag.name,
 					value: tag.usageCount,
@@ -159,43 +144,14 @@ export const TagCloud: React.FC<TagCloudProps> = ({
 	}, [isExpanded, tags, onTagClick]);
 
 	return (
-		<div className={`relative ${className}`}>
-			<div
-				className="inline-flex items-center gap-2 px-6 py-3 bg-surface border border-border rounded-full cursor-pointer hover:bg-background hover:border-primary/50 transition-all duration-200 shadow-sm"
-				onMouseDown={handleMouseClick}
-				onMouseLeave={handleMouseLeave}
-			>
-				<svg
-					className="w-5 h-5 text-primary"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-				>
-					<path
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth={2}
-						d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"
-					/>
-				</svg>
-				<span className="text-text font-medium">{t("tagSearch")}</span>
-			</div>
-
+		<div className={`${className}`}>
 			{isExpanded && (
-				<div
-					className="fixed inset-0 z-50 bg-black/10 backdrop-blur-sm"
-					onMouseEnter={handleCloudMouseEnter}
-				>
+				<div onMouseEnter={handleCloudMouseEnter}>
 					<div
-						onMouseLeave={handleCloudMouseLeave}
-						className="absolute top-1/4 left-1/4 w-1/2 h-1/2 bg-surface/50 rounded-lg shadow-2xl border border-border overflow-hidden"
-					>
-						<div
-							ref={chartRef}
-							className="w-full h-full"
-							style={{ minHeight: "400px" }}
-						/>
-					</div>
+						ref={chartRef}
+						className="w-full h-full"
+						style={{ minHeight: "400px" }}
+					/>
 				</div>
 			)}
 		</div>

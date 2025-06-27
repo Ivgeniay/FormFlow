@@ -55,6 +55,7 @@
 	"unsavedChanges": "У вас есть несохраненные изменения",
 	"discard": "Отменить",
 	"saveChanges": "Сохранить изменения",
+	"viewAllTags": "Все теги",
 
 	"createTemplate": "Создать шаблон",
 	"editTemplate": "Редактировать шаблон",
@@ -284,5 +285,13 @@
 	"loadingResponses": "Загрузка ответов...",
 	"viewResponse": "Просмотр ответа",
 	"legacyResponse": "Устаревший ответ",
-	"responseContainsLegacyAnswers": "Этот ответ содержит ответы на вопросы, которые могли быть изменены или удалены"
+	"responseContainsLegacyAnswers": "Этот ответ содержит ответы на вопросы, которые могли быть изменены или удалены",
+
+	"addComment": "Добавить комментарий...",
+	"submitting": "Отправка...",
+	"noCommentsYet": "Комментариев пока нет",
+	"beFirstToComment": "Будьте первым, кто оставит комментарий!",
+	"loadMore": "Загрузить еще",
+	"failedToLoadComments": "Не удалось загрузить комментарии",
+	"failedToAddComment": "Не удалось добавить комментарий"
 }

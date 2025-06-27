@@ -112,7 +112,11 @@ export const TagCloudSection: React.FC = () => {
 				</button>
 			</div>
 
-			<TagCloud tags={tags} onTagClick={handleTagClick} />
+			<TagCloud
+				tags={tags}
+				onTagClick={handleTagClick}
+				isExpandedDefault={true}
+			/>
 
 			<div className="text-center">
 				<p className="text-sm text-textMuted">
