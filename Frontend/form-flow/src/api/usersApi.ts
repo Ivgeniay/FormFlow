@@ -5,6 +5,7 @@ import {
 	UserSearchDto,
 	PaginatedResponse,
 	ContactDto,
+	AuthenticationResult,
 } from "../shared/api_types";
 
 const API_BASE_URL = ENV.API_URL;
@@ -261,6 +262,21 @@ class UsersApi {
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);
+		return response.data;
+	}
+
+	async promoteToRole(
+		accessToken: string,
+		role: number
+	): Promise<AuthenticationResult> {
+		const response = await axios.post<AuthenticationResult>(
+			`${API_BASE_URL}/auth/promote-to-role`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}`, role: `${role}` },
+			}
+		);
+
 		return response.data;
 	}
 }

@@ -10,7 +10,8 @@ import { templateApi } from "../../api/templateApi";
 import { FormRenderer } from "../../modules/forms/components/FormRenderer";
 import { TemplateHeader } from "../../modules/templates/components/editorPageTabs/TemplateHeader";
 import { LikeButton } from "../../ui/Button/LikeButton";
-import { CommentsSection } from "../../modules/comments/CommentsSection";
+import { useTemplateActivity } from "../../modules/auth/hooks/useTemplateActivity";
+import { CommentDisposer } from "../../modules/comments/CommentDisposer";
 
 export const TemplatePage: React.FC = () => {
 	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
@@ -18,8 +19,8 @@ export const TemplatePage: React.FC = () => {
 	const navigate = useNavigate();
 	const { isAuthenticated, user, accessToken, isAdmin, isModerator } =
 		useAuth();
-
 	const [template, setTemplate] = useState<TemplateDto | null>(null);
+	const [activityState, activityActions] = useTemplateActivity(template?.id);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
@@ -36,15 +37,18 @@ export const TemplatePage: React.FC = () => {
 			}
 			setLoading(false);
 		}
-	}, [id, isAuthenticated, accessToken]);
+	}, [id, isAuthenticated, accessToken, sourceId]);
 
 	const fetchTemplate = async (templateId: string) => {
 		try {
 			setLoading(true);
 			setError(null);
 
-			const response = await templateApi.getTemplate(templateId);
+			const response = await templateApi.getTemplate(templateId, accessToken);
 			setTemplate(response);
+			console.log(response);
+			if (response && response.id) {
+			}
 		} catch (err: any) {
 			setError(err.response?.data?.message || "Failed to load template");
 		} finally {
@@ -59,6 +63,7 @@ export const TemplatePage: React.FC = () => {
 
 	const canEdit = () => {
 		if (!template) return false;
+		console.log(template);
 		return isOwnerOrModerator() && template.canUserEdit;
 	};
 
@@ -77,7 +82,7 @@ export const TemplatePage: React.FC = () => {
 	};
 
 	const handleLikeToggle = () => {
-		console.log("Toogle like");
+		activityActions.toggleLike();
 	};
 
 	if (loading) {
@@ -114,7 +119,6 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (!template) {
-		console.log(template);
 		return (
 			<div className="flex items-center justify-center py-16">
 				<div className="text-center">
@@ -128,54 +132,82 @@ export const TemplatePage: React.FC = () => {
 
 	if (canViewAsEditor()) {
 		return (
-			<>
-				<TemplateEditorPage className="mb-6" template={template} />
-				<CommentsSection
-					templateId={template.id}
-					isAuthenticated={isAuthenticated}
-				/>
-			</>
+			<div className="space-y-6">
+				<div className="bg-surface border border-border rounded-lg p-6">
+					<TemplateEditorPage className="mb-6" template={template} />
+				</div>
+
+				<div className="bg-surface border border-border rounded-lg">
+					<CommentDisposer
+						comments={activityState.comments}
+						initialCommentCounts={template.commentsCount}
+						onAddComment={activityActions.addComment}
+						onLoadMore={activityActions.loadComments}
+						isLoading={activityState.isLoading}
+						isLoadingMoreComments={activityState.isLoadingMore}
+						isSubmitting={activityState.isSubmitting}
+						hasMore={activityState.hasMoreComments}
+						error={activityState.error}
+						canComment={isAuthenticated}
+						className="h-96"
+					/>
+				</div>
+			</div>
 		);
 	}
 
 	if (canViewAsReader()) {
+		console.log("As viewer");
 		return (
 			<div className="space-y-6">
-				<div className="bg-surface border border-border rounded-lg p-6">
-					<div className="flex flex-col sm:flex-row gap-4">
-						<button
-							onClick={() => handleFillForm(template.id)}
-							disabled={!isAuthenticated}
-							className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
-						>
-							{t("fillTheForm", "Fill the Form")}
-						</button>
-					</div>
-				</div>
-
-				<div className="bg-surface border border-border rounded-lg p-6">
-					<h2 className="text-xl font-semibold text-text mb-4">
-						{t("templatePreview", "Template Preview")}
-					</h2>
-					<TemplateHeader template={template}></TemplateHeader>
-					<FormRenderer template={template} mode="readonly" />
-					<div className="flex justify-between">
-						<div></div>
-						<div className="flex items-center gap-3">
-							<LikeButton
-								likesCount={template.likesCount}
-								isUserLiked={template.isUserLiked}
-								isAuthenticated={isAuthenticated}
-								onLikeToggle={handleLikeToggle}
-							/>
+				<div className="max-w-2xl mx-auto mt-8">
+					<div className="bg-surface border border-border rounded-lg p-6 mb-6">
+						<div className="flex flex-col sm:flex-row gap-4">
+							<button
+								onClick={() => handleFillForm(template.id)}
+								disabled={!isAuthenticated}
+								className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+							>
+								{t("fillTheForm", "Fill the Form")}
+							</button>
 						</div>
 					</div>
-				</div>
 
-				<CommentsSection
-					templateId={template.id}
-					isAuthenticated={isAuthenticated}
-				/>
+					<div className="bg-surface border border-border rounded-lg p-6 mb-6">
+						<h2 className="text-xl font-semibold text-text mb-4">
+							{t("templatePreview", "Template Preview")}
+						</h2>
+						<TemplateHeader template={template}></TemplateHeader>
+						<FormRenderer template={template} mode="readonly" />
+						<div className="flex justify-between">
+							<div></div>
+							<div className="flex items-center gap-3">
+								<LikeButton
+									likesCount={activityState.likesCount}
+									isUserLiked={activityState.isUserLiked}
+									isAuthenticated={isAuthenticated}
+									onLikeToggle={handleLikeToggle}
+								/>
+							</div>
+						</div>
+					</div>
+
+					<div className="bg-surface border border-border rounded-lg">
+						<CommentDisposer
+							comments={activityState.comments}
+							initialCommentCounts={template.commentsCount}
+							onAddComment={activityActions.addComment}
+							onLoadMore={activityActions.loadComments}
+							isLoading={activityState.isLoading}
+							isLoadingMoreComments={activityState.isLoadingMore}
+							isSubmitting={activityState.isSubmitting}
+							hasMore={activityState.hasMoreComments}
+							error={activityState.error}
+							canComment={isAuthenticated}
+							className="h-96"
+						/>
+					</div>
+				</div>
 			</div>
 		);
 	}

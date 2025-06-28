@@ -184,7 +184,6 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 			toast.error("Authentication required");
 			return;
 		}
-		console.log("KEK");
 
 		const validationError = validateTemplate();
 		if (validationError) {
@@ -257,7 +256,7 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 	};
 
 	const handleCancel = () => {
-		navigate(-1);
+		goBack();
 	};
 
 	const goBack = () => {

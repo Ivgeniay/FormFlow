@@ -1,4 +1,4 @@
-import { UserDto } from '../../../shared/api_types';
+import { UserDto } from "../../../shared/api_types";
 
 export interface RegisterRequest {
 	userName: string;
@@ -94,4 +94,5 @@ export interface AuthActions {
 	setRedirectPath: (path: string | null) => void;
 	checkEmailExists: (email: string) => Promise<boolean>;
 	checkUsernameExists: (username: string) => Promise<boolean>;
+	updateAuthData: (authData: Partial<AuthState>) => void;
 }

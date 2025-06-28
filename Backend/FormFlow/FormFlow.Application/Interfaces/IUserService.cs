@@ -33,6 +33,8 @@ namespace FormFlow.Application.Interfaces
         Task<UserDto> AddUserContactAsync(Guid userId, AddContactRequest request);
         Task RemoveUserContactAsync(Guid userId, Guid contactId);
         Task<UserDto> UpdateUserContactAsync(Guid userId, UpdateContactRequest request);
+
+        Task<AuthenticationResult> PromoteToRole(Guid userId, UserRole role);
     }
 
     

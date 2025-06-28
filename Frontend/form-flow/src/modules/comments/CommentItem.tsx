@@ -11,7 +11,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 	comment,
 	className = "",
 }) => {
-	console.log(comment);
 	return (
 		<div
 			className={`p-4 border border-border rounded-lg bg-surface ${className}`}

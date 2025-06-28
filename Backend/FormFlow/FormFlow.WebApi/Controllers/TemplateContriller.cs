@@ -44,8 +44,8 @@ namespace FormFlow.WebApi.Controllers
         {
             try
             {
-                //var userId = this.GetCurrentUserId();
-                var template = await _templateService.GetTemplateByIdAsync(id);
+                var userId = this.GetCurrentUserId();
+                var template = await _templateService.GetTemplateByIdAsync(id, userId.HasValue ? userId.Value : null);
                 return Ok(template);
             }
             catch (Exception ex)

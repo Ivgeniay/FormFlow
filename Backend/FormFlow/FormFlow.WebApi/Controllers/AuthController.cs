@@ -4,6 +4,7 @@ using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using FormFlow.Domain.Models.General;
 
 namespace FormFlow.WebApi.Controllers
 {
@@ -202,6 +203,39 @@ namespace FormFlow.WebApi.Controllers
 
             var exists = await _userService.UserNameExistsAsync(request.UserName);
             return Ok(new { exists });
+        }
+
+        [HttpPost("promote-to-role")]
+        public async Task<IActionResult> PromoteToAdmin([FromHeader] int role)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var typedRole = (UserRole)role;
+
+                var result = await _userService.PromoteToRole(userId.Value, typedRole);
+
+                if (!result.IsSuccess)
+                    return BadRequest(new { message = result.ErrorMessage });
+
+                return Ok(new
+                {
+                    message = "User promoted to admin successfully",
+                    user = result.User,
+                    accessToken = result.AccessToken,
+                    refreshToken = result.RefreshToken,
+                    accessTokenExpiry = result.AccessTokenExpiry,
+                    refreshTokenExpiry = result.RefreshTokenExpiry,
+                    authType = result.AuthType.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
         }
     }
 

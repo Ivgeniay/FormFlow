@@ -22,6 +22,7 @@ import { SearchPage } from "./pages/search/SearchPage";
 import { FormPage } from "./pages/forms/FormPage";
 import { PreviewFormPage } from "./pages/forms/PreviewFormPage";
 import { FormView } from "./pages/forms/FormView";
+import { ProfilePage } from "./pages/user/ProfilePage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -63,6 +64,14 @@ function App() {
 							element={
 								<Layout>
 									<SearchPage />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/profile"
+							element={
+								<Layout>
+									<ProfilePage />
 								</Layout>
 							}
 						/>
@@ -124,7 +133,14 @@ function App() {
 								</Layout>
 							}
 						/>
-						<Route path="/settings" element={<UserSettings />} />
+						<Route
+							path="/settings"
+							element={
+								<Layout>
+									<UserSettings />
+								</Layout>
+							}
+						/>
 						<Route
 							path="/auth/google/callback"
 							element={<GoogleCallbackPage />}

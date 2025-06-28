@@ -249,7 +249,7 @@
 	"unlike": "Убрать лайк",
 	"like": "Лайк",
 	"logInToLike": "Войдите чтобы поставить лайк",
-	"fillTheForm": "заполнить форму",
+	"fillTheForm": "Заполнить форму",
 	"logInToComment": "Войдите чтобы оставить комментарий",
 	"back": "Назад",
 	"interfaceSettings": "Настройки интерфейса",
@@ -293,5 +293,11 @@
 	"beFirstToComment": "Будьте первым, кто оставит комментарий!",
 	"loadMore": "Загрузить еще",
 	"failedToLoadComments": "Не удалось загрузить комментарии",
-	"failedToAddComment": "Не удалось добавить комментарий"
+	"failedToAddComment": "Не удалось добавить комментарий",
+
+	"promoteToAdmin": "Получить Админа",
+	"promoteToUser": "Стать User",
+	"tagCloudDescription": "Нажмите на любой тег, чтобы найти соответствующие шаблоны",
+	"popularTags": "Популярные теги",
+	"latestTemplates": "Недавно созданные шаблоны"
 }

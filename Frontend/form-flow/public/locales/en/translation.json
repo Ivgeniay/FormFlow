@@ -293,5 +293,11 @@
 	"beFirstToComment": "Be the first to leave a comment!",
 	"loadMore": "Load more comments",
 	"failedToLoadComments": "Failed to load comments",
-	"failedToAddComment": "Failed to add comment"
+	"failedToAddComment": "Failed to add comment",
+
+	"promoteToAdmin": "Promote To Admin",
+	"promoteToUser": "Promote to User",
+	"tagCloudDescription": "Click on any tag to search for related templates",
+	"popularTags": "Popular Tags",
+	"latestTemplates": "Latest Templates"
 }

@@ -6,6 +6,7 @@ using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.Domain.Models.General;
+using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 
 namespace FormFlow.Application.Services
@@ -638,6 +639,45 @@ namespace FormFlow.Application.Services
             await _userContactRepository.UpdateAsync(contact);
 
             return DTOMapper.MapToUserDto(user);
+        }
+
+        [HttpPost("promote-to-admin")]
+        public async Task<AuthenticationResult> PromoteToRole(Guid userId, UserRole role)
+        {
+            try
+            {
+                var user = await _userRepository.GetByIdAsync(userId);
+                if (user == null)
+                    throw new UserNotFoundException(userId);
+
+                if (user.IsBlocked)
+                    throw new UserBlockedException(userId);
+
+                if (user.Role.HasFlag(role))
+                    return new AuthenticationResult { IsSuccess = false, ErrorMessage = $"User is already an {Enum.GetName<UserRole>(role)}" };
+
+                user.Role = role;
+                await _userRepository.UpdateAsync(user);
+
+                await _jwtService.RevokeAllUserTokensAsync(userId);
+
+                var tokenResult = await _jwtService.GenerateTokenAsync(user, user.EmailAuth != null ? AuthType.Internal : AuthType.Google);
+
+                return new AuthenticationResult
+                {
+                    User = DTOMapper.MapToUserDto(user),
+                    AccessToken = tokenResult.AccessToken,
+                    RefreshToken = tokenResult.RefreshToken,
+                    AccessTokenExpiry = tokenResult.AccessTokenExpiry,
+                    RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
+                    AuthType = tokenResult.AuthType,
+                    IsSuccess = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
+            }
         }
 
     }

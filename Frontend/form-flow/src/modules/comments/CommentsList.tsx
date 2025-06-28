@@ -7,6 +7,7 @@ import { LittleSpinner } from "../../ui/Spinner/LittleSpinner";
 interface CommentsListProps {
 	comments: CommentDto[];
 	isLoading?: boolean;
+	isLoadingMoreComments?: boolean;
 	hasMore?: boolean;
 	onLoadMore?: () => void;
 	className?: string;
@@ -15,6 +16,7 @@ interface CommentsListProps {
 export const CommentsList: React.FC<CommentsListProps> = ({
 	comments,
 	isLoading = false,
+	isLoadingMoreComments,
 	hasMore = false,
 	onLoadMore,
 	className = "",
@@ -43,16 +45,18 @@ export const CommentsList: React.FC<CommentsListProps> = ({
 				<CommentItem key={comment.id} comment={comment} />
 			))}
 			<LittleSpinner isLoading={isLoading} />
-			{hasMore && !isLoading && onLoadMore && (
+			{hasMore && !isLoading && onLoadMore && !isLoadingMoreComments && (
 				<div className="text-center py-4">
 					<button
 						onClick={onLoadMore}
-						className="px-4 py-2 bg-surface border border-border rounded-lg text-text hover:bg-background transition-colors"
+						disabled={isLoadingMoreComments}
+						className="px-4 py-2 bg-surface border border-border rounded-lg text-text hover:bg-background transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 					>
 						{t("loadMore", "Load more comments") || "Load more comments"}
 					</button>
 				</div>
 			)}
+			{isLoadingMoreComments && <LittleSpinner />}
 		</div>
 	);
 };

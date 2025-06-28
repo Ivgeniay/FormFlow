@@ -27,7 +27,7 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	formTemplate,
 	onFormTemplateChange,
 	mode,
-	isDebug = true,
+	isDebug = false,
 }) => {
 	const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 	const toolbarRef = useRef<HTMLDivElement>(null);

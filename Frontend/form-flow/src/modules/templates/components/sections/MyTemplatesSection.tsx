@@ -152,9 +152,7 @@ export const MyTemplatesSection: React.FC = () => {
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold text-text">
-					{t("myTemplates", "My Templates")}
-				</h2>
+				<div></div>
 				<button
 					onClick={handleCreateNew}
 					className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity"
@@ -165,6 +163,7 @@ export const MyTemplatesSection: React.FC = () => {
 
 			<TemplateGallery
 				templates={templates}
+				title={t("myTemplates", "My Templates") || "My Templates"}
 				maxItems={6}
 				mode="compact"
 				columns={6}

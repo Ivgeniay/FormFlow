@@ -16,10 +16,14 @@ import { commentApi } from "../../../api/commentApi";
 
 interface TemplateActivityState {
 	comments: CommentDto[];
+	isLoadingMore: boolean;
+	hasMoreComments: boolean;
+	currentPage: number;
 	likesCount: number;
 	isUserLiked: boolean;
 	isConnected: boolean;
 	isLoading: boolean;
+	isSubmitting: boolean;
 	error: string | null;
 	onlineUsers: Array<{
 		userId: string;
@@ -31,7 +35,7 @@ interface TemplateActivityState {
 interface TemplateActivityActions {
 	addComment: (content: string) => Promise<void>;
 	toggleLike: () => Promise<void>;
-	loadComments: (page: number, pageSize: number) => Promise<CommentDto[]>;
+	loadComments: () => Promise<void>;
 	refreshActivity: () => Promise<void>;
 }
 
@@ -40,11 +44,15 @@ export const useTemplateActivity = (
 ): [TemplateActivityState, TemplateActivityActions] => {
 	const { accessToken, isAuthenticated } = useAuth();
 	const [state, setState] = useState<TemplateActivityState>({
+		isLoadingMore: false,
+		hasMoreComments: true,
+		currentPage: 1,
 		comments: [],
 		likesCount: 0,
 		isUserLiked: false,
 		isConnected: false,
 		isLoading: true,
+		isSubmitting: false,
 		error: null,
 		onlineUsers: [],
 	});
@@ -61,7 +69,7 @@ export const useTemplateActivity = (
 			if (event.templateId === templateIdRef.current) {
 				setState((prev) => ({
 					...prev,
-					comments: [...prev.comments, event.comment],
+					comments: [event.comment, ...prev.comments],
 				}));
 			}
 		});
@@ -76,6 +84,7 @@ export const useTemplateActivity = (
 		});
 
 		templateActivityService.onUserJoined((event: UserJoinedEvent) => {
+			console.log(event);
 			if (event.templateId === templateIdRef.current) {
 				setState((prev) => ({
 					...prev,
@@ -92,6 +101,7 @@ export const useTemplateActivity = (
 		});
 
 		templateActivityService.onUserLeft((event: UserLeftEvent) => {
+			console.log(event);
 			if (event.templateId === templateIdRef.current) {
 				setState((prev) => ({
 					...prev,
@@ -111,6 +121,7 @@ export const useTemplateActivity = (
 						likesCount: event.likesCount,
 						isUserLiked: event.userLiked,
 						isLoading: false,
+						hasMoreComments: event.recentComments.length >= 10,
 					}));
 				}
 			}
@@ -133,7 +144,6 @@ export const useTemplateActivity = (
 		});
 
 		templateActivityService.onError((event: ErrorEvent) => {
-			console.error("SignalR Error:", event);
 			setState((prev) => ({
 				...prev,
 				error: event.message,
@@ -159,10 +169,6 @@ export const useTemplateActivity = (
 				isConnected: connected,
 				isLoading: !connected,
 			}));
-
-			if (connected) {
-				setupEventHandlers();
-			}
 		} catch (error) {
 			console.error("Failed to connect to SignalR:", error);
 			setState((prev) => ({
@@ -172,7 +178,7 @@ export const useTemplateActivity = (
 				error: "Failed to connect to real-time service",
 			}));
 		}
-	}, [accessToken, setupEventHandlers]);
+	}, [accessToken]);
 
 	const joinTemplateGroup = useCallback(async () => {
 		if (
@@ -180,11 +186,17 @@ export const useTemplateActivity = (
 			!templateActivityService.isSignalRConnected() ||
 			isJoinedRef.current
 		) {
+			console.log("Cannot join:", {
+				templateId,
+				connected: templateActivityService.isSignalRConnected(),
+				alreadyJoined: isJoinedRef.current,
+			});
 			return;
 		}
 
 		try {
 			await templateActivityService.joinTemplate(templateId);
+
 			await templateActivityService.getTemplateActivity(templateId);
 			isJoinedRef.current = true;
 		} catch (error) {
@@ -222,10 +234,19 @@ export const useTemplateActivity = (
 			}
 
 			try {
+				setState((prev) => ({
+					...prev,
+					isSubmitting: true,
+				}));
 				await templateActivityService.addComment(templateId, content.trim());
 			} catch (error) {
 				console.error("Failed to add comment:", error);
 				toast.error("Failed to add comment");
+			} finally {
+				setState((prev) => ({
+					...prev,
+					isSubmitting: false,
+				}));
 			}
 		},
 		[templateId, isAuthenticated]
@@ -245,24 +266,36 @@ export const useTemplateActivity = (
 		}
 	}, [templateId, isAuthenticated]);
 
-	const loadComments = useCallback(
-		async (page: number, pageSize: number): Promise<CommentDto[]> => {
-			if (!templateId) return [];
+	const loadComments = useCallback(async (): Promise<void> => {
+		if (!templateId || state.isLoadingMore || !state.hasMoreComments) return;
 
-			try {
-				const result = await commentApi.getCommentsByTemplate(
-					templateId,
-					page,
-					pageSize
-				);
-				return result.data;
-			} catch (error) {
-				console.error("Failed to load comments:", error);
-				return [];
-			}
-		},
-		[templateId]
-	);
+		setState((prev) => ({ ...prev, isLoadingMore: true }));
+
+		try {
+			const result = await commentApi.getCommentsByTemplate(
+				templateId,
+				state.currentPage + 1,
+				10
+			);
+
+			setState((prev) => ({
+				...prev,
+				comments: [...prev.comments, ...result.data],
+				currentPage: result.pagination.currentPage,
+				hasMoreComments: result.pagination.hasNext,
+				isLoadingMore: false,
+			}));
+		} catch (error) {
+			console.error("Failed to load comments:", error);
+		} finally {
+			setState((prev) => ({ ...prev, isLoadingMore: false }));
+		}
+	}, [
+		templateId,
+		state.isLoadingMore,
+		state.hasMoreComments,
+		state.currentPage,
+	]);
 
 	const refreshActivity = useCallback(async () => {
 		if (!templateId || !templateActivityService.isSignalRConnected()) {
@@ -283,6 +316,16 @@ export const useTemplateActivity = (
 	}, [templateId]);
 
 	useEffect(() => {
+		if (state.isConnected && templateId) {
+			setupEventHandlers();
+
+			return () => {
+				templateActivityService.offAll();
+			};
+		}
+	}, [state.isConnected, templateId, setupEventHandlers]);
+
+	useEffect(() => {
 		connectSignalR();
 
 		return () => {
@@ -293,8 +336,8 @@ export const useTemplateActivity = (
 	useEffect(() => {
 		if (
 			state.isConnected &&
-			templateId &&
-			templateId !== templateIdRef.current
+			templateId
+			// && templateId !== templateIdRef.current
 		) {
 			leaveTemplateGroup();
 			joinTemplateGroup();

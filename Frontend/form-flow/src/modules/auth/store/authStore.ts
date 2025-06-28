@@ -54,7 +54,8 @@ const createAuthActions = (set: any, get: any): AuthActions => ({
 				window.location.href = "/";
 			}
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : "Login failed";
+			const errorMessage =
+				error instanceof Error ? error.message : "Login failed";
 			set({
 				isLoading: false,
 				error: errorMessage,
@@ -243,6 +244,10 @@ const createAuthActions = (set: any, get: any): AuthActions => ({
 		} catch (error) {
 			return false;
 		}
+	},
+
+	updateAuthData: (authData: Partial<AuthState>) => {
+		set(authData);
 	},
 });
 

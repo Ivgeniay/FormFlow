@@ -10,7 +10,7 @@ import {
 	UserJoinedEvent,
 	UserLeftEvent,
 } from "./events";
-import { signalRService } from "./SignalRService";
+import { signalRService } from "./signalRService";
 
 export class TemplateActivityService {
 	private currentTemplateId: string | null = null;

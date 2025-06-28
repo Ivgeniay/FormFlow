@@ -20,6 +20,14 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
+        public async Task<User?> GetByIdWithAuthAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.EmailAuth)
+                .Include(u => u.GoogleAuth)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+        }
+
         public async Task<User?> GetByEmailAsync(string email)
         {
             return await _context.Users

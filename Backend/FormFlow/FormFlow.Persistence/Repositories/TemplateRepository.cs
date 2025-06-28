@@ -263,6 +263,8 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
+                .Include(t => t.Likes)
+                .Include(t => t.Forms)
                 .Where(t => t.AuthorId == authorId && !t.IsDeleted)
                 .OrderByDescending(t => t.CreatedAt);
 
@@ -299,6 +301,8 @@ namespace FormFlow.Persistence.Repositories
         {
             return await _context.Templates
                 .Include(t => t.Author)
+                .Include(t => t.Likes)
+                .Include(t => t.Forms)
                 .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished)
                 .OrderByDescending(t => t.CreatedAt)
                 .Take(count)

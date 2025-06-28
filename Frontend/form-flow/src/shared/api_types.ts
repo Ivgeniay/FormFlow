@@ -44,6 +44,16 @@ export interface GoogleAuthMethodDto extends AuthMethodDto {
 	email: string;
 }
 
+export interface AuthenticationResult {
+	user: UserDto;
+	accessToken: string;
+	refreshToken: string;
+	accessTokenExpiry: string;
+	refreshTokenExpiry: string;
+	authType: string;
+	isSuccess: boolean;
+}
+
 export interface UserDto {
 	id: string;
 	userName: string;
@@ -212,12 +222,14 @@ export interface LanguageDto {
 
 export interface PaginatedResponse<T> {
 	data: T[];
-	currentPage: number;
-	pageSize: number;
-	totalCount: number;
-	totalPages: number;
-	hasNext: boolean;
-	hasPrevious: boolean;
+	pagination: {
+		currentPage: number;
+		pageSize: number;
+		totalCount: number;
+		totalPages: number;
+		hasNext: boolean;
+		hasPrevious: boolean;
+	};
 }
 
 export interface SearchResponse {

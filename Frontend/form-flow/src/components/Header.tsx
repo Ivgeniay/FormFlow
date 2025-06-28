@@ -7,6 +7,9 @@ import {
 	DropdownMenuItemType,
 } from "../ui/Dropdown/DropdownMenu";
 import { useNavigate } from "react-router-dom";
+import { SimpleButton } from "../ui/Button/SimpleButton";
+import { PromoteToRoleButtons } from "../modules/auth/components/PromoteToRoleButton";
+import { UserAvanar } from "./UserAvatar";
 
 interface HeaderProps {
 	user: UserDto | null;
@@ -61,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
 					/>
 				</svg>
 			),
-			onClick: () => console.log("Navigate to profile"),
+			onClick: () => navigate("/profile"),
 		},
 		{
 			id: "settings",
@@ -87,7 +90,7 @@ export const Header: React.FC<HeaderProps> = ({
 					/>
 				</svg>
 			),
-			onClick: () => console.log("Navigate to settings"),
+			onClick: () => navigate("/settings"),
 		},
 		{
 			type: "separator",
@@ -154,15 +157,9 @@ export const Header: React.FC<HeaderProps> = ({
 						handleSearchChange={handleSearchChange}
 						className="relative w-full"
 					/>
-					{/* <ThemeDropdown availableThemes={themes} className="min-w-[120px] " /> */}
 				</div>
 
 				<div className="flex items-center gap-3">
-					{/* <LanguageDropdown
-						availableLanguages={languages}
-						className="min-w-[120px]"
-					/> */}
-
 					<div className="flex items-center gap-2 min-w-[240px] justify-end">
 						{isAuthenticated ? (
 							<>
@@ -179,37 +176,19 @@ export const Header: React.FC<HeaderProps> = ({
 											onClick={handleUserMenuClick}
 											className="p-2 rounded-lg text-text hover:bg-background transition-colors flex-shrink-0"
 										>
-											<svg
-												className="w-6 h-6"
-												fill="none"
-												stroke="currentColor"
-												viewBox="0 0 24 24"
-											>
-												<path
-													strokeLinecap="round"
-													strokeLinejoin="round"
-													strokeWidth={2}
-													d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-												/>
-											</svg>
+											<UserAvanar />
 										</button>
 									}
 								/>
 							</>
 						) : (
 							<div>
-								<button
+								<SimpleButton
 									onClick={onLogin}
-									className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors min-w-[100px]"
-								>
-									{t("login")}
-								</button>
-								<button
-									onClick={onRegister}
-									className="px-4 py-2 bg-primary text-white rounded-lg hover:opacity-90 transition-colors min-w-[100px]"
-								>
-									{t("register")}
-								</button>
+									localKey="login"
+									className="mx-3"
+								/>
+								<SimpleButton onClick={onRegister} localKey="register" />
 							</div>
 						)}
 					</div>
