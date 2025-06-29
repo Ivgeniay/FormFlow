@@ -420,7 +420,7 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 						</button>
 
 						{showColumnDropdown && (
-							<div className="absolute right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-10 min-w-48 p-2">
+							<div className="absolute right-0 top-full mt-1 bg-surface border border-border rounded-lg shadow-lg z-30 min-w-48 p-2">
 								{columns.map((column) => (
 									<label
 										key={column.key}

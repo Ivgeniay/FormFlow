@@ -4,6 +4,7 @@ using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.Domain.Models.General;
 using Microsoft.AspNetCore.Mvc;
@@ -20,6 +21,7 @@ namespace FormFlow.Application.Services
         private readonly IGoogleAuthRepository _googleAuthRepository;
         private readonly IUserContactRepository _userContactRepository;
         private readonly IEmailAuthRepository _emailAuthRepository;
+        private readonly ITokenBlacklistService _tokenBlacklistService;
 
         public UserService(IUserRepository userRepository, 
             IJwtService jwtService, 
@@ -27,7 +29,8 @@ namespace FormFlow.Application.Services
             IUserSettingsRepository userSettingsRepository, 
             IGoogleAuthRepository googleAuthRepository,
             IUserContactRepository userContactRepository,
-        IEmailAuthRepository emailAuthRepository
+            IEmailAuthRepository emailAuthRepository,
+            ITokenBlacklistService tokenBlacklistService
             )
         {
             _userRepository = userRepository;
@@ -37,6 +40,7 @@ namespace FormFlow.Application.Services
             _googleAuthRepository = googleAuthRepository;
             _userContactRepository = userContactRepository;
             _emailAuthRepository = emailAuthRepository;
+            _tokenBlacklistService = tokenBlacklistService;
         }
 
         public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
@@ -133,67 +137,6 @@ namespace FormFlow.Application.Services
                 return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
             }
         }
-
-        //public async Task<AuthenticationResult> RegisterUserAsync(RegisterUserRequest request)
-        //{
-        //    try
-        //    {
-        //        if (await _userRepository.EmailExistsAsync(request.Email))
-        //            return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Email already exists" };
-
-        //        if (await _userRepository.UserNameExistsAsync(request.UserName))
-        //            return new AuthenticationResult { IsSuccess = false, ErrorMessage = "Username already exists" };
-
-        //        var user = new User
-        //        {
-        //            UserName = request.UserName,
-        //            Role = UserRole.User
-        //        };
-
-        //        var emailAuth = new EmailPasswordAuth
-        //        {
-        //            UserId = user.Id,
-        //            Email = request.Email,
-        //            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        //        };
-
-        //        user.EmailAuth = emailAuth;
-
-        //        User userInDb = await _userRepository.CreateUserWithAuthAsync(user);
-
-        //        await _userContactRepository.CreateAsync(new UserContact
-        //        {
-        //            UserId = user.Id,
-        //            Type = ContactType.Email,
-        //            Value = request.Email,
-        //            IsPrimary = true
-        //        });
-
-
-        //        if (!await _userSettingsRepository.ExistsByUserIdAsync(userInDb.Id))
-        //        {
-        //            await _userSettingsRepository.CreateDefaultForUserAsync(userInDb.Id);
-        //        }
-
-        //        var tokenResult = await _jwtService.GenerateTokenAsync(user, AuthType.Internal);
-
-        //        return new AuthenticationResult
-        //        {
-        //            User = DTOMapper.MapToUserDto(user),
-        //            AccessToken = tokenResult.AccessToken,
-        //            RefreshToken = tokenResult.RefreshToken,
-        //            AccessTokenExpiry = tokenResult.AccessTokenExpiry,
-        //            RefreshTokenExpiry = tokenResult.RefreshTokenExpiry,
-        //            AuthType = AuthType.Internal,
-        //            IsSuccess = true
-        //        };
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return new AuthenticationResult { IsSuccess = false, ErrorMessage = ex.Message };
-        //    }
-        //}
-
         public async Task<AuthenticationResult> AuthenticateWithEmailAsync(EmailLoginRequest request)
         {
             try
@@ -508,6 +451,28 @@ namespace FormFlow.Application.Services
         public async Task<bool> UserNameExistsAsync(string userName)
         {
             return await _userRepository.UserNameExistsAsync(userName);
+        }
+
+        public async Task<UserDto> ToggleAdminUserRole(Guid userId)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+
+            if (user.Role.HasFlag(UserRole.Admin))
+            {
+                user.Role = UserRole.User;
+            }
+            else
+            {
+                user.Role = UserRole.Admin;
+            }
+
+            await _userRepository.UpdateAsync(user);
+            await _jwtService.RevokeAllUserTokensAsync(userId);
+            _tokenBlacklistService.AddToBlacklist(userId);
+
+            return DTOMapper.MapToUserDto(user);
         }
 
         public async Task<PagedResult<UserDto>> GetUsersPagedAsync(int page, int pageSize)

@@ -14,6 +14,7 @@ using Nest;
 using Scalar.AspNetCore;
 using System.Text;
 using Newtonsoft.Json.Serialization;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 
 namespace FormFlow.WebApi
 {
@@ -71,6 +72,7 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<IColorThemeService, ColorThemeService>();
             builder.Services.AddScoped<ILanguageService, LanguageService>();
             builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+            builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 

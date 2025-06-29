@@ -58,6 +58,8 @@ export interface UserDto {
 	id: string;
 	userName: string;
 	role: number;
+	templatesCount: number;
+	formsCount: number;
 	isBlocked: boolean;
 	createdAt: string;
 	updatedAt: string;
@@ -88,6 +90,7 @@ export interface TemplateDto {
 	version: number;
 	isPublished: boolean;
 	isArchived: boolean;
+	isDeleted: boolean;
 	baseTemplateId?: string;
 	previousVersionId?: string;
 	questions: QuestionDto[];

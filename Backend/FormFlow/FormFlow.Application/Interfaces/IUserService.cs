@@ -22,6 +22,7 @@ namespace FormFlow.Application.Interfaces
         Task DeleteUserAsync(Guid id);
         Task<bool> EmailExistsAsync(string email);
         Task<bool> UserNameExistsAsync(string userName);
+        Task<UserDto> ToggleAdminUserRole(Guid userId);
 
         Task<PagedResult<UserDto>> GetUsersPagedAsync(int page, int pageSize);
         Task<List<UserDto>> SearchUsersAsync(string query, int limit = 10);

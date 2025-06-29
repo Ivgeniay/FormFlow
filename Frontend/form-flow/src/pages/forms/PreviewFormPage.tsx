@@ -13,7 +13,7 @@ export const PreviewFormPage: React.FC = () => {
 	const { t } = useTranslation();
 	const { templateId } = useParams<{ templateId: string }>();
 	const navigate = useNavigate();
-	const { accessToken, isAuthenticated } = useAuth();
+	const { accessToken, isAuthenticated, isAdmin } = useAuth();
 
 	const [loading, setLoading] = useState(true);
 	const [template, setTemplate] = useState<TemplateDto | null>(null);
@@ -43,17 +43,15 @@ export const PreviewFormPage: React.FC = () => {
 
 			const templateData = await templateApi.getTemplate(templateId);
 
-			if (!templateData.canUserEdit) {
-				setError(
-					t(
-						"noAccessToPreview",
-						"You don't have access to preview this template"
-					)
-				);
+			if (isAdmin || templateData.canUserEdit) {
+				setTemplate(templateData);
 				return;
 			}
 
-			setTemplate(templateData);
+			setError(
+				t("noAccessToPreview", "You don't have access to preview this template")
+			);
+			return;
 		} catch (error: any) {
 			const errorMessage =
 				error.response?.data?.message ||

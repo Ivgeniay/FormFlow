@@ -243,28 +243,6 @@ class UsersApi {
 		});
 	}
 
-	async addAdminRole(userId: string, accessToken: string): Promise<UserDto> {
-		const response = await axios.post<UserDto>(
-			`${API_BASE_URL}/user/${userId}/add-admin`,
-			{},
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		return response.data;
-	}
-
-	async removeAdminRole(userId: string, accessToken: string): Promise<UserDto> {
-		const response = await axios.post<UserDto>(
-			`${API_BASE_URL}/user/${userId}/remove-admin`,
-			{},
-			{
-				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		return response.data;
-	}
-
 	async promoteToRole(
 		accessToken: string,
 		role: number
@@ -278,6 +256,16 @@ class UsersApi {
 		);
 
 		return response.data;
+	}
+
+	async toggleAdminRole(userId: string, accessToken: string): Promise<void> {
+		await axios.post(
+			`${API_BASE_URL}/user/${userId}/toggle-admin`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
 	}
 }
 

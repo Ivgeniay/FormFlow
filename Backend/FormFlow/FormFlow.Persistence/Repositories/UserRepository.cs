@@ -107,6 +107,8 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Users
                 .Include(u => u.Contacts)
+                .Include(u => u.Templates)
+                .Include(u => u.Forms)
                 .Where(u => !u.IsDeleted)
                 .OrderBy(u => u.UserName);
 

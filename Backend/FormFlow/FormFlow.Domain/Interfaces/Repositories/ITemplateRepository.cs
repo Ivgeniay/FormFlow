@@ -5,6 +5,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
     public interface ITemplateRepository
     {
         Task<Template?> GetByIdAsync(Guid id);
+        Task<Template?> GetByIdUnlimitedAsync(Guid id);
         Task<List<Template>> GetByIdsAsync(Guid[] id);
         Task<List<Guid>> GetUserEditableTemplateIdsAsync(Guid[] templateIds, Guid userId);
         Task<Template?> GetCurrentVersionAsync(Guid baseTemplateId);
@@ -19,6 +20,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<bool> ExistsAsync(Guid id);
         Task<bool> BaseTemplateExistsAsync(Guid baseTemplateId);
         Task DeleteAsync(Guid id);
+        Task UnDeleteAsync(Guid id);
         Task DeleteTemplatesAsync(Guid[] templateIds);
         Task DeleteAllVersionsAsync(Guid baseTemplateId);
 
@@ -29,6 +31,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<PagedResult<Template>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize);
         Task<PagedResult<Template>> GetPopularTemplatesAsync(int page, int pageSize);
 
+        Task<PagedResult<Template>> GetTemplatesPagedForAdminAsync(int page, int pageSize);
         Task<PagedResult<Template>> GetPublicTemplatesPagedAsync(int page, int pageSize);
         Task<PagedResult<Template>> GetTemplatesByAuthorPagedAsync(Guid authorId, int page, int pageSize);
         Task<PagedResult<Template>> GetUserAccessibleTemplatesPagedAsync(Guid userId, int page, int pageSize);

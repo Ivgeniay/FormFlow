@@ -1,19 +1,53 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
-import { PromoteToRoleButtons } from "../../modules/auth/components/PromoteToRoleButton";
-import { UserAvanar } from "../../components/UserAvatar";
+import { useParams } from "react-router-dom";
+import { UserDto } from "../../shared/api_types";
+import { usersApi } from "../../api/usersApi";
+import { LittleSpinner } from "../../ui/Spinner/LittleSpinner";
+import { ProfileElement } from "../../modules/auth/profile/ProfileElement";
 
 export const ProfilePage: React.FC = () => {
 	const { t } = useTranslation();
-	const {
-		user,
-		isAuthenticated,
-		authType,
-		userDisplayName,
-		userEmail,
-		getRoleNames,
-	} = useAuth();
+	const { id } = useParams<{ id?: string }>();
+	const { user, isAuthenticated, authType, accessToken } = useAuth();
+	const [otherUser, setOtherUser] = useState<UserDto | null>(null);
+	const [isLoading, setIsLoading] = useState<boolean>(false);
+
+	const isOwnProfile = useCallback((): boolean => {
+		return !id || id === user?.id;
+	}, [id, user]);
+
+	const fetchUser = useCallback(
+		async (userId: string) => {
+			try {
+				if (accessToken) {
+					setIsLoading(true);
+					const response = await usersApi.getUserById(userId, accessToken);
+					setOtherUser(response);
+				}
+			} catch (error: any) {
+			} finally {
+				setIsLoading(false);
+			}
+		},
+		[accessToken]
+	);
+
+	useEffect(() => {
+		if (!isOwnProfile && id) {
+			fetchUser(id);
+		}
+	}, [id, isOwnProfile, fetchUser]);
+
+	const converRoleToStringFroUser = (user: UserDto): string => {
+		if (!user) return "undefined";
+		if (user.role & 1) return "User";
+		if (user.role & 2) return "Admin";
+		if (user.role & 4) return "Moderator";
+		if (user.role & 8) return "SuperAdmin";
+		return "undefined";
+	};
 
 	if (!isAuthenticated || !user) {
 		return (
@@ -30,84 +64,39 @@ export const ProfilePage: React.FC = () => {
 			</div>
 		);
 	}
+	if (isLoading) {
+		return (
+			<>
+				<div className="max-w-4xl mx-auto p-6 space-y-6">
+					<div className="flex items-center justify-center bg-surface border border-border rounded-lg p-6">
+						<LittleSpinner />
+					</div>
+				</div>
+			</>
+		);
+	}
 
-	return (
-		<div className="max-w-4xl mx-auto p-6 space-y-6">
-			<div className="bg-surface border border-border rounded-lg p-6">
-				<div className="flex items-center gap-4 mb-6">
-					<UserAvanar
-						size={16}
-						literal={userDisplayName.charAt(0).toUpperCase()}
-						mode={`picture`}
-						// picture="https://lh3.googleusercontent.com/a/ACg8ocKf8FAOJtarltS-I7HM01-b77I_gudwHMjuQ3ux5XmaTNpB5Uy_=s96-c"
+	if (isOwnProfile) {
+		return (
+			<ProfileElement
+				user={user}
+				roleName={converRoleToStringFroUser(user)}
+				authType={authType}
+				isShowPromoteToRole={isOwnProfile()}
+			/>
+		);
+	} else {
+		return (
+			<>
+				{otherUser && (
+					<ProfileElement
+						user={otherUser}
+						roleName={converRoleToStringFroUser(otherUser)}
+						// authType={authType}
+						// isShowPromoteToRole = {isOwnProfile}
 					/>
-					<div>
-						<h1 className="text-2xl font-bold text-text">{userDisplayName}</h1>
-						{userEmail && <p className="text-textMuted">{userEmail}</p>}
-					</div>
-				</div>
-
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-					<div className="space-y-4">
-						<div>
-							<label className="block text-sm font-medium text-text mb-1">
-								{t("username", "Username") || "Username"}
-							</label>
-							<p className="text-text">{user.userName}</p>
-						</div>
-
-						<div>
-							{userEmail && (
-								<>
-									<label className="block text-sm font-medium text-text mb-1">
-										{t("email", "Email") || "Email"}
-									</label>
-									<p className="text-text">{user.primaryEmail}</p>
-								</>
-							)}
-						</div>
-
-						<div>
-							<label className="block text-sm font-medium text-text mb-1">
-								{t("authMethod", "Authentication Method") ||
-									"Authentication Method"}
-							</label>
-							<p className="text-text">{authType}</p>
-						</div>
-					</div>
-
-					<div className="space-y-4">
-						<div>
-							<label className="block text-sm font-medium text-text mb-1">
-								{t("roles", "Roles") || "Roles"}
-							</label>
-							<div className="flex flex-wrap gap-2">
-								{getRoleNames().map((role) => (
-									<span
-										key={role}
-										className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary"
-									>
-										{role}
-									</span>
-								))}
-							</div>
-						</div>
-
-						<div>
-							<label className="block text-sm font-medium text-text mb-1">
-								{t("memberSince", "Member Since") || "Member Since"}
-							</label>
-							<p className="text-text">
-								{new Date(user.createdAt).toLocaleDateString()}
-							</p>
-						</div>
-
-						<div className="pt-4">
-							<PromoteToRoleButtons className="w-full" />
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+				)}
+			</>
+		);
+	}
 };

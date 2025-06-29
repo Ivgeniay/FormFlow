@@ -1,5 +1,4 @@
 ﻿using FormFlow.Domain.Interfaces.Repositories;
-using FormFlow.Domain.Interfaces.Services;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using FormFlow.Domain.Models.General;
@@ -9,20 +8,28 @@ using FormFlow.Domain.Models.Auth;
 using System.Security.Claims;
 using System.Text;
 using static FormFlow.Infrastructure.Constants;
+using System.Collections.Concurrent;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 
 namespace FormFlow.Infrastructure.Services
 {
     public class JwtService : IJwtService
     {
+        private readonly ConcurrentDictionary<Guid, DateTime> _blacklist = new();
+
         private readonly IConfiguration _configuration;
         private readonly IUserRepository _userRepository;
+        private readonly ITokenBlacklistService _tokenBlacklistService;
         private readonly string _secretKey;
         private readonly string _issuer;
         private readonly string _audience;
         private readonly int _accessTokenExpiryMinutes;
         private readonly int _refreshTokenExpiryDays;
 
-        public JwtService(IConfiguration configuration, IUserRepository userRepository)
+        public JwtService(IConfiguration configuration, 
+            IUserRepository userRepository,
+            ITokenBlacklistService tokenBlacklistService
+            )
         {
             _configuration = configuration;
             _userRepository = userRepository;
@@ -31,6 +38,7 @@ namespace FormFlow.Infrastructure.Services
             _audience = _configuration["Jwt:Audience"] ?? throw new ArgumentNullException("Jwt:Audience");
             _accessTokenExpiryMinutes = int.Parse(_configuration["Jwt:AccessTokenExpiryMinutes"] ?? "15");
             _refreshTokenExpiryDays = int.Parse(_configuration["Jwt:RefreshTokenExpiryDays"] ?? "7");
+            _tokenBlacklistService = tokenBlacklistService;
         }
 
         public async Task<JwtTokenResult> GenerateTokenAsync(User user, AuthType authType)
@@ -82,6 +90,10 @@ namespace FormFlow.Infrastructure.Services
 
             if (!IsRefreshTokenValidInternal(user, refreshToken))
                 throw new UnauthorizedAccessException("Refresh token is expired or revoked");
+
+            var freshUser = await _userRepository.GetByIdAsync(user.Id);
+            if (freshUser == null)
+                throw new UnauthorizedAccessException("User not found");
 
             var authType = DetermineAuthTypeFromRefreshToken(user, refreshToken);
             await RevokeRefreshTokenAsync(user, refreshToken);
@@ -276,8 +288,16 @@ namespace FormFlow.Infrastructure.Services
         {
             if (user.EmailAuth?.RefreshToken == refreshToken)
             {
-                return user.EmailAuth.RefreshTokenRevokedAt == null &&
-                       user.EmailAuth.RefreshTokenExpiresAt > DateTime.UtcNow;
+                Console.WriteLine($"EmailAuth check for user {user.Id}:");
+                Console.WriteLine($"RefreshTokenRevokedAt: {user.EmailAuth.RefreshTokenRevokedAt}");
+                Console.WriteLine($"RefreshTokenExpiresAt: {user.EmailAuth.RefreshTokenExpiresAt}");
+                Console.WriteLine($"Current time: {DateTime.UtcNow}");
+
+                var isValid = user.EmailAuth.RefreshTokenRevokedAt == null &&
+                             user.EmailAuth.RefreshTokenExpiresAt > DateTime.UtcNow;
+
+                Console.WriteLine($"Token valid: {isValid}");
+                return isValid;
             }
 
             if (user.GoogleAuth?.RefreshToken == refreshToken)
@@ -300,6 +320,7 @@ namespace FormFlow.Infrastructure.Services
                 user.GoogleAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
                 user.GoogleAuth.UpdatedAt = DateTime.UtcNow;
             }
+            _tokenBlacklistService.RemoveFromBlacklist(user.Id);
 
             await _userRepository.UpdateAsync(user);
         }
@@ -319,9 +340,11 @@ namespace FormFlow.Infrastructure.Services
                 user.GoogleAuth.RefreshTokenRevokedAt = DateTime.UtcNow;
                 user.GoogleAuth.UpdatedAt = DateTime.UtcNow;
             }
+            _tokenBlacklistService.RemoveFromBlacklist(userId);
 
             await _userRepository.UpdateAsync(user);
         }
+
     }
 
 }

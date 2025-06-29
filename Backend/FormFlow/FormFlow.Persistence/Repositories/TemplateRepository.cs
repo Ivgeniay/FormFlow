@@ -13,12 +13,19 @@ namespace FormFlow.Persistence.Repositories
             _context = context;
         }
 
+        public async Task<Template?> GetByIdUnlimitedAsync(Guid id){
+            return await _context.Templates
+                .Include(t => t.Author)
+                .FirstOrDefaultAsync(t => t.Id == id);
+        }
+
         public async Task<Template?> GetByIdAsync(Guid id)
         {
             return await _context.Templates
                 .Include(t => t.Author)
                 .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
         }
+
 
         public async Task<List<Template>?> GetByIdsAsync(Guid[] ids)
         {
@@ -154,6 +161,13 @@ namespace FormFlow.Persistence.Repositories
                 .AnyAsync(t => (t.BaseTemplateId == baseTemplateId || t.Id == baseTemplateId) && !t.IsDeleted);
         }
 
+        public async Task UnDeleteAsync(Guid id)
+        {
+            await _context.Templates
+                .Where(t => t.Id == id)
+                .ExecuteUpdateAsync(t => t.SetProperty(p => p.IsDeleted, false));
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             var template = await _context.Templates.FindAsync(id);
@@ -240,6 +254,24 @@ namespace FormFlow.Persistence.Repositories
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync();
+            return new PagedResult<Template>(templates, totalCount, page, pageSize);
+        }
+
+        public async Task<PagedResult<Template>> GetTemplatesPagedForAdminAsync(int page, int pageSize)
+        {
+            var query = _context.Templates
+                .Include(t => t.Author)
+                .Include(t => t.Comments)
+                .Include(t => t.Likes)
+                .Include(t => t.Forms)
+                .OrderByDescending(t => t.CreatedAt);
+
+            var totalCount = await query.CountAsync();
+            var templates = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
             return new PagedResult<Template>(templates, totalCount, page, pageSize);
         }
 

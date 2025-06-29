@@ -1,9 +1,9 @@
-﻿using FormFlow.Domain.Interfaces.Services;
-using FormFlow.Domain.Models.General;
+﻿using FormFlow.Domain.Models.General;
 using FormFlow.Infrastructure.Models;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.WebApi.Common;
 using System.Security.Claims;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 
 namespace FormFlow.WebApi.Middlewares
 {

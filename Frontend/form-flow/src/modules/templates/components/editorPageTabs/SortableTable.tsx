@@ -28,6 +28,8 @@ interface SortableTableProps<T> {
 	onRowHover?: (itemId: string | null) => void;
 	maxColumnLabelLength?: number;
 	maxColumnsWithoutScroll?: number;
+	onReachEnd?: () => void;
+	isLoadingMore?: boolean;
 }
 
 export function SortableTable<T>({
@@ -123,12 +125,8 @@ export function SortableTable<T>({
 		<div
 			className={`bg-surface border border-border rounded-lg overflow-hidden ${className}`}
 		>
-			<div
-				className={`${
-					needsHorizontalScroll ? "overflow-x-auto" : "overflow-x-hidden"
-				}`}
-			>
-				<table className={`${needsHorizontalScroll ? "min-w-max" : "w-full"}`}>
+			<div className="overflow-x-auto">
+				<table className="w-full min-w-max">
 					<thead className="bg-background border-b border-border">
 						<tr>
 							{selectable && (
@@ -193,7 +191,9 @@ export function SortableTable<T>({
 										<td
 											key={String(column.key)}
 											className={`px-4 py-3 text-sm text-text ${
-												needsHorizontalScroll ? "min-w-32 max-w-48" : ""
+												needsHorizontalScroll
+													? "min-w-32 whitespace-nowrap"
+													: ""
 											}`}
 										>
 											{defaultRenderCell(item, column)}
@@ -206,6 +206,14 @@ export function SortableTable<T>({
 					</tbody>
 				</table>
 			</div>
+
+			{/* <div ref={endTriggerRef} className="h-1">
+      {isLoadingMore && (
+        <div className="flex justify-center py-4 border-t border-border">
+          <span className="text-textMuted text-sm">Loading more...</span>
+        </div>
+      )}
+    </div> */}
 
 			{data.length === 0 && (
 				<div className="text-center py-8 text-textMuted">{emptyMessage}</div>

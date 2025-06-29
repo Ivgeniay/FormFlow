@@ -1,7 +1,7 @@
 ﻿using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.Auth;
 
-namespace FormFlow.Domain.Interfaces.Services
+namespace FormFlow.Domain.Interfaces.Services.Jwt
 {
     public interface IJwtService
     {

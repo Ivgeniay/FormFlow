@@ -206,7 +206,8 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("promote-to-role")]
-        public async Task<IActionResult> PromoteToAdmin([FromHeader] int role)
+        [Authorize]
+        public async Task<IActionResult> PromoteToRole([FromHeader] int role)
         {
             try
             {

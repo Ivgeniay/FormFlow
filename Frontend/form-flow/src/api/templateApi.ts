@@ -284,6 +284,35 @@ class TemplateApi {
 		return response.data;
 	}
 
+	async archiveTemplate(
+		templateId: string,
+		accessToken: string
+	): Promise<void> {
+		await axios.post(
+			`${API_BASE_URL}/template/${templateId}/archive`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+	}
+
+	async undeleteTemplate(
+		templateId: string,
+		accessToken: string
+	): Promise<void> {
+		await axios.patch(
+			`${API_BASE_URL}/template/undelete`,
+			{ templateId },
+			{
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					"Content-Type": "application/json",
+				},
+			}
+		);
+	}
+
 	async patchArchiveVersions(
 		ids: string[],
 		accessToken: string

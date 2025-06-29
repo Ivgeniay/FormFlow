@@ -342,6 +342,19 @@ namespace FormFlow.Application.Services
             await IndexTemplateAsync(templateId);
         }
 
+        public async Task UnDeleteTemplateAsync(Guid templateId, Guid userId)
+        {
+            var template = await _templateRepository.GetByIdUnlimitedAsync(templateId);
+            if (template == null)
+                throw new TemplateNotFoundException(templateId);
+
+            if (!await CanUserEditTemplateAsync(templateId, userId))
+                throw new UnauthorizedAccessException("User cannot delete this template");
+
+            await _templateRepository.UnDeleteAsync(templateId);
+
+            await IndexTemplateAsync(templateId);
+        }
         public async Task<bool> DeleteTemplatesAsync(Guid[] templateIds, Guid userId)
         {
             var templates = await _templateRepository.GetByIdsAsync(templateIds);
@@ -449,6 +462,20 @@ namespace FormFlow.Application.Services
         {
             return await _templateRepository.BaseTemplateExistsAsync(baseTemplateId);
         }
+
+        public async Task<PagedResult<TemplateDto>> GetTemplatesPagedForAdminAsync(int page, int pageSize)
+        {
+            var result = await _templateRepository.GetTemplatesPagedForAdminAsync(page, pageSize);
+            var templateDtos = new List<TemplateDto>();
+
+            foreach (var template in result.Data)
+            {
+                templateDtos.Add(await MapToTemplateDtoAsync(template, null));
+            }
+
+            return new PagedResult<TemplateDto>(templateDtos, result.Pagination.TotalCount, page, pageSize);
+        }
+
 
         public async Task<PagedResult<TemplateDto>> GetPublicTemplatesPagedAsync(int page, int pageSize)
         {
@@ -728,6 +755,7 @@ namespace FormFlow.Application.Services
                 Version = template.Version,
                 IsPublished = template.IsPublished,
                 IsArchived = template.IsArchived,
+                IsDeleted = template.IsDeleted,
                 BaseTemplateId = template.BaseTemplateId,
                 PreviousVersionId = template.PreviousVersionId,
                 Questions = template.Questions?.Select(q => new QuestionDto

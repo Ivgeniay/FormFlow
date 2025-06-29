@@ -16,6 +16,7 @@ namespace FormFlow.Application.Interfaces
         Task<bool> ArchiveTemplatesAsync(Guid[] templateIds, Guid userId);
         Task<bool> UnarchiveTemplatesAsync(Guid[] templateIds, Guid userId);
         Task DeleteTemplateAsync(Guid templateId, Guid userId);
+        Task UnDeleteTemplateAsync(Guid templateId, Guid userId);
         Task<bool> DeleteTemplatesAsync(Guid[] templateIds, Guid userId);
         Task DeleteAllVersionsAsync(Guid baseTemplateId, Guid userId);
 
@@ -26,6 +27,7 @@ namespace FormFlow.Application.Interfaces
         Task<bool> TemplateExistsAsync(Guid id);
         Task<bool> BaseTemplateExistsAsync(Guid baseTemplateId);
 
+        Task<PagedResult<TemplateDto>> GetTemplatesPagedForAdminAsync(int page, int pageSize);
         Task<PagedResult<TemplateDto>> GetPublicTemplatesPagedAsync(int page, int pageSize);
         Task<PagedResult<TemplateDto>> GetTemplatesByTagNameAsync(string tagName, int page, int pageSize);
         Task<PagedResult<TemplateDto>> GetPopularTemplatesAsync(int page, int pageSize);

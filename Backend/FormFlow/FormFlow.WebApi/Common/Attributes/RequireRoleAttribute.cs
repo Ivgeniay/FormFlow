@@ -2,6 +2,7 @@
 using FormFlow.Infrastructure.Models;
 using FormFlow.Domain.Models.General;
 using Microsoft.AspNetCore.Mvc;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 
 namespace FormFlow.WebApi.Common.Attributes
 {
@@ -35,6 +36,17 @@ namespace FormFlow.WebApi.Common.Attributes
             if (currentUser.IsBlocked)
             {
                 context.Result = new ForbidResult();
+                return;
+            }
+
+            var tokenBlacklistService = context.HttpContext.RequestServices.GetService<ITokenBlacklistService>();
+            if (tokenBlacklistService != null && tokenBlacklistService.IsBlacklisted(currentUser.Id))
+            {
+                context.Result = new UnauthorizedObjectResult(new
+                {
+                    message = "Token refresh required",
+                    requireTokenRefresh = true
+                });
                 return;
             }
 

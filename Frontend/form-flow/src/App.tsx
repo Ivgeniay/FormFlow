@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	BrowserRouter as Router,
 	Routes,
@@ -23,6 +23,8 @@ import { FormPage } from "./pages/forms/FormPage";
 import { PreviewFormPage } from "./pages/forms/PreviewFormPage";
 import { FormView } from "./pages/forms/FormView";
 import { ProfilePage } from "./pages/user/ProfilePage";
+import { AdminPanelPage } from "./pages/admin/AdminPanelPage";
+import setupAxiosInterceptors from "./api/setupAxiosInterceptors";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -36,6 +38,10 @@ const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 };
 
 function App() {
+	useEffect(() => {
+		setupAxiosInterceptors();
+	}, []);
+
 	const { isInitialized, isLoading, error } = useAppInitialization();
 	if (isLoading) return <AppLoader isVisible={!isInitialized} />;
 	if (error) {
@@ -64,6 +70,14 @@ function App() {
 							element={
 								<Layout>
 									<SearchPage />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/profile/:id"
+							element={
+								<Layout>
+									<ProfilePage />
 								</Layout>
 							}
 						/>
@@ -144,6 +158,14 @@ function App() {
 						<Route
 							path="/auth/google/callback"
 							element={<GoogleCallbackPage />}
+						/>
+						<Route
+							path="/admin_panel"
+							element={
+								<Layout>
+									<AdminPanelPage />
+								</Layout>
+							}
 						/>
 
 						<Route

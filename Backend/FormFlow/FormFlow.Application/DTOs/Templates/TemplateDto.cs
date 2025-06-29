@@ -21,6 +21,7 @@ namespace FormFlow.Application.DTOs.Templates
         public int Version { get; set; }
         public bool IsPublished { get; set; }
         public bool IsArchived { get; set; }
+        public bool IsDeleted { get; set; }
         public Guid? BaseTemplateId { get; set; }
         public Guid? PreviousVersionId { get; set; }
 

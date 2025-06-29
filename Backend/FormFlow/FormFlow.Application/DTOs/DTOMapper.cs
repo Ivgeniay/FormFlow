@@ -14,6 +14,9 @@ namespace FormFlow.Application.DTOs
                 Role = user.Role,
                 IsBlocked = user.IsBlocked,
                 CreatedAt = user.CreatedAt,
+                UpdatedAt = user.UpdatedAt,
+                TemplatesCount = user.Templates.Count(),
+                FormsCount = user.Forms.Count(),
                 Contacts = user.Contacts?.Select(c => new UserContactDto
                 {
                     Id = c.Id,

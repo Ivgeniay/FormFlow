@@ -1,6 +1,7 @@
 ﻿using FormFlow.Application.DTOs.Users;
 using FormFlow.Application.Interfaces;
 using FormFlow.Application.Services;
+using FormFlow.Domain.Interfaces.Services.Jwt;
 using FormFlow.Domain.Models.Auth;
 using FormFlow.Domain.Models.General;
 using FormFlow.WebApi.Common.Attributes;
@@ -16,10 +17,12 @@ namespace FormFlow.WebApi.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IJwtService _jwtService;
 
-        public UserController(IUserService userService)
+        public UserController(IUserService userService, IJwtService jwtService)
         {
             _userService = userService;
+            _jwtService = jwtService;
         }
 
         [HttpGet]
@@ -169,13 +172,34 @@ namespace FormFlow.WebApi.Controllers
                 {
                     message = "User role changed successfully",
                     user = result.User,
-                    accessToken = result.AccessToken,
-                    refreshToken = result.RefreshToken,
-                    accessTokenExpiry = result.AccessTokenExpiry,
-                    refreshTokenExpiry = result.RefreshTokenExpiry
+                    //accessToken = result.AccessToken,
+                    //refreshToken = result.RefreshToken,
+                    //accessTokenExpiry = result.AccessTokenExpiry,
+                    //refreshTokenExpiry = result.RefreshTokenExpiry
                 });
             }
             catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpPost("{id}/toggle-admin")]
+        [RequireRole(UserRole.Admin)]
+        public async Task<IActionResult> ToggleAdminRole(Guid id)
+        {
+            try
+            {
+                var user = await _userService.ToggleAdminUserRole(id);
+
+                return Ok(new
+                {
+                    message = "Role updated successfully",
+                    data = user,
+                });
+
+            }
+            catch(Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
             }

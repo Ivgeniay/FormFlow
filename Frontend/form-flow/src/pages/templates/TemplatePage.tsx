@@ -14,8 +14,8 @@ import { useTemplateActivity } from "../../modules/auth/hooks/useTemplateActivit
 import { CommentDisposer } from "../../modules/comments/CommentDisposer";
 
 export const TemplatePage: React.FC = () => {
-	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
 	const { t } = useTranslation();
+	const { id, sourceId } = useParams<{ id?: string; sourceId?: string }>();
 	const navigate = useNavigate();
 	const { isAuthenticated, user, accessToken, isAdmin, isModerator } =
 		useAuth();
@@ -46,9 +46,6 @@ export const TemplatePage: React.FC = () => {
 
 			const response = await templateApi.getTemplate(templateId, accessToken);
 			setTemplate(response);
-			console.log(response);
-			if (response && response.id) {
-			}
 		} catch (err: any) {
 			setError(err.response?.data?.message || "Failed to load template");
 		} finally {
@@ -157,7 +154,6 @@ export const TemplatePage: React.FC = () => {
 	}
 
 	if (canViewAsReader()) {
-		console.log("As viewer");
 		return (
 			<div className="space-y-6">
 				<div className="max-w-2xl mx-auto mt-8">

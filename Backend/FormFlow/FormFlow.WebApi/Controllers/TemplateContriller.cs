@@ -93,6 +93,25 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+        [HttpPatch("undelete")]
+        [Authorize]
+        public async Task<IActionResult> UnDeleteTemplate([FromBody] UnDeleteTemplateRequest request)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                await _templateService.UnDeleteTemplateAsync(request.TemplateId, userId.Value);
+                return Ok(new { message = "Template deleted successfully" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
         [HttpDelete("delete-multiple")]
         [Authorize]
         public async Task<IActionResult> DeleteTemplates([FromBody] Guid[] templateGuids)
@@ -247,7 +266,7 @@ namespace FormFlow.WebApi.Controllers
         {
             try
             {
-                var result = await _templateService.GetPublicTemplatesPagedAsync(page, pageSize);
+                var result = await _templateService.GetTemplatesPagedForAdminAsync(page, pageSize);
                 return Ok(result);
             }
             catch (Exception ex)
@@ -413,5 +432,10 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+    }
+
+    public class UnDeleteTemplateRequest
+    {
+        public Guid TemplateId { get; set; }
     }
 }

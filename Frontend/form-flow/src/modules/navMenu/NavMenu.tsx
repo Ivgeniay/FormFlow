@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { NavMenuButton } from "./components/NavMenuButton";
 import { UserDto } from "../../shared/api_types";
+import { useAuth } from "../auth/hooks/useAuth";
 
 interface NavMenuProps {
 	isOpen: boolean;
@@ -20,6 +21,7 @@ export const NavMenu: React.FC<NavMenuProps> = ({
 }) => {
 	const { t } = useTranslation();
 	const navRef = useRef<HTMLElement>(null);
+	const { isAdmin } = useAuth();
 
 	useEffect(() => {
 		const handlerClickOutside = (e: MouseEvent) => {
@@ -186,28 +188,28 @@ export const NavMenu: React.FC<NavMenuProps> = ({
 							icon={profileIcon}
 							label={t("profile") || "Profile"}
 							onClick={() => handleNavigate("/profile")}
-							// isVisible={isAuthenticated}
+							isVisible={isAuthenticated}
 						/>
 
 						<NavMenuButton
 							icon={templatesIcon}
 							label={t("myTemplates") || "My Templates"}
 							onClick={() => handleNavigate("/my-templates")}
-							// isVisible={isAuthenticated}
+							isVisible={isAuthenticated}
 						/>
 
 						<NavMenuButton
 							icon={settingsIcon}
 							label={t("settings") || "Settings"}
 							onClick={() => handleNavigate("/settings")}
-							// isVisible={isAuthenticated}
+							isVisible={isAuthenticated}
 						/>
 
 						<NavMenuButton
 							icon={adminIcon}
 							label={t("adminPanel") || "Admin Panel"}
-							onClick={() => handleNavigate("/admin")}
-							// isVisible={isAuthenticated && user?.isAdmin}
+							onClick={() => handleNavigate("/admin_panel")}
+							isVisible={isAuthenticated && isAdmin}
 						/>
 					</ul>
 				</div>
