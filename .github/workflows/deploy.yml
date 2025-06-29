@@ -31,6 +31,9 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: ./Frontend/form-flow
+        build-args: |
+          REACT_APP_GOOGLE_REDIRECT_URI=${{ secrets.REACT_APP_GOOGLE_REDIRECT_URI}}
+          REACT_APP_GOOGLE_CLIENT_ID=${{ secrets.REACT_APP_GOOGLE_CLIENT_ID}}
         push: true
         tags: ${{ secrets.DOCKER_USERNAME }}/formflow-frontend:latest
         
