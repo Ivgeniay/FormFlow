@@ -33,10 +33,16 @@ namespace FormFlow.WebApi
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.AllowAnyOrigin()
-                            .AllowAnyMethod()
-                            .AllowAnyHeader();
-                });
+                    policy.WithOrigins(
+                            "https://www.form-flow.xyz",
+                            "https://form-flow.xyz",
+                            "http://localhost:3000",
+                            "http://localhost:5173"
+                        )
+                        .AllowAnyMethod()
+                        .AllowAnyHeader()
+                        .AllowCredentials();
+                            });
             });
             builder.Services.AddSignalR();
 
