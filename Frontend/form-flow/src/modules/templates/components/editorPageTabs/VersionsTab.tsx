@@ -10,6 +10,7 @@ import { TemplateDto } from "../../../../shared/api_types";
 import { templateApi } from "../../../../api/templateApi";
 import { SortableTable, SortConfig, TableColumn } from "./SortableTable";
 import { ActionItem, ActionPanel } from "./ActionPanel";
+import { useAuth } from "../../../auth/hooks/useAuth";
 
 interface VersionsTabProps {
 	template: TemplateDto;
@@ -44,6 +45,7 @@ const defaultColumns: ColumnConfig[] = [
 export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 	({ template, accessToken, hasChangeCallback }, ref) => {
 		const { t } = useTranslation();
+		const { user } = useAuth();
 		const [versions, setVersions] = useState<TemplateDto[]>([]);
 		const [sortedVersions, setSortedVersions] = useState<TemplateDto[]>([]);
 		const [loading, setLoading] = useState(true);
@@ -68,11 +70,13 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 
 		const loadVersions = async () => {
 			if (!accessToken) return;
+			if (!user) return;
 
 			try {
 				setLoading(true);
-				const versionsData = await templateApi.getTemplateVersions(
+				const versionsData = await templateApi.getTemplateVersionsForUser(
 					template.id,
+					user?.id,
 					accessToken
 				);
 				setVersions(versionsData);
@@ -188,7 +192,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleArchiveSelected = async () => {
-			console.log("Archive selected versions:", Array.from(selectedVersions));
 			try {
 				if (accessToken) {
 					setLoading(true);
@@ -209,7 +212,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleUnarchiveSelected = async () => {
-			console.log("Archive selected versions:", Array.from(selectedVersions));
 			try {
 				if (accessToken) {
 					setLoading(true);
@@ -230,7 +232,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleDeleteSelected = () => {
-			// console.log("Delete selected versions:", Array.from(selectedVersions));
 			try {
 				if (accessToken) {
 					setLoading(true);
@@ -259,7 +260,6 @@ export const VersionsTab = forwardRef<VersionsTabRef, VersionsTabProps>(
 		};
 
 		const handleDeleteVersion = (version: TemplateDto) => {
-			// console.log("Delete version:", version.id);
 			try {
 				if (accessToken) {
 					setLoading(true);

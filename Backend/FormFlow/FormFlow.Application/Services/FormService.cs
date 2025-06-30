@@ -282,6 +282,23 @@ namespace FormFlow.Application.Services
             return dto;
         }
 
+        public async Task<PagedResult<FormDto>> GetAllForAdmin(Guid userId, int page, int pageSize)
+        {
+            var user = await _userRepository.GetByIdAsync(userId);
+            if (user == null)
+                throw new UserNotFoundException(userId);
+
+            var result = await _formRepository.GetAllFormsForAdmin(page, pageSize);
+            var formDtos = new List<FormDto>();
+
+            foreach (var form in result.Data)
+            {
+                formDtos.Add(await MapToFormDtoAsync(form, userId));
+            }
+
+            return new PagedResult<FormDto>(formDtos, result.Pagination.TotalCount, page, pageSize);
+        }
+
         public async Task<FormAccessDto> GetFormAccessAsync(Guid templateId, Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);

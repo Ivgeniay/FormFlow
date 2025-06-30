@@ -91,8 +91,8 @@ namespace FormFlow.Application.Services
             if (baseTemplate == null)
                 throw new TemplateNotFoundException(request.BaseTemplateId);
 
-            if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplate.BaseTemplateId ?? baseTemplate.Id, userId))
-                throw new UnauthorizedAccessException("Only template author can create new versions");
+            //if (!await _templateRepository.IsAuthorOfBaseTemplateAsync(baseTemplate.BaseTemplateId ?? baseTemplate.Id, userId))
+            //    throw new UnauthorizedAccessException("Only template author can create new versions");
 
             var user = await _userRepository.GetByIdAsync(userId);
             if (user == null || user.IsBlocked)
@@ -153,20 +153,57 @@ namespace FormFlow.Application.Services
             template.AccessType = request.AccessType;
             template.TopicId = request.TopicId;
 
-            template.Questions.Clear();
-            foreach (var questionDto in request.Questions)
+            var questionsToDelete = request.Questions
+                .Where(q => q.IsDeleted && !q.IsNewQuestion)
+                .Select(q => Guid.Parse(q.Id))
+                .ToList();
+
+            if (questionsToDelete.Any())
             {
-                var question = new Question
-                {
-                    Id = questionDto.Id,
-                    TemplateId = template.Id,
-                    Order = questionDto.Order,
-                    ShowInResults = questionDto.ShowInResults,
-                    IsRequired = questionDto.IsRequired,
-                    Data = questionDto.Data
-                };
-                template.Questions.Add(question);
+                await _questionRepository.DeleteQuestionsAsync(questionsToDelete);
             }
+
+            List<Question> newQuestions = request.Questions
+                .Where(q => q.IsNewQuestion && !q.IsDeleted)
+                .Select(q => new Question
+                {
+                    Id = Guid.NewGuid(),
+                    TemplateId = template.Id,
+                    Order = q.Order,
+                    ShowInResults = q.ShowInResults,
+                    IsRequired = q.IsRequired,
+                    Data = q.Data,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                })
+                .ToList();
+
+            if (newQuestions.Any())
+            {
+                await _questionRepository.CreateQuestionsAsync(newQuestions);
+            }
+
+            List<Question> existingQuestions = request.Questions
+                .Where(q => !q.IsNewQuestion && !q.IsDeleted)
+                .Select(q => new Question
+                {
+                    Id = Guid.Parse(q.Id),
+                    TemplateId = template.Id,
+                    Order = q.Order,
+                    ShowInResults = q.ShowInResults,
+                    IsRequired = q.IsRequired,
+                    Data = q.Data,
+                    UpdatedAt = DateTime.UtcNow,
+                })
+                .ToList();
+
+            if (existingQuestions.Any())
+            {
+                await _questionRepository.UpdateQuestionsAsync(existingQuestions);
+            }
+
+            template.Questions.Clear();
+            template.Questions.AddRange(newQuestions.Concat(existingQuestions));
 
             var existingTagIds = await _templateRepository.GetTemplateTagIdsAsync(template.Id);
             var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
@@ -437,14 +474,27 @@ namespace FormFlow.Application.Services
             return await MapToTemplateDtoAsync(template, userId);
         }
 
-        public async Task<List<TemplateDto>> GetAllVersionsAsync(Guid templateId, Guid userId)
+        public async Task<List<TemplateDto>> GetAllVersionsForUserAsync(Guid templateId, Guid askingUserId, Guid userId)
+        {
+            var templates = await _templateRepository.GetAllVersionsForUserAsync(templateId, userId);
+            var templateDtos = new List<TemplateDto>();
+
+            foreach (var template in templates)
+            {
+                templateDtos.Add(await MapToTemplateDtoAsync(template, askingUserId));
+            }
+
+            return templateDtos;
+        }
+
+        public async Task<List<TemplateDto>> GetAllVersionsAsync(Guid templateId, Guid askingUserId)
         {
             var templates = await _templateRepository.GetAllVersionsAsync(templateId);
             var templateDtos = new List<TemplateDto>();
 
             foreach (var template in templates)
             {
-                templateDtos.Add(await MapToTemplateDtoAsync(template, userId));
+                templateDtos.Add(await MapToTemplateDtoAsync(template, askingUserId));
             }
 
             return templateDtos;

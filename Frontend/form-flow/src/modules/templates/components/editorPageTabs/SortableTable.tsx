@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 export interface TableColumn<T> {
 	key: keyof T | string;
@@ -46,11 +46,37 @@ export function SortableTable<T>({
 	onRowHover,
 	maxColumnLabelLength = 15,
 	maxColumnsWithoutScroll = 6,
+	onReachEnd,
+	isLoadingMore = false,
 }: SortableTableProps<T>) {
 	const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+	const endTriggerRef = useRef<HTMLDivElement>(null);
 
 	const visibleColumns = columns.filter((col) => col.visible !== false);
 	const needsHorizontalScroll = visibleColumns.length > maxColumnsWithoutScroll;
+
+	useEffect(() => {
+		if (!onReachEnd || !endTriggerRef.current) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const [entry] = entries;
+				if (entry.isIntersecting && !isLoadingMore) {
+					onReachEnd();
+				}
+			},
+			{
+				threshold: 0.1,
+				rootMargin: "50px",
+			}
+		);
+
+		observer.observe(endTriggerRef.current);
+
+		return () => {
+			observer.disconnect();
+		};
+	}, [onReachEnd, isLoadingMore]);
 
 	const handleSort = (columnKey: string) => {
 		const column = columns.find((col) => col.key === columnKey);
@@ -207,13 +233,13 @@ export function SortableTable<T>({
 				</table>
 			</div>
 
-			{/* <div ref={endTriggerRef} className="h-1">
-      {isLoadingMore && (
-        <div className="flex justify-center py-4 border-t border-border">
-          <span className="text-textMuted text-sm">Loading more...</span>
-        </div>
-      )}
-    </div> */}
+			<div ref={endTriggerRef} className="h-1">
+				{isLoadingMore && (
+					<div className="flex justify-center py-4 border-t border-border">
+						<span className="text-textMuted text-sm">Loading more...</span>
+					</div>
+				)}
+			</div>
 
 			{data.length === 0 && (
 				<div className="text-center py-8 text-textMuted">{emptyMessage}</div>

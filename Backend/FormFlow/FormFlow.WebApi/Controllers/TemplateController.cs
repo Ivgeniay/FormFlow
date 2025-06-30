@@ -64,7 +64,6 @@ namespace FormFlow.WebApi.Controllers
                 if (userId == null)
                     return Unauthorized(new { message = "Invalid user context" });
 
-                request.Id = id;
                 var template = await _templateService.UpdateTemplateAsync(request, userId.Value);
                 return Ok(template);
             }
@@ -277,7 +276,26 @@ namespace FormFlow.WebApi.Controllers
 
         [HttpGet("{baseTemplateId}/versions")]
         [Authorize]
-        public async Task<IActionResult> GetTemplateVersions(Guid baseTemplateId)
+        public async Task<IActionResult> GetTemplateVersionsForUser(Guid baseTemplateId, [FromQuery] Guid userId)
+        {
+            try
+            {
+                var curUserId = this.GetCurrentUserId();
+                if (curUserId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                var versions = await _templateService.GetAllVersionsForUserAsync(baseTemplateId, curUserId.Value, userId);
+                return Ok(versions);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("{baseTemplateId}/allversions")]
+        [Authorize]
+        public async Task<IActionResult> GetAllTemplateVersions(Guid baseTemplateId)
         {
             try
             {
@@ -366,7 +384,7 @@ namespace FormFlow.WebApi.Controllers
                     return Unauthorized(new { message = "Invalid user context" });
 
                 request.BaseTemplateId = id;
-                var template = await _templateService.CreateNewVersionAsync(request, userId.Value);
+                var template = await _templateService.CreateNewVersionAsync(request, request.AuthorId);
                 return Ok(template);
             }
             catch (Exception ex)

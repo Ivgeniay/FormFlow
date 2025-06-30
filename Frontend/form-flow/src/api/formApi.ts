@@ -43,6 +43,18 @@ class FormApi {
 		return response.data;
 	}
 
+	async getAllFormsForAdmin(
+		page: number,
+		pageSize: number,
+		accessToken: string
+	): Promise<{ data: FormDto[]; pagination: any }> {
+		const response = await axios.get(`${API_BASE_URL}/form/all/admin`, {
+			params: { page, pageSize },
+			headers: { Authorization: `Bearer ${accessToken}` },
+		});
+		return response.data;
+	}
+
 	async getForm(id: string, accessToken: string): Promise<FormDto> {
 		const response = await axios.get<FormDto>(`${API_BASE_URL}/form/${id}`, {
 			headers: { Authorization: `Bearer ${accessToken}` },

@@ -44,14 +44,27 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(q => q.Id == questionId);
         }
 
-        public async Task<bool> UpdateQuestionsAsync(List<Question> newValue)
+        public async Task<bool> UpdateQuestionsAsync(List<Question> questionsToUpdate)
         {
             try
             {
-                if (newValue.Any())
+                if (questionsToUpdate.Any())
                 {
-                    _context.Questions.UpdateRange(newValue);
-                    await _context.SaveChangesAsync ();
+                    foreach (var questionUpdate in questionsToUpdate)
+                    {
+                        var existingQuestion = await _context.Questions
+                            .FirstOrDefaultAsync(q => q.Id == questionUpdate.Id);
+
+                        if (existingQuestion != null)
+                        {
+                            existingQuestion.Order = questionUpdate.Order;
+                            existingQuestion.ShowInResults = questionUpdate.ShowInResults;
+                            existingQuestion.IsRequired = questionUpdate.IsRequired;
+                            existingQuestion.Data = questionUpdate.Data;
+                            existingQuestion.UpdatedAt = DateTime.UtcNow;
+                        }
+                    }
+                    await _context.SaveChangesAsync();
                 }
                 return true;
             }
@@ -74,5 +87,21 @@ namespace FormFlow.Persistence.Repositories
                 return false;
             }
         }
+
+        public async Task DeleteQuestionsAsync(List<Guid> questionsToDelete)
+        {
+            var toDelete = await _context.Questions
+                .Where(q => questionsToDelete.Contains(q.Id))
+                .ToListAsync();
+            _context.RemoveRange(toDelete);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CreateQuestionsAsync(List<Question> newQuestions)
+        {
+            await _context.Questions.AddRangeAsync(newQuestions);
+            await _context.SaveChangesAsync();
+        }
+
     }
 }

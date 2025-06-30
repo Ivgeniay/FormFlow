@@ -1,5 +1,6 @@
 ﻿using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Models.General;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 
 namespace FormFlow.Persistence.Repositories
@@ -220,6 +221,23 @@ namespace FormFlow.Persistence.Repositories
                 .Take(count)
                 .Select(g => g.Key)
                 .ToListAsync();
+        }
+
+        public async Task<PagedResult<Form>> GetAllFormsForAdmin(int page, int pageSize)
+        {
+            var query = _context.Forms
+                .Include(f => f.Template)
+                .ThenInclude(t => t.Author)
+                .Include(f => f.User)
+                .OrderByDescending(f => f.SubmittedAt);
+
+            var totalCount = await query.CountAsync();
+            var forms = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return new PagedResult<Form>(forms, totalCount, page, pageSize);
         }
     }
 }

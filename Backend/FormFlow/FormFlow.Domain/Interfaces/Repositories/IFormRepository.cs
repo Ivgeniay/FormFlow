@@ -30,5 +30,6 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<int> GetTotalFormsCountAsync();
         Task<Dictionary<string, int>> GetFormsCountByMonthAsync();
         Task<List<Guid>> GetMostActiveUsersAsync(int count);
+        Task<PagedResult<Form>> GetAllFormsForAdmin(int page, int pageSize);
     }
 }

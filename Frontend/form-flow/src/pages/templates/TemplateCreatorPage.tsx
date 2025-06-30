@@ -28,11 +28,11 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 }) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
-	const { accessToken } = useAuth();
+	const { accessToken, user } = useAuth();
 
 	const [formTemplate, setFormTemplate] = useState<FormTemplate>(() => {
 		if (sourceTemplate) {
-			return {
+			const ft = {
 				title: `${sourceTemplate.title}`,
 				description: sourceTemplate.description,
 				image: null,
@@ -44,6 +44,8 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					convertQuestionDtoToQuestionData
 				),
 			};
+			// console.log("111", ft);
+			return ft;
 		}
 		return {
 			title: "",
@@ -59,78 +61,13 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					order: 0,
 					title: "",
 					description: "",
+					isDeleted: false,
 					type: QuestionType.ShortText,
 					isRequired: true,
 					showInResults: true,
 					typeSpecificData: {
 						maxLength: 100,
 						placeholder: "",
-					},
-				},
-				{
-					id: "1",
-					order: 1,
-					title: "What is your name?",
-					description: "Please enter your full name",
-					type: QuestionType.ShortText,
-					isRequired: true,
-					showInResults: true,
-					typeSpecificData: {
-						maxLength: 100,
-						placeholder: "Enter your name",
-					},
-				},
-				{
-					id: "2",
-					order: 2,
-					title: "Tell us about yourself",
-					description: "Share your background and interests",
-					type: QuestionType.LongText,
-					isRequired: false,
-					showInResults: true,
-					typeSpecificData: {
-						maxLength: 500,
-						placeholder: "Describe yourself...",
-					},
-				},
-				{
-					id: "3",
-					order: 3,
-					title: "What is your favorite color?",
-					description: "",
-					type: QuestionType.SingleChoice,
-					isRequired: true,
-					showInResults: true,
-					typeSpecificData: {
-						options: ["Red", "Blue", "Green", "Yellow", "Other"],
-					},
-				},
-				{
-					id: "4",
-					order: 4,
-					title: "Which programming languages do you know?",
-					description: "Select all that apply",
-					type: QuestionType.MultipleChoice,
-					isRequired: false,
-					showInResults: true,
-					typeSpecificData: {
-						options: ["JavaScript", "Python", "Java", "C#", "Go", "Rust"],
-						maxSelections: 3,
-					},
-				},
-				{
-					id: "5",
-					order: 5,
-					title: "Rate your experience with React",
-					description: "Scale from 1 (beginner) to 5 (expert)",
-					type: QuestionType.Scale,
-					isRequired: true,
-					showInResults: true,
-					typeSpecificData: {
-						minValue: 1,
-						maxValue: 5,
-						minLabel: "Beginner",
-						maxLabel: "Expert",
 					},
 				},
 			],
@@ -184,6 +121,10 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 			toast.error("Authentication required");
 			return;
 		}
+		if (!user) {
+			toast.error("User undefined");
+			return;
+		}
 
 		const validationError = validateTemplate();
 		if (validationError) {
@@ -202,6 +143,7 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 				const createNewVersionRequest: CreateNewVersionRequest = {
 					baseTemplateId: sourceTemplate.id,
 					title: formTemplate.title,
+					authorId: user?.id,
 					description: formTemplate.description,
 					topicId: formTemplate.topicId,
 					accessType: formTemplate.accessType,
@@ -235,7 +177,7 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					formTemplate.image,
 					accessToken
 				);
-				console.log(response);
+				// console.log(response);
 			}
 
 			if (publishImmediately) {

@@ -9,6 +9,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         public Task<Question> GetQuestionByIdAsync(Guid questionId);
         public Task<bool> UpdateQuestionsAsync(List<Question> newValue);
         public Task<bool> UpdateQuestionAsync(Question newWalue);
+        public Task DeleteQuestionsAsync(List<Guid> questionsToDelete);
+        public Task CreateQuestionsAsync(List<Question> newQuestions);
     }
 
 }

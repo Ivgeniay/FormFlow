@@ -22,12 +22,13 @@ export interface UpdateTemplateRequest {
 	accessType: number;
 	tags: string[];
 	allowedUserIds: string[];
-	questions: QuestionUpdateRequest[];
+	questions: UpdateQuestionDto[];
 }
 
 export interface CreateNewVersionRequest {
 	baseTemplateId: string;
 	title: string;
+	authorId: string;
 	description: string;
 	topicId: string;
 	accessType: number;
@@ -51,9 +52,11 @@ export interface QuestionCreateRequest {
 	data: string;
 }
 
-export interface QuestionUpdateRequest {
-	id?: string;
+export interface UpdateQuestionDto {
+	id: string;
 	order: number;
+	isDeleted: boolean;
+	isNewQuestion: boolean;
 	showInResults: boolean;
 	isRequired: boolean;
 	data: string;
@@ -215,8 +218,23 @@ class TemplateApi {
 		accessToken: string
 	): Promise<TemplateDto[]> {
 		const response = await axios.get<TemplateDto[]>(
+			`${API_BASE_URL}/template/${baseTemplateId}/allversions`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
+	async getTemplateVersionsForUser(
+		baseTemplateId: string,
+		userId: string,
+		accessToken: string
+	): Promise<TemplateDto[]> {
+		const response = await axios.get<TemplateDto[]>(
 			`${API_BASE_URL}/template/${baseTemplateId}/versions`,
 			{
+				params: { userId },
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);

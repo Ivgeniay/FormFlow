@@ -4,6 +4,7 @@ export interface QuestionData {
 	id: string;
 	order: number;
 	title: string;
+	isDeleted: boolean;
 	description: string;
 	type: QuestionType;
 	isRequired: boolean;

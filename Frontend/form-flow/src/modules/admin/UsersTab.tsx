@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import {
@@ -47,17 +47,20 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 	const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
 	const [showColumnDropdown, setShowColumnDropdown] = useState(false);
 	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
-	const [currentPage, setCurrentPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(1);
+	// const [currentPage, setCurrentPage] = useState(1);
+	// const [totalPages, setTotalPages] = useState(1);
 	const [totalCount, setTotalCount] = useState(0);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
+	const [page, setPage] = useState(1);
 	const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 	const [userToDelete, setUserToDelete] = useState<UserDto | null>(null);
 
-	const pageSize = 20;
+	const pageSize = 3;
 
 	useEffect(() => {
-		loadUsers();
-	}, [accessToken, currentPage]);
+		loadInitialUsers();
+	}, [accessToken]);
 
 	useEffect(() => {
 		setSortedUsers([...users]);
@@ -74,18 +77,15 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 		return () => document.removeEventListener("click", handleClickOutside);
 	}, [showColumnDropdown]);
 
-	const loadUsers = async () => {
+	const loadInitialUsers = async () => {
 		try {
 			setLoading(true);
-			const result = await usersApi.getUsers(
-				currentPage,
-				pageSize,
-				accessToken
-			);
+			const result = await usersApi.getUsers(1, pageSize, accessToken);
 			console.log(result);
 			setUsers(result.data);
-			setTotalPages(result.pagination.totalPages);
+			setPage(1);
 			setTotalCount(result.pagination.totalCount);
+			setHasMore(result.data.length === pageSize);
 		} catch (error: any) {
 			toast.error(
 				error.message || t("errorLoadingUsers", "Error loading users")
@@ -94,6 +94,30 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 			setLoading(false);
 		}
 	};
+
+	const loadMoreUsers = useCallback(async () => {
+		if (!accessToken || loadingMore) return;
+
+		try {
+			setLoadingMore(true);
+			const nextPage = page + 1;
+			const result = await usersApi.getUsers(nextPage, pageSize, accessToken);
+
+			if (result.data.length > 0) {
+				setUsers((prev) => [...prev, ...result.data]);
+				setPage(nextPage);
+				setHasMore(result.data.length === pageSize);
+			} else {
+				setHasMore(false);
+			}
+		} catch (error: any) {
+			toast.error(
+				error.message || t("errorLoadingMoreUsers", "Error loading more users")
+			);
+		} finally {
+			setLoadingMore(false);
+		}
+	}, [accessToken, page, loadingMore]);
 
 	//#region Handlers
 
@@ -168,7 +192,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 					t("userBlockedSuccessfully", "User blocked successfully")
 				);
 			}
-			loadUsers();
+			loadInitialUsers();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -181,7 +205,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 		try {
 			const result = await usersApi.toggleAdminRole(user.id, accessToken);
 			console.log(result);
-			loadUsers();
+			loadInitialUsers();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -201,7 +225,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 				t("usersBlockedSuccessfully", "Users blocked successfully")
 			);
 			setSelectedUsers(new Set());
-			loadUsers();
+			loadInitialUsers();
 		} catch (error: any) {
 			toast.error(
 				error.message || t("errorBlockingUsers", "Error blocking users")
@@ -220,7 +244,7 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 				t("usersUnblockedSuccessfully", "Users unblocked successfully")
 			);
 			setSelectedUsers(new Set());
-			loadUsers();
+			loadInitialUsers();
 		} catch (error: any) {
 			toast.error(
 				error.message || t("errorUnblockingUsers", "Error unblocking users")
@@ -424,6 +448,8 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 					getItemId={(user) => user.id}
 					emptyMessage={t("noUsersFound", "No users found") || "No users found"}
 					onRowHover={setHoveredRowId}
+					onReachEnd={hasMore ? loadMoreUsers : undefined}
+					isLoadingMore={loadingMore}
 					renderRow={(user) => (
 						<td className="absolute inset-0 pointer-events-none">
 							<ActionPanel
@@ -435,33 +461,6 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 						</td>
 					)}
 				/>
-
-				{totalPages > 1 && (
-					<div className="flex items-center justify-center gap-2 mt-4">
-						<button
-							onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-							disabled={currentPage === 1}
-							className="px-3 py-2 border border-border rounded-lg text-text hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-						>
-							{t("previous", "Previous")}
-						</button>
-						<span className="px-3 py-2 text-sm text-textMuted">
-							{t("pageOfTotal", "Page {{current}} of {{total}}", {
-								current: currentPage,
-								total: totalPages,
-							})}
-						</span>
-						<button
-							onClick={() =>
-								setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-							}
-							disabled={currentPage === totalPages}
-							className="px-3 py-2 border border-border rounded-lg text-text hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-						>
-							{t("next", "Next")}
-						</button>
-					</div>
-				)}
 			</div>
 
 			<Dialog.Root open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

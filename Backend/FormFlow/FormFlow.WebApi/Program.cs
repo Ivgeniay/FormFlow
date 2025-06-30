@@ -29,21 +29,19 @@ namespace FormFlow.WebApi
             });
             builder.Services.AddOpenApi();
 
+            var allowedOrigins = builder.Configuration.GetValue<string>("AllowedOrigins")?.Split(',') ?? new[] { "http://localhost:3000" };
+
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    policy.WithOrigins(
-                            "https://www.form-flow.xyz",
-                            "https://form-flow.xyz",
-                            "http://localhost:3000",
-                            "http://localhost:5173"
-                        )
+                    policy.WithOrigins(allowedOrigins)
                         .AllowAnyMethod()
                         .AllowAnyHeader()
                         .AllowCredentials();
-                            });
+                });
             });
+
             builder.Services.AddSignalR();
 
             builder.Services.AddDbContext<ApplicationDbContext>(options =>

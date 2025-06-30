@@ -60,7 +60,6 @@ export const TemplatePage: React.FC = () => {
 
 	const canEdit = () => {
 		if (!template) return false;
-		console.log(template);
 		return isOwnerOrModerator() && template.canUserEdit;
 	};
 
@@ -76,6 +75,10 @@ export const TemplatePage: React.FC = () => {
 
 	const handleFillForm = (templateid: string) => {
 		navigate(`/form/from/${templateid}`);
+	};
+
+	const handleCloneTemplate = (templateid: string) => {
+		navigate(`/template/from/${templateid}`);
 	};
 
 	const handleLikeToggle = () => {
@@ -158,13 +161,22 @@ export const TemplatePage: React.FC = () => {
 			<div className="space-y-6">
 				<div className="max-w-2xl mx-auto mt-8">
 					<div className="bg-surface border border-border rounded-lg p-6 mb-6">
-						<div className="flex flex-col sm:flex-row gap-4">
+						<div className="flex flex-col sm:flex-row gap-4 mb-2">
 							<button
 								onClick={() => handleFillForm(template.id)}
 								disabled={!isAuthenticated}
 								className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
 							>
 								{t("fillTheForm", "Fill the Form")}
+							</button>
+						</div>
+						<div className="flex flex-col sm:flex-row gap-4">
+							<button
+								onClick={() => handleCloneTemplate(template.id)}
+								disabled={!isAuthenticated}
+								className="flex-1 px-6 py-3 bg-primary text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+							>
+								{t("cloneTemplate", "Clone template")}
 							</button>
 						</div>
 					</div>

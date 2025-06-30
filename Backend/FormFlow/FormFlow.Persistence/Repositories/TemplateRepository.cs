@@ -93,6 +93,25 @@ namespace FormFlow.Persistence.Repositories
             await _context.SaveChangesAsync();
             return template;
         }
+        public async Task<List<Template>> GetAllVersionsForUserAsync(Guid templateId, Guid forUserId)
+        {
+            var currentTemplate = await _context.Templates
+                .FirstOrDefaultAsync(t => t.Id == templateId && !t.IsDeleted);
+            if (currentTemplate == null)
+                return new List<Template>();
+
+            Guid baseTemplateId;
+            if (currentTemplate.BaseTemplateId.HasValue)
+                baseTemplateId = currentTemplate.BaseTemplateId.Value;
+            else
+                baseTemplateId = templateId;
+
+            return await _context.Templates
+                .Include(t => t.Author)
+                .Where(t => (t.Id == baseTemplateId || t.BaseTemplateId == baseTemplateId) && t.Author.Id == forUserId)
+                .OrderBy(t => t.CreatedAt)
+                .ToListAsync();
+        }
 
         public async Task<List<Template>> GetAllVersionsAsync(Guid templateId)
         {
@@ -113,9 +132,6 @@ namespace FormFlow.Persistence.Repositories
                 .ToListAsync();
         }
 
-            //await _context.Templates
-            //    .Where(t => t.BaseTemplateId == oldVersion.BaseTemplateId)
-            //    .ExecuteUpdateAsync(t => t.SetProperty(x => x.IsCurrentVersion, false));
         public async Task<Template> CreateNewVersionAsync(Template oldVersion, Template newVersion)
         {
 

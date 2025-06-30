@@ -21,5 +21,6 @@ namespace FormFlow.Application.Interfaces
         Task<bool> CanUserEditFormAsync(Guid formId, Guid userId);
 
         Task<FormAccessDto> GetFormAccessAsync(Guid templateId, Guid userId);
+        Task<PagedResult<FormDto>> GetAllForAdmin(Guid userId, int psge, int pageSize);
     }
 }

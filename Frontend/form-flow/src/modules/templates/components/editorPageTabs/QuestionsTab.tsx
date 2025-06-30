@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useImperativeHandle, useState } from "react";
 import { TemplateEditor } from "../../../../pages/templates/TemplateEditor";
 import { QuestionDto, TemplateDto } from "../../../../shared/api_types";
 import {
-	QuestionUpdateRequest,
+	UpdateQuestionDto,
 	templateApi,
 	UpdateTemplateRequest,
 } from "../../../../api/templateApi";
@@ -40,6 +40,7 @@ export const convertQuestionDtoToQuestionData = (
 	return {
 		id: questionDto.id,
 		order: questionDto.order,
+		isDeleted: false,
 		title: parsedData.title || "",
 		description: parsedData.description || "",
 		type: parsedData.type || QuestionType.ShortText,
@@ -64,19 +65,31 @@ export const downloadImageFromUrl = async (
 
 export const convertQuestionDataToUpdateRequest = (
 	questionData: QuestionData
-): QuestionUpdateRequest => {
-	return {
-		id: questionData.id,
-		order: questionData.order,
-		showInResults: questionData.showInResults,
-		isRequired: questionData.isRequired,
-		data: JSON.stringify({
-			title: questionData.title,
-			description: questionData.description,
-			type: questionData.type,
-			typeSpecificData: questionData.typeSpecificData,
-		}),
-	};
+): UpdateQuestionDto => {
+	try {
+		const isNewQuestion =
+			!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+				questionData.id
+			);
+		const result = {
+			id: questionData.id,
+			order: questionData.order,
+			showInResults: questionData.showInResults,
+			isNewQuestion: isNewQuestion,
+			isDeleted: questionData.isDeleted,
+			isRequired: questionData.isRequired,
+			data: JSON.stringify({
+				title: questionData.title,
+				description: questionData.description,
+				type: questionData.type,
+				typeSpecificData: questionData.typeSpecificData,
+			}),
+		};
+		return result;
+	} catch (error) {
+		console.error("Error converting question:", error, questionData);
+		throw error;
+	}
 };
 
 export function convertTemplateToFormTemplate(
@@ -90,7 +103,9 @@ export function convertTemplateToFormTemplate(
 		accessType: template.accessType,
 		tags: template.tags.map((tag) => tag.name),
 		allowedUserIds: template.allowedUsers.map((user) => user.id),
-		questions: template.questions.map(convertQuestionDtoToQuestionData),
+		questions: template.questions
+			.sort((a, b) => a.order - b.order)
+			.map(convertQuestionDtoToQuestionData),
 	};
 }
 
@@ -104,7 +119,6 @@ export const QuestionsTab = forwardRef<QuestionsTabRef, TabProps>(
 
 		const handleFormTemplateChange = (updatedTemplate: FormTemplate) => {
 			setFormTemplate(updatedTemplate);
-			// console.log(updatedTemplate);
 			setHasChanges(true);
 			if (hasChangeCallback) hasChangeCallback(true);
 		};
@@ -131,7 +145,7 @@ export const QuestionsTab = forwardRef<QuestionsTabRef, TabProps>(
 						convertQuestionDataToUpdateRequest
 					),
 				};
-				// console.log(updateRequest);
+				// console.log("About to call updateTemplate with:", updateRequest);
 				await templateApi.updateTemplate(
 					template.id,
 					updateRequest,
@@ -154,6 +168,7 @@ export const QuestionsTab = forwardRef<QuestionsTabRef, TabProps>(
 				setHasChanges(false);
 				if (hasChangeCallback) hasChangeCallback(false);
 			} catch (error: any) {
+				console.error(error);
 				toast.error(
 					error.message || t("errorSavingQuestions", "Error saving questions")
 				);

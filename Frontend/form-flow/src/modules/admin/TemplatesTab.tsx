@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -50,15 +50,16 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 	const [columns, setColumns] = useState<ColumnConfig[]>(defaultColumns);
 	const [showColumnDropdown, setShowColumnDropdown] = useState(false);
 	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
-	const [currentPage, setCurrentPage] = useState(1);
-	const [totalPages, setTotalPages] = useState(1);
+	const [loadingMore, setLoadingMore] = useState(false);
+	const [hasMore, setHasMore] = useState(true);
+	const [page, setPage] = useState(1);
 	const [totalCount, setTotalCount] = useState(0);
 
-	const pageSize = 20;
+	const pageSize = 2;
 
 	useEffect(() => {
-		loadTemplates();
-	}, [accessToken, currentPage]);
+		loadInitialTemplates();
+	}, [accessToken]);
 
 	useEffect(() => {
 		setSortedTemplates([...templates]);
@@ -75,18 +76,19 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 		return () => document.removeEventListener("click", handleClickOutside);
 	}, [showColumnDropdown]);
 
-	const loadTemplates = async () => {
+	const loadInitialTemplates = async () => {
 		try {
 			setLoading(true);
 			const result = await templateApi.getAllTemplatesForAdmin(
-				currentPage,
+				1,
 				pageSize,
 				accessToken
 			);
 			console.log(result);
 			setTemplates(result.data);
-			setTotalPages(result.pagination.totalPages);
 			setTotalCount(result.pagination.totalCount);
+			setPage(1);
+			setHasMore(result.data.length === pageSize);
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -97,6 +99,36 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 			setLoading(false);
 		}
 	};
+
+	const loadMoreTemplates = useCallback(async () => {
+		if (!accessToken || loadingMore) return;
+
+		try {
+			setLoadingMore(true);
+			const nextPage = page + 1;
+			const result = await templateApi.getAllTemplatesForAdmin(
+				nextPage,
+				pageSize,
+				accessToken
+			);
+
+			if (result.data.length > 0) {
+				setTemplates((prev) => [...prev, ...result.data]);
+				setPage(nextPage);
+				setHasMore(result.data.length === pageSize);
+			} else {
+				setHasMore(false);
+			}
+		} catch (error: any) {
+			toast.error(
+				error.message ||
+					t("errorLoadingMoreTemplates", "Error loading more templates") ||
+					"Error loading more templates"
+			);
+		} finally {
+			setLoadingMore(false);
+		}
+	}, [accessToken, page, loadingMore]);
 
 	const handleSort = (sortConfig: SortConfig) => {
 		const sorted = [...templates].sort((a, b) => {
@@ -195,7 +227,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 					) || "Template published successfully"
 				);
 			}
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -212,7 +244,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 				t("templateArchivedSuccessfully", "Template archived successfully") ||
 					"Template archived successfully"
 			);
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -237,7 +269,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 						"Template deleted successfully"
 				);
 			}
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -261,7 +293,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 				) || "Templates published successfully"
 			);
 			setSelectedTemplates(new Set());
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -285,7 +317,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 				) || "Templates unpublished successfully"
 			);
 			setSelectedTemplates(new Set());
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -307,7 +339,7 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 					"Templates deleted successfully"
 			);
 			setSelectedTemplates(new Set());
-			loadTemplates();
+			loadInitialTemplates();
 		} catch (error: any) {
 			toast.error(
 				error.message ||
@@ -529,6 +561,8 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 					t("noTemplatesFound", "No templates found") || "No templates found"
 				}
 				onRowHover={setHoveredRowId}
+				onReachEnd={hasMore ? loadMoreTemplates : undefined}
+				isLoadingMore={loadingMore}
 				renderRow={(template) => (
 					<td className="absolute inset-0 pointer-events-none">
 						<ActionPanel
@@ -540,33 +574,6 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 					</td>
 				)}
 			/>
-
-			{totalPages > 1 && (
-				<div className="flex items-center justify-center gap-2 mt-4">
-					<button
-						onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-						disabled={currentPage === 1}
-						className="px-3 py-2 border border-border rounded-lg text-text hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-					>
-						{t("previous", "Previous") || "Previous"}
-					</button>
-					<span className="px-3 py-2 text-sm text-textMuted">
-						{t("pageOfTotal", "Page {{current}} of {{total}}", {
-							current: currentPage,
-							total: totalPages,
-						}) || `Page ${currentPage} of ${totalPages}`}
-					</span>
-					<button
-						onClick={() =>
-							setCurrentPage((prev) => Math.min(totalPages, prev + 1))
-						}
-						disabled={currentPage === totalPages}
-						className="px-3 py-2 border border-border rounded-lg text-text hover:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-					>
-						{t("next", "Next") || "Next"}
-					</button>
-				</div>
-			)}
 		</div>
 	);
 };

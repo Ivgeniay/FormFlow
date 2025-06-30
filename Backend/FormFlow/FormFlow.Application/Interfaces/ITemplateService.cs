@@ -23,7 +23,8 @@ namespace FormFlow.Application.Interfaces
         Task<TemplateDto> GetTemplateByIdAsync(Guid id, Guid? userId = null);
         Task<TemplateDto> GetCurrentVersionAsync(Guid baseTemplateId, Guid? userId = null);
         Task<TemplateDto> GetSpecificVersionAsync(Guid baseTemplateId, int version, Guid? userId = null);
-        Task<List<TemplateDto>> GetAllVersionsAsync(Guid baseTemplateId, Guid userId);
+        Task<List<TemplateDto>> GetAllVersionsForUserAsync(Guid templateId, Guid askingUserId, Guid forUserId);
+        Task<List<TemplateDto>> GetAllVersionsAsync(Guid templateId, Guid askingUserId);
         Task<bool> TemplateExistsAsync(Guid id);
         Task<bool> BaseTemplateExistsAsync(Guid baseTemplateId);
 

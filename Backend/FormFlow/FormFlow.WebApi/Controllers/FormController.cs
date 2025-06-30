@@ -2,9 +2,11 @@
 using FormFlow.Application.DTOs.Templates;
 using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Models.General;
+using FormFlow.WebApi.Common.Attributes;
 using FormFlow.WebApi.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 
 namespace FormFlow.WebApi.Controllers
 {
@@ -71,6 +73,29 @@ namespace FormFlow.WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("all/admin")]
+        [Authorize]
+        [RequireRole(UserRole.Admin)]
+        public async Task<IActionResult> GetFormsForAdmin([FromQuery] int page, [FromQuery] int pageSize)
+        {
+            try
+            {
+                var userId = this.GetCurrentUserId();
+                if (!userId.HasValue)
+                {
+                    return Unauthorized(new { message = "Invalid user context" });
+                }
+
+                var forms = await _formService.GetAllForAdmin(userId.Value, page, pageSize);
+
+                return Ok(forms);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(new { message = $"{ex.Message}" });
             }
         }
 

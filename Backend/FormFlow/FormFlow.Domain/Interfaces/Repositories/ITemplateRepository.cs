@@ -12,6 +12,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task ArchiveTemplatesAsync(Guid[] templateIds);
         Task UnarchiveTemplatesAsync(Guid[] templateIds);
         Task<Template?> GetSpecificVersionAsync(Guid baseTemplateId, int version);
+        Task<List<Template>> GetAllVersionsForUserAsync(Guid templateId, Guid forUserId);
         Task<List<Template>> GetAllVersionsAsync(Guid templateId);
         Task<List<Template>> GetAllVersionsByBaseAsync(Guid baseTemplateId);
         Task<Template> CreateAsync(Template template);

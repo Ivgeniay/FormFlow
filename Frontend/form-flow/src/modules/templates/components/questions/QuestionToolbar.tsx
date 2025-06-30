@@ -39,11 +39,12 @@ export const QuestionToolbar = React.forwardRef<
 			>
 				<button
 					onClick={onAddQuestion}
-					disabled={isOnlyView}
+					// disabled={isOnlyView}
 					className={`p-3 rounded-lg transition-colors group ${
-						isOnlyView
-							? "text-textMuted cursor-not-allowed opacity-50"
-							: "text-text hover:bg-background"
+						// isOnlyView
+						// 	? "text-textMuted cursor-not-allowed opacity-50"
+						// 	:
+						"text-text hover:bg-background"
 					}`}
 					title={t("addQuestion") || "Add Question"}
 				>
@@ -63,12 +64,13 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
-					disabled={isOnlyView}
+					// disabled={isOnlyView}
 					onClick={onDuplicateQuestion}
 					className={`p-3 rounded-lg transition-colors group ${
-						isOnlyView
-							? "text-textMuted cursor-not-allowed opacity-50"
-							: "text-text hover:bg-background"
+						// isOnlyView
+						// 	? "text-textMuted cursor-not-allowed opacity-50"
+						// 	:
+						"text-text hover:bg-background"
 					}`}
 					title={t("duplicateQuestion") || "Duplicate Question"}
 				>
@@ -88,12 +90,15 @@ export const QuestionToolbar = React.forwardRef<
 				</button>
 
 				<button
-					disabled={binDisable || isOnlyView}
+					// disabled={binDisable || isOnlyView}
+					disabled={binDisable}
 					onClick={onDeleteQuestion}
 					className={`p-3 rounded-lg transition-colors group ${
-						binDisable || isOnlyView
-							? "text-textMuted cursor-not-allowed opacity-50"
-							: "text-textMuted hover:text-error hover:bg-background"
+						!binDisable &&
+						// || isOnlyView
+						// 	? "text-textMuted cursor-not-allowed opacity-50"
+						// 	:
+						"text-textMuted hover:text-error hover:bg-background"
 					}`}
 					title={t("deleteQuestion") || "Delete Question"}
 				>

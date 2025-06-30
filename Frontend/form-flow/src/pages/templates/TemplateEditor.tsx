@@ -131,8 +131,21 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 
 	const handleDeleteQuestion = (questionId: string) => {
 		updateQuestions((prev) => {
-			const filtered = prev.filter((q) => q.id !== questionId);
-			return reorderQuestions(filtered);
+			const isNewQuestion =
+				!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+					questionId
+				);
+
+			let updatedQuestions;
+			if (isNewQuestion) {
+				updatedQuestions = prev.filter((q) => q.id !== questionId);
+			} else {
+				updatedQuestions = prev.map((q) =>
+					q.id === questionId ? { ...q, isDeleted: true } : q
+				);
+			}
+
+			return reorderQuestions(updatedQuestions);
 		});
 	};
 
@@ -147,20 +160,18 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 	};
 
 	const addNewQuestion = () => {
-		const activeIndex = activeQuestionId
-			? formTemplate.questions.findIndex((q) => q.id === activeQuestionId)
-			: -1;
-		const newOrder =
-			activeIndex !== -1
-				? formTemplate.questions[activeIndex].order + 1
-				: formTemplate.questions.length + 1;
-
 		const newId = getNextQuestionId();
+
+		const activeQuestions = formTemplate.questions.filter((q) => !q.isDeleted);
+		const activeIndex = activeQuestionId
+			? activeQuestions.findIndex((q) => q.id === activeQuestionId)
+			: -1;
 
 		const newQuestion: QuestionData = {
 			id: newId,
-			order: newOrder,
+			order: activeIndex !== -1 ? activeIndex + 2 : activeQuestions.length + 1, // временный order
 			title: "",
+			isDeleted: false,
 			description: "",
 			type: QuestionType.ShortText,
 			isRequired: false,
@@ -191,11 +202,24 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 		return updatedQuestions;
 	};
 
+	// const reorderQuestions = (questions: QuestionData[]) => {
+	// 	return questions.map((question, index) => ({
+	// 		...question,
+	// 		order: index + 1,
+	// 	}));
+	// };
+
 	const reorderQuestions = (questions: QuestionData[]) => {
-		return questions.map((question, index) => ({
+		const activeQuestions = questions
+			.filter((q) => !q.isDeleted)
+			.sort((a, b) => a.order - b.order);
+
+		const reorderedActive = activeQuestions.map((question, index) => ({
 			...question,
 			order: index + 1,
 		}));
+		const deletedQuestions = questions.filter((q) => q.isDeleted);
+		return [...reorderedActive, ...deletedQuestions];
 	};
 
 	const handleDragEnd = (event: DragEndEvent) => {
@@ -203,14 +227,22 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 
 		if (over && active.id !== over.id) {
 			updateQuestions((prev) => {
-				const oldIndex = prev.findIndex((q) => q.id === active.id);
-				const newIndex = prev.findIndex((q) => q.id === over.id);
+				const activeQuestions = prev.filter((q) => !q.isDeleted);
+				const deletedQuestions = prev.filter((q) => q.isDeleted);
 
-				const updatedQuestions = [...prev];
-				const [movedQuestion] = updatedQuestions.splice(oldIndex, 1);
-				updatedQuestions.splice(newIndex, 0, movedQuestion);
+				const oldIndex = activeQuestions.findIndex((q) => q.id === active.id);
+				const newIndex = activeQuestions.findIndex((q) => q.id === over.id);
 
-				return reorderQuestions(updatedQuestions);
+				const reorderedActive = [...activeQuestions];
+				const [movedQuestion] = reorderedActive.splice(oldIndex, 1);
+				reorderedActive.splice(newIndex, 0, movedQuestion);
+
+				const finalActiveQuestions = reorderedActive.map((question, index) => ({
+					...question,
+					order: index + 1,
+				}));
+
+				return [...finalActiveQuestions, ...deletedQuestions];
 			});
 		}
 	};
@@ -222,7 +254,9 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 			modifiers={[restrictToVerticalAxis]}
 		>
 			<SortableContext
-				items={formTemplate.questions.map((q) => q.id)}
+				items={formTemplate.questions
+					.filter((q) => !q.isDeleted)
+					.map((q) => q.id)}
 				strategy={verticalListSortingStrategy}
 			>
 				<div className="min-h-screen bg-background p-8">
@@ -244,20 +278,22 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 						/>
 
 						<div className="space-y-2">
-							{formTemplate.questions.map((question, index) => (
-								<QuestionCard
-									key={question.id}
-									ref={(el) => setCardRef(question.id, el)}
-									question={question}
-									onQuestionChange={(updatedQuestion) =>
-										handleQuestionChange(question.id, updatedQuestion)
-									}
-									onDelete={() => handleDeleteQuestion(question.id)}
-									isActive={activeQuestionId === question.id}
-									onActivate={() => setActiveQuestionId(question.id)}
-									mode={mode}
-								/>
-							))}
+							{formTemplate.questions
+								.filter((q) => !q.isDeleted)
+								.map((question, index) => (
+									<QuestionCard
+										key={question.id}
+										ref={(el) => setCardRef(question.id, el)}
+										question={question}
+										onQuestionChange={(updatedQuestion) =>
+											handleQuestionChange(question.id, updatedQuestion)
+										}
+										onDelete={() => handleDeleteQuestion(question.id)}
+										isActive={activeQuestionId === question.id}
+										onActivate={() => setActiveQuestionId(question.id)}
+										mode={mode}
+									/>
+								))}
 						</div>
 
 						<QuestionToolbar

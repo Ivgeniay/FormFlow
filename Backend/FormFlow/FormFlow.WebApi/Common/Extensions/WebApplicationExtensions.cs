@@ -527,9 +527,9 @@ namespace FormFlow.WebApi.Common.Extensions
             return allTags.OrderBy(x => random.Next()).Take(count).ToList();
         }
 
-        private static List<QuestionDto> GenerateRandomQuestions(Random random)
+        private static List<UpdateQuestionDto> GenerateRandomQuestions(Random random)
         {
-            var questions = new List<QuestionDto>();
+            var questions = new List<UpdateQuestionDto>();
             var questionCount = random.Next(3, 8);
             var jsonSettings = new JsonSerializerSettings
             {
@@ -542,9 +542,10 @@ namespace FormFlow.WebApi.Common.Extensions
                 var questionType = (QuestionType)random.Next(1, 8);
                 var questionData = GenerateQuestionData(questionType, i, random);
 
-                questions.Add(new QuestionDto
+                questions.Add(new UpdateQuestionDto
                 {
-                    Id = Guid.Empty,
+                    Id = "",
+                    IsNewQuestion = true,
                     Order = i + 1,
                     ShowInResults = random.Next(100) < 70,
                     IsRequired = random.Next(100) < 60,
