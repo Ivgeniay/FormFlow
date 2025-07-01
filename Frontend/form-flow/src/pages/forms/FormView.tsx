@@ -6,8 +6,6 @@ import { formApi } from "../../api/formApi";
 import { FormDto } from "../../shared/api_types";
 import toast from "react-hot-toast";
 import { AppLoader } from "../../components/AppLoader";
-import { FormRenderer } from "../../modules/forms/components/FormRenderer";
-import { TemplateHeader } from "../../modules/templates/components/editorPageTabs/TemplateHeader";
 import { FormattedTextDisplay } from "../../ui/Input/FormattedTextDisplay";
 
 export const FormView: React.FC = () => {

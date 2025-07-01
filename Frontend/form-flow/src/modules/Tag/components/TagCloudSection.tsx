@@ -21,6 +21,7 @@ export const TagCloudSection: React.FC = () => {
 			setLoading(true);
 			setError(null);
 			const popularTags = await tagsApi.getTagCloud(30);
+			console.log(popularTags);
 			setTags(
 				popularTags.tags.map((e) => ({
 					id: e.id,

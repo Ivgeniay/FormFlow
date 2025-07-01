@@ -202,13 +202,6 @@ export const TemplateEditor: React.FC<FormTemplateProps> = ({
 		return updatedQuestions;
 	};
 
-	// const reorderQuestions = (questions: QuestionData[]) => {
-	// 	return questions.map((question, index) => ({
-	// 		...question,
-	// 		order: index + 1,
-	// 	}));
-	// };
-
 	const reorderQuestions = (questions: QuestionData[]) => {
 		const activeQuestions = questions
 			.filter((q) => !q.isDeleted)

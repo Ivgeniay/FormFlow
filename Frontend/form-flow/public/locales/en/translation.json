@@ -41,6 +41,14 @@
 	"authenticationSuccessful": "Authentication Successful",
 	"redirectingToHome": "Redirecting to home...",
 
+	"noEditPermission": "You don't have permission to edit this form",
+	"failedToLoadForm": "Failed to load form",
+	"formSaved": "Form saved successfully",
+	"failedToSaveForm": "Failed to save form",
+	"unsavedChangesConfirm": "You have unsaved changes. Are you sure you want to leave?",
+	"enterAnswer": "Enter your answer",
+	"lastUpdated": "Last updated",
+
 	"home": "Home",
 	"profile": "Profile",
 	"settings": "Settings",

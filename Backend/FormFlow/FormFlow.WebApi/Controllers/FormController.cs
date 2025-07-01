@@ -101,7 +101,7 @@ namespace FormFlow.WebApi.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<IActionResult> UpdateForm(Guid formId, [FromBody] UpdateFormRequest request)
+        public async Task<IActionResult> UpdateForm([FromBody] UpdateFormRequest request)
         {
             try
             {
@@ -109,10 +109,9 @@ namespace FormFlow.WebApi.Controllers
                 if (userId == null)
                     return Unauthorized(new { message = "Invalid user context" });
 
-                if (!await _formService.CanUserEditFormAsync(formId, userId.Value))
+                if (!await _formService.CanUserEditFormAsync(request.Id, userId.Value))
                     return Forbid("You don't have permission to edit this form");
 
-                request.Id = formId;
                 var form = await _formService.UpdateFormAsync(request, userId.Value);
                 return Ok(form);
             }

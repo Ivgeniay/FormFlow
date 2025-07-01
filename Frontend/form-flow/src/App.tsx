@@ -25,6 +25,7 @@ import { FormView } from "./pages/forms/FormView";
 import { ProfilePage } from "./pages/user/ProfilePage";
 import { AdminPanelPage } from "./pages/admin/AdminPanelPage";
 import setupAxiosInterceptors from "./api/setupAxiosInterceptors";
+import { FormEditorPage } from "./pages/forms/FormEditorPage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -128,6 +129,14 @@ function App() {
 							element={
 								<Layout>
 									<TemplatePage />
+								</Layout>
+							}
+						/>
+						<Route
+							path="/form/edit/:formId"
+							element={
+								<Layout>
+									<FormEditorPage />
 								</Layout>
 							}
 						/>

@@ -48,6 +48,14 @@
 	"myTemplates": "Мои шаблоны",
 	"myForms": "Мои формы",
 
+	"noEditPermission": "У вас нет прав для редактирования этой формы",
+	"failedToLoadForm": "Не удалось загрузить форму",
+	"formSaved": "Форма успешно сохранена",
+	"failedToSaveForm": "Не удалось сохранить форму",
+	"unsavedChangesConfirm": "У вас есть несохраненные изменения. Вы уверены, что хотите уйти?",
+	"enterAnswer": "Введите ваш ответ",
+	"lastUpdated": "Последнее обновление",
+
 	"authMethods": "Методы авторизации",
 	"emailAuth": "Email и пароль",
 	"googleAuth": "Google",
