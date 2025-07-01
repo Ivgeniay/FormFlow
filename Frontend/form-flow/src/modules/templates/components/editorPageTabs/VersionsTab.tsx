@@ -8,7 +8,11 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { TemplateDto } from "../../../../shared/api_types";
 import { templateApi } from "../../../../api/templateApi";
-import { SortableTable, SortConfig, TableColumn } from "./SortableTable";
+import {
+	SortableTable,
+	SortConfig,
+	TableColumn,
+} from "../../../../ui/SortableTable";
 import { ActionItem, ActionPanel } from "./ActionPanel";
 import { useAuth } from "../../../auth/hooks/useAuth";
 

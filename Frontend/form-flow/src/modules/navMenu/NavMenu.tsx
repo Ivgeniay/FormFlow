@@ -215,8 +215,8 @@ export const NavMenu: React.FC<NavMenuProps> = ({
 
 						<NavMenuButton
 							icon={templatesIcon}
-							label={t("myTemplates") || "My Templates"}
-							onClick={() => handleNavigate("/my-templates")}
+							label={t("myDashboard") || "My Dashboard"}
+							onClick={() => handleNavigate("/mydashboard")}
 							isVisible={isAuthenticated}
 						/>
 

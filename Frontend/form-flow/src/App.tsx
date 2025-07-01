@@ -26,6 +26,7 @@ import { ProfilePage } from "./pages/user/ProfilePage";
 import { AdminPanelPage } from "./pages/admin/AdminPanelPage";
 import setupAxiosInterceptors from "./api/setupAxiosInterceptors";
 import { FormEditorPage } from "./pages/forms/FormEditorPage";
+import { MyDashboardPage } from "./pages/dashboard/MyDashboardPage";
 
 const AuthOnlyRoute: React.FC<{ children: React.ReactNode }> = ({
 	children,
@@ -64,6 +65,14 @@ function App() {
 										}
 									/>
 								</AuthOnlyRoute>
+							}
+						/>
+						<Route
+							path="/mydashboard"
+							element={
+								<Layout>
+									<MyDashboardPage />
+								</Layout>
 							}
 						/>
 						<Route

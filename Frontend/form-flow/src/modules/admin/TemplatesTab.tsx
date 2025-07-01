@@ -8,11 +8,7 @@ import {
 	ActionItem,
 	ActionPanel,
 } from "../templates/components/editorPageTabs/ActionPanel";
-import {
-	SortableTable,
-	SortConfig,
-	TableColumn,
-} from "../templates/components/editorPageTabs/SortableTable";
+import { SortableTable, SortConfig, TableColumn } from "../../ui/SortableTable";
 
 interface TemplatesTabProps {
 	accessToken: string;

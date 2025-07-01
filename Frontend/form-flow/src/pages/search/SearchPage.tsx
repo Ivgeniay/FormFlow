@@ -5,10 +5,7 @@ import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { TemplateDto, UserSearchDto } from "../../shared/api_types";
 import { searchApi, SearchSortBy, SearchRequest } from "../../api/searchApi";
 import { AppLoader } from "../../components/AppLoader";
-import {
-	SortableTable,
-	TableColumn,
-} from "../../modules/templates/components/editorPageTabs/SortableTable";
+import { SortableTable, TableColumn } from "../../ui/SortableTable";
 import {
 	ActionItem,
 	ActionPanel,

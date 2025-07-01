@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
-import {
-	SortableTable,
-	SortConfig,
-	TableColumn,
-} from "../templates/components/editorPageTabs/SortableTable";
+import { SortableTable, SortConfig, TableColumn } from "../../ui/SortableTable";
 import { UserDto } from "../../shared/api_types";
 import { usersApi } from "../../api/usersApi";
 import {

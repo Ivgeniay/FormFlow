@@ -2,7 +2,11 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { formApi } from "../../../../api/formApi";
-import { SortableTable, SortConfig, TableColumn } from "./SortableTable";
+import {
+	SortableTable,
+	SortConfig,
+	TableColumn,
+} from "../../../../ui/SortableTable";
 import { ActionItem, ActionPanel } from "./ActionPanel";
 import toast from "react-hot-toast";
 import { FormDto, TemplateDto } from "../../../../shared/api_types";

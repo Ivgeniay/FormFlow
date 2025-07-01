@@ -159,8 +159,11 @@ namespace FormFlow.Persistence.Repositories
             var tag = await GetByIdAsync(tagId);
             if (tag != null && tag.UsageCount > 0)
             {
-                tag.UsageCount--;
-                await UpdateAsync(tag);
+                if (tag.UsageCount > 0)
+                {
+                    tag.UsageCount--;
+                    await UpdateAsync(tag);
+                }
             }
         }
 
@@ -172,8 +175,17 @@ namespace FormFlow.Persistence.Repositories
 
             if (tags != null)
             {
-                tags.ForEach(t => t.UsageCount--);
-                await _context.SaveChangesAsync();
+                int decrementCounter = 0;
+                tags.ForEach(t =>
+                {
+                    if (t.UsageCount > 0)
+                    {
+                        t.UsageCount--;
+                        decrementCounter++;
+                    }
+                });
+
+                if (decrementCounter > 0) await _context.SaveChangesAsync();
             }
         }
 

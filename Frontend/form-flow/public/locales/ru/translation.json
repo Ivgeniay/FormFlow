@@ -55,6 +55,12 @@
 	"unsavedChangesConfirm": "У вас есть несохраненные изменения. Вы уверены, что хотите уйти?",
 	"enterAnswer": "Введите ваш ответ",
 	"lastUpdated": "Последнее обновление",
+	"myDashboard": "Моя панель инструментов",
+	"confirmDeleteTemplate": "Подтвердите удаление шаблона",
+	"deleteTemplateConfirm": "Вы уверены, что хотите удалить этот шаблон? Это действие нельзя отменить.",
+	"selectedTemplates": "Выбрано",
+	"errorLoadingMoreTemplates": "Ошибка загрузки дополнительных шаблонов",
+	"dashboardDescription": "Управляйте шаблонами и отправленными формами",
 
 	"authMethods": "Методы авторизации",
 	"emailAuth": "Email и пароль",
