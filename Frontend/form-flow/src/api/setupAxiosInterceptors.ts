@@ -76,12 +76,9 @@ const setupAxiosInterceptors = () => {
 				try {
 					const authStore = useAuthStore.getState();
 
-					console.log("Attempting token refresh due to blacklist...");
 					await authStore.refreshTokens();
-					console.log("Token refresh successful");
 
 					const newAccessToken = useAuthStore.getState().accessToken;
-					console.log(`newAccessToken: ${newAccessToken}`);
 
 					if (newAccessToken && originalRequest.headers) {
 						originalRequest.headers[

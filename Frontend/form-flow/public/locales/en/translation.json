@@ -16,6 +16,11 @@
 	"status": "Status",
 	"noResults": "No results",
 	"viewAuthor": "View Author",
+	"includeArchived": "Include archived",
+	"searching": "Searching...",
+	"searchTopics": "Search with topics",
+	"searchAuthors ": "Search with authors",
+	"searchTags": "Search with tags",
 
 	"login": "Login",
 	"register": "Register",

@@ -83,6 +83,14 @@ namespace FormFlow.Infrastructure.Services
                         {
                             Field = "title",
                             Value = $"*{query.ToLower()}*"
+                        },
+                    },
+                    MustNot = new QueryContainer[]
+                    {
+                        new TermQuery
+                        {
+                            Field = "isDeleted",
+                            Value = true
                         }
                     },
                     MinimumShouldMatch = 1
@@ -348,9 +356,8 @@ namespace FormFlow.Infrastructure.Services
         {
             return sortBy switch
             {
-                SearchSortBy.CreatedDate => new List<ISort> { new FieldSort { Field = "createdAt", Order = SortOrder.Descending } },
-                SearchSortBy.FormsCount => new List<ISort> { new FieldSort { Field = "formsCount", Order = SortOrder.Descending } },
-                SearchSortBy.LikesCount => new List<ISort> { new FieldSort { Field = "likesCount", Order = SortOrder.Descending } },
+                SearchSortBy.Date => new List<ISort> { new FieldSort { Field = "createdAt", Order = SortOrder.Descending } },
+                SearchSortBy.Popularity => new List<ISort> { new FieldSort { Field = "formsCount", Order = SortOrder.Descending } },
                 SearchSortBy.Title => new List<ISort> { new FieldSort { Field = "title.keyword", Order = SortOrder.Ascending } },
                 SearchSortBy.Relevance => new List<ISort> { new FieldSort { Field = "_score", Order = SortOrder.Descending } },
                 _ => new List<ISort> { new FieldSort { Field = "_score", Order = SortOrder.Descending } }

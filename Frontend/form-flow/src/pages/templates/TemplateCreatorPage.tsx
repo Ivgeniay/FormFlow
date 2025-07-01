@@ -44,7 +44,6 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					convertQuestionDtoToQuestionData
 				),
 			};
-			// console.log("111", ft);
 			return ft;
 		}
 		return {
@@ -177,7 +176,6 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					formTemplate.image,
 					accessToken
 				);
-				// console.log(response);
 			}
 
 			if (publishImmediately) {

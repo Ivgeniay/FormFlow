@@ -177,8 +177,8 @@ namespace FormFlow.WebApi.Controllers
             [FromQuery] string[]? tags = null,
             [FromQuery] string? author = null,
             [FromQuery] string? topic = null,
-            [FromQuery] SearchSortBy sortBy = SearchSortBy.Relevance,
-            [FromQuery] bool includeDeleted = false,
+            [FromQuery] int sortBy = -1,
+            [FromQuery] bool includeDeleted = true,
             [FromQuery] bool includeArchived = true,
             [FromQuery] bool includeUnpublished = true,
             [FromQuery] int page = 1,
@@ -188,13 +188,15 @@ namespace FormFlow.WebApi.Controllers
             {
                 if (pageSize > 100) pageSize = 100;
 
+                var typeSortBy = sortBy != -1 ? SearchSortBy.Relevance : (SearchSortBy)sortBy;
+
                 var searchQuery = new SearchQuery
                 {
                     Query = q?.Trim() ?? "",
                     Tags = tags?.Where(t => !string.IsNullOrWhiteSpace(t)).ToList(),
                     AuthorName = author?.Trim(),
                     Topic = topic?.Trim(),
-                    SortBy = sortBy,
+                    SortBy = typeSortBy,
                     Page = page,
                     PageSize = pageSize,
                     IncludeDeleted = includeDeleted,
@@ -203,10 +205,12 @@ namespace FormFlow.WebApi.Controllers
                 };
 
                 var result = await _searchService.SearchTemplatesAsync(searchQuery);
+                var templateIds = result.Results.Select(r => r.Id).ToList();
+                var fullTemplates = await _templateService.GetTemplateByIdsAsync(templateIds);
 
                 return Ok(new
                 {
-                    templates = result.Results,
+                    templates = fullTemplates,
                     pagination = new
                     {
                         currentPage = page,

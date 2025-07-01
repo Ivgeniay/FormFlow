@@ -44,7 +44,6 @@ export const FormPage: React.FC<FormPageProps> = () => {
 			setError(null);
 
 			const access = await formApi.getFormAccess(templateId, accessToken);
-			console.log(access);
 			setFormAccess(access);
 		} catch (error: any) {
 			const errorMessage =

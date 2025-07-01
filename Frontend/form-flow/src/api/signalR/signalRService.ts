@@ -40,7 +40,6 @@ export class SignalRService {
 			this.setupEventHandlers();
 			await this.connection.start();
 
-			console.log("SignalR Connected Successfully");
 			this.reconnectAttempts = 0;
 			this.isReconnecting = false;
 
@@ -55,16 +54,15 @@ export class SignalRService {
 		if (!this.connection) return;
 
 		this.connection.onclose(async (error) => {
-			console.log("SignalR Connection Closed:", error);
+			console.error("SignalR Connection Closed:", error);
 		});
 
 		this.connection.onreconnecting((error) => {
-			console.log("SignalR Reconnecting:", error);
+			console.error("SignalR Reconnecting:", error);
 			this.isReconnecting = true;
 		});
 
 		this.connection.onreconnected(() => {
-			console.log("SignalR Reconnected");
 			this.isReconnecting = false;
 			this.reconnectAttempts = 0;
 		});
@@ -74,7 +72,6 @@ export class SignalRService {
 		if (this.connection) {
 			await this.connection.stop();
 			this.connection = null;
-			console.log("SignalR Disconnected");
 		}
 	}
 

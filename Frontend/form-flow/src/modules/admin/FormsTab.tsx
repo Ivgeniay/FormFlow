@@ -77,7 +77,6 @@ export const FormsTab: React.FC<FormsTabProps> = ({ accessToken }) => {
 				pageSize,
 				accessToken
 			);
-			console.log(result);
 			setForms(result.data);
 			setPage(1);
 			setHasMore(result.data.length === pageSize);

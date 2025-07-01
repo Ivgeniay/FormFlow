@@ -868,7 +868,9 @@ namespace FormFlow.Application.Services
             try
             {
                 var template = await _templateRepository.GetWithAllDetailsAsync(templateId, true);
-                if (template == null || template.IsDeleted)
+                if (template == null 
+                    //|| template.IsDeleted
+                    )
                 {
                     await _searchService.RemoveTemplateFromIndexAsync(templateId);
                     return;

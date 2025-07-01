@@ -136,8 +136,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 			const answer = questionData?.answer || null;
 			return answer;
 		}
-
-		console.log("No answer found for:", questionId);
 		return null;
 	};
 
@@ -223,11 +221,6 @@ export const FormRenderer: React.FC<FormRendererProps> = ({
 
 			case QuestionType.MultipleChoice:
 				const multipleChoiceValue = getAnswerValue(question.id);
-				console.log(
-					"MultipleChoice value:",
-					multipleChoiceValue,
-					typeof multipleChoiceValue
-				);
 
 				return (
 					<MultipleChoiceQuestion

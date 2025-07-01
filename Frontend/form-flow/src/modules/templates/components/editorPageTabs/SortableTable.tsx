@@ -120,7 +120,6 @@ export function SortableTable<T>({
 		} else {
 			newSelection.add(itemId);
 		}
-		// console.log(newSelection);
 		onSelectionChange(newSelection);
 	};
 

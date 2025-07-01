@@ -68,7 +68,7 @@ class SearchApi {
 			q: request.q || "",
 			page: request.page || 1,
 			pageSize: request.pageSize || 20,
-			sortBy: request.sortBy || SearchSortBy.Relevance,
+			sortBy: Number(request.sortBy || SearchSortBy.Relevance),
 			includeArchived: request.includeArchived || false,
 		};
 
@@ -92,11 +92,13 @@ class SearchApi {
 			params.createdBefore = request.createdBefore;
 		}
 
-		console.log("Final params:", params);
 		const response = await axios.get<SearchResponse>(
 			`${API_BASE_URL}/search/templates`,
 			{
 				params,
+				paramsSerializer: {
+					indexes: null,
+				},
 			}
 		);
 
@@ -111,9 +113,9 @@ class SearchApi {
 			q: request.q || "",
 			page: request.page || 1,
 			pageSize: request.pageSize || 20,
-			sortBy: request.sortBy || SearchSortBy.Relevance,
+			sortBy: Number(request.sortBy || SearchSortBy.Relevance),
 			includeArchived: request.includeArchived || true,
-			includeDeleted: request.includeDeleted || false,
+			includeDeleted: request.includeDeleted || true,
 			includeUnpublished: request.includeUnpublished || true,
 		};
 
@@ -128,11 +130,13 @@ class SearchApi {
 		if (request.topic) {
 			params.topic = request.topic;
 		}
-
 		const response = await axios.get<SearchResponse>(
 			`${API_BASE_URL}/search/admin`,
 			{
 				params,
+				paramsSerializer: {
+					indexes: null,
+				},
 				headers: { Authorization: `Bearer ${accessToken}` },
 			}
 		);

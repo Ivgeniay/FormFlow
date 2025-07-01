@@ -73,5 +73,12 @@ namespace FormFlow.Application.Services
         {
             return await _topicRepository.TopicNameExistsAsync(name.Trim());
         }
+
+        public async Task<List<Topic>> SearchTopicAsync(string q, int limit)
+        {
+            var normalizedQuery = q.Trim().ToLower();
+            var tags = await _topicRepository.SearchByNameAsync(normalizedQuery, limit);
+            return tags;
+        }
     }
 }

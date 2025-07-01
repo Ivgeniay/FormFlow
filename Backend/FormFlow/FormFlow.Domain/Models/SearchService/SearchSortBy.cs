@@ -2,10 +2,9 @@
 {
     public enum SearchSortBy
     {
-        Relevance = 1,
-        CreatedDate = 2,
-        FormsCount = 3,
-        LikesCount = 4,
-        Title = 5
+        Relevance = 0,
+        Date = 1,
+        Popularity = 2,
+        Title = 4
     }
 }

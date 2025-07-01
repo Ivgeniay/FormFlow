@@ -19,10 +19,6 @@ export const ProfilePage: React.FC = () => {
 		const ownId = user?.id.toLocaleLowerCase();
 		const isEqual = _id === ownId;
 
-		// console.log("ID:", _id);
-		// console.log("user?.id:", ownId);
-		// console.log("isEqual:", isEqual);
-
 		return isEqual || !id;
 	}, [id, user]);
 

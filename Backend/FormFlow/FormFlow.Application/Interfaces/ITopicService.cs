@@ -12,5 +12,6 @@ namespace FormFlow.Application.Interfaces
         Task DeleteTopicAsync(Guid id);
         Task<bool> TopicExistsAsync(Guid id);
         Task<bool> TopicNameExistsAsync(string name);
+        Task<List<Topic>> SearchTopicAsync(string q, int limit);
     }
 }

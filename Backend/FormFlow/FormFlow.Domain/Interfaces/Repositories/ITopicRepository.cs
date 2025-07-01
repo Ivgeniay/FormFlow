@@ -12,5 +12,6 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<Topic> CreateTopicAsync(Topic topic);
         Task<Topic> UpdateTopicAsync(Guid id, string v);
         Task DeleteTopicAsync(Guid id);
+        Task<List<Topic>> SearchByNameAsync(string normalizedQuery, int limit);
     }
 }

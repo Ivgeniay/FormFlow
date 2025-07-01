@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
-import { TemplateDto } from "../../shared/api_types";
+import { TemplateDto, UserSearchDto } from "../../shared/api_types";
 import { searchApi, SearchSortBy, SearchRequest } from "../../api/searchApi";
 import { AppLoader } from "../../components/AppLoader";
 import {
@@ -13,6 +13,9 @@ import {
 	ActionItem,
 	ActionPanel,
 } from "../../modules/templates/components/editorPageTabs/ActionPanel";
+import { usersApi } from "../../api/usersApi";
+import { topicsApi } from "../../api/topicsApi";
+import { tagsApi } from "../../api/tagsApi";
 
 export const SearchPage: React.FC = () => {
 	const { t } = useTranslation();
@@ -26,6 +29,13 @@ export const SearchPage: React.FC = () => {
 	const [error, setError] = useState<string | null>(null);
 	const [pagination, setPagination] = useState<any>(null);
 	const [searchInfo, setSearchInfo] = useState<any>(null);
+
+	const [availableTags, setAvailableTags] = useState<string[]>([]);
+	const [availableAuthors, setAvailableAuthors] = useState<UserSearchDto[]>([]);
+	const [availableTopics, setAvailableTopics] = useState<string[]>([]);
+	const [tagInput, setTagInput] = useState("");
+	const [authorInput, setAuthorInput] = useState("");
+	const [topicInput, setTopicInput] = useState("");
 
 	const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
 	const [selectedTags, setSelectedTags] = useState<string[]>(
@@ -53,6 +63,10 @@ export const SearchPage: React.FC = () => {
 		setError(null);
 
 		try {
+			// if (!searchParams.get("q")) {
+			// 	return;
+			// }
+
 			const request: SearchRequest = {
 				q: searchParams.get("q") || "",
 				tags: searchParams.getAll("tags"),
@@ -68,8 +82,6 @@ export const SearchPage: React.FC = () => {
 				isAdmin && accessToken
 					? await searchApi.adminSearch(request, accessToken)
 					: await searchApi.searchTemplates(request);
-
-			console.log(response);
 
 			setTemplates(response.templates);
 			setPagination(response.pagination);
@@ -133,7 +145,7 @@ export const SearchPage: React.FC = () => {
 						<span
 							key={tag.name}
 							onClick={() => handleTagClick(tag.name)}
-							className="px-2 py-1 bg-primary/10 text-primary text-xs rounded cursor-pointer hover:bg-primary/20"
+							className="px-2 py-1 bg-background text-primary text-xs rounded cursor-pointer hover:bg-primary/20"
 						>
 							{tag.name}
 						</span>
@@ -173,6 +185,7 @@ export const SearchPage: React.FC = () => {
 			),
 		},
 	];
+
 	const getTemplateActions = (template: TemplateDto): ActionItem[] => [
 		{
 			id: "view",
@@ -223,6 +236,83 @@ export const SearchPage: React.FC = () => {
 			sortBy: sortBy.toString(),
 			includeArchived: includeArchived.toString(),
 		});
+	};
+
+	const handleTagInputChange = async (value: string) => {
+		setTagInput(value);
+		if (value.length >= 2) {
+			try {
+				const tags = await tagsApi.getTagsForAutocomplete(value, 5);
+				setAvailableTags(tags.filter((tag) => !selectedTags.includes(tag)));
+			} catch (error) {
+				console.error("Error loading tags:", error);
+				setAvailableTags([]);
+			}
+		} else {
+			setAvailableTags([]);
+		}
+	};
+
+	const handleAuthorInputChange = async (value: string) => {
+		setAuthorInput(value);
+		if (value.length >= 2 && accessToken) {
+			try {
+				const users = await usersApi.searchUsers(value, 5, accessToken);
+				setAvailableAuthors(users);
+			} catch (error) {
+				console.error("Error loading users:", error);
+				setAvailableAuthors([]);
+			}
+		} else {
+			setAvailableAuthors([]);
+		}
+	};
+
+	const handleTopicInputChange = async (value: string) => {
+		setTopicInput(value);
+		if (value.length >= 2) {
+			try {
+				const topics = await topicsApi.getTopicForAutocomplete(value, 5);
+				setAvailableTopics(topics);
+			} catch (error) {
+				console.error("Error loading topics:", error);
+				setAvailableTopics([]);
+			}
+		} else {
+			setAvailableTopics([]);
+		}
+	};
+
+	const addTag = (tag: string) => {
+		if (!selectedTags.includes(tag)) {
+			setSelectedTags([...selectedTags, tag]);
+		}
+		setTagInput("");
+		setAvailableTags([]);
+	};
+
+	const selectAuthor = (author: UserSearchDto) => {
+		setSelectedAuthor(author.userName);
+		setAuthorInput("");
+		setAvailableAuthors([]);
+	};
+
+	const selectTopic = (topic: string) => {
+		setSelectedTopic(topic);
+		setTopicInput("");
+		setAvailableTopics([]);
+	};
+
+	const clearAuthor = () => {
+		setSelectedAuthor("");
+		setAuthorInput("");
+		setAvailableAuthors([]);
+	};
+
+	const clearTopic = () => {
+		setSelectedTopic("");
+		setTopicInput("");
+		setAvailableTopics([]);
 	};
 
 	const handleTemplateClick = (template: TemplateDto) => {
@@ -328,6 +418,121 @@ export const SearchPage: React.FC = () => {
 							))}
 						</div>
 					)}
+
+					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="relative">
+							<label className="block text-sm font-medium text-text mb-1">
+								{t("tags", "Tags")}
+							</label>
+							<input
+								type="text"
+								value={tagInput}
+								onChange={(e) => handleTagInputChange(e.target.value)}
+								placeholder={
+									t("searchTags", "Search tags...") || "Search tags..."
+								}
+								className="w-full px-3 py-2 border border-border rounded-md bg-background text-text focus:border-primary focus:outline-none"
+							/>
+							{availableTags.length > 0 && (
+								<div className="absolute z-10 w-full mt-1 bg-surface border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+									{availableTags.map((tag) => (
+										<button
+											key={tag}
+											onClick={() => addTag(tag)}
+											className="w-full text-left px-3 py-2 hover:bg-background text-text"
+										>
+											{tag}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+
+						<div className="relative">
+							<label className="block text-sm font-medium text-text mb-1">
+								{t("author", "Author")}
+							</label>
+							<input
+								type="text"
+								value={selectedAuthor || authorInput}
+								onChange={(e) => {
+									if (!selectedAuthor) {
+										handleAuthorInputChange(e.target.value);
+									}
+								}}
+								placeholder={
+									t("searchAuthors", "Search authors...") || "Search authors..."
+								}
+								className="w-full px-3 py-2 border border-border rounded-md bg-background text-text focus:border-primary focus:outline-none"
+								readOnly={!!selectedAuthor}
+							/>
+							{selectedAuthor && (
+								<button
+									onClick={clearAuthor}
+									className="absolute right-2 top-8 text-textMuted hover:text-text"
+								>
+									×
+								</button>
+							)}
+							{!selectedAuthor && availableAuthors.length > 0 && (
+								<div className="absolute z-10 w-full mt-1 bg-surface border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+									{availableAuthors.map((author) => (
+										<button
+											key={author.id}
+											onClick={() => selectAuthor(author)}
+											className="w-full text-left px-3 py-2 hover:bg-background text-text"
+										>
+											<div>{author.userName}</div>
+											<div className="text-sm text-textMuted">
+												{author.primaryEmail}
+											</div>
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+
+						<div className="relative">
+							<label className="block text-sm font-medium text-text mb-1">
+								{t("topic", "Topic")}
+							</label>
+							<input
+								type="text"
+								value={selectedTopic || topicInput}
+								onChange={(e) => {
+									if (!selectedTopic) {
+										handleTopicInputChange(e.target.value);
+									}
+								}}
+								placeholder={
+									t("searchTopics", "Search topics...") || "Search topics..."
+								}
+								className="w-full px-3 py-2 border border-border rounded-md bg-background text-text focus:border-primary focus:outline-none"
+								readOnly={!!selectedTopic}
+							/>
+							{selectedTopic && (
+								<button
+									onClick={clearTopic}
+									className="absolute right-2 top-8 text-textMuted hover:text-text"
+								>
+									×
+								</button>
+							)}
+							{!selectedTopic && availableTopics.length > 0 && (
+								<div className="absolute z-10 w-full mt-1 bg-surface border border-border rounded-md shadow-lg max-h-40 overflow-y-auto">
+									{availableTopics.map((topic) => (
+										<button
+											key={topic}
+											onClick={() => selectTopic(topic)}
+											className="w-full text-left px-3 py-2 hover:bg-background text-text"
+										>
+											{topic}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
+					</div>
 
 					<div className="flex flex-wrap gap-4">
 						<div>

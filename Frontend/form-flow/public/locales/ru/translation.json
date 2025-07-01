@@ -16,6 +16,11 @@
 	"status": "Статус",
 	"noResults": "Нет результатов",
 	"viewAuthor": "Просмотр автора",
+	"includeArchived": "Включая архивные",
+	"searching": "Поиск...",
+	"searchTopics": "Поиск по темам",
+	"searchAuthors": "Поиск по авторам",
+	"searchTags": "Поиск по тегам",
 
 	"login": "Вход",
 	"register": "Регистрация",

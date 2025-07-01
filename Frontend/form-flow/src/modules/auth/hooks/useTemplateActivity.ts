@@ -84,7 +84,6 @@ export const useTemplateActivity = (
 		});
 
 		templateActivityService.onUserJoined((event: UserJoinedEvent) => {
-			console.log(event);
 			if (event.templateId === templateIdRef.current) {
 				setState((prev) => ({
 					...prev,
@@ -101,7 +100,6 @@ export const useTemplateActivity = (
 		});
 
 		templateActivityService.onUserLeft((event: UserLeftEvent) => {
-			console.log(event);
 			if (event.templateId === templateIdRef.current) {
 				setState((prev) => ({
 					...prev,
@@ -186,7 +184,7 @@ export const useTemplateActivity = (
 			!templateActivityService.isSignalRConnected() ||
 			isJoinedRef.current
 		) {
-			console.log("Cannot join:", {
+			console.error("Cannot join:", {
 				templateId,
 				connected: templateActivityService.isSignalRConnected(),
 				alreadyJoined: isJoinedRef.current,

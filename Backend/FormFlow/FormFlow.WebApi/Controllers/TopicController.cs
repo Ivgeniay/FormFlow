@@ -1,4 +1,5 @@
 ﻿using FormFlow.Application.Interfaces;
+using FormFlow.Application.Services;
 using FormFlow.Domain.Models.General;
 using FormFlow.WebApi.Common.Attributes;
 using Microsoft.AspNetCore.Authorization;
@@ -149,6 +150,25 @@ namespace FormFlow.WebApi.Controllers
 
                 var exists = await _topicService.TopicNameExistsAsync(request.Name);
                 return Ok(new { exists });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("autocomplete")]
+        public async Task<IActionResult> GetTopicsForAutocomplete(
+            [FromQuery] string q,
+            [FromQuery] int limit = 10)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(q))
+                    return Ok(new List<string>());
+
+                var topics = await _topicService.SearchTopicAsync(q, limit);
+                return Ok(topics.Select(t => t.Name).ToList());
             }
             catch (Exception ex)
             {

@@ -1,6 +1,7 @@
 ﻿using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Models.General;
 using Microsoft.EntityFrameworkCore;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace FormFlow.Persistence.Repositories
 {
@@ -91,6 +92,16 @@ namespace FormFlow.Persistence.Repositories
                 throw new ArgumentException($"Topic with ID '{id}' not found");
             _context.Topics.Remove(topic);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<Topic>> SearchByNameAsync(string query, int limit)
+        {
+            var normalizedQuery = query.Trim().ToLower();
+            return await _context.Topics
+                .Where(t => t.Name.Contains(normalizedQuery))
+                .OrderBy(t => t.Name)
+                .Take(limit)
+                .ToListAsync();
         }
     }
 }

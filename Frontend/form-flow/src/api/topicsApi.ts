@@ -61,6 +61,19 @@ class TopicsApi {
 		return response.data;
 	}
 
+	async getTopicForAutocomplete(
+		query: string,
+		limit: number = 10
+	): Promise<string[]> {
+		const response = await axios.get<string[]>(
+			`${API_BASE_URL}/topic/autocomplete`,
+			{
+				params: { q: query, limit },
+			}
+		);
+		return response.data;
+	}
+
 	async createTopic(
 		request: CreateTopicRequest,
 		accessToken: string

@@ -85,7 +85,6 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 		try {
 			setLoading(true);
 			const result = await usersApi.getUsers(1, pageSize, accessToken);
-			console.log(result);
 			setUsers(result.data);
 			setPage(1);
 			setTotalCount(result.pagination.totalCount);

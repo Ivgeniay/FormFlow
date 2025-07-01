@@ -112,7 +112,6 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 		if (!existingTag && accessToken) {
 			try {
 				await tagsApi.createTag({ name: trimmedTag }, accessToken);
-				console.log(`Created new tag: ${trimmedTag}`);
 			} catch (error) {
 				console.error("Error creating tag:", error);
 				setTagInput("");

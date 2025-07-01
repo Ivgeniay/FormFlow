@@ -84,7 +84,6 @@ export const TemplatesTab: React.FC<TemplatesTabProps> = ({ accessToken }) => {
 				pageSize,
 				accessToken
 			);
-			console.log(result);
 			setTemplates(result.data);
 			setTotalCount(result.pagination.totalCount);
 			setPage(1);

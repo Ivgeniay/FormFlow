@@ -61,7 +61,13 @@ namespace FormFlow.WebApi.Controllers
                 if (limit < 1) limit = 10;
 
                 var users = await _userService.SearchUsersAsync(q, limit);
-                return Ok(users);
+                var result = users.Select(u => new {
+                    id = u.Id,
+                    userName = u.UserName,
+                    //primaryEmail = u.Contacts?.FirstOrDefault(e => e.Type == ContactType.Email)?.Value
+                });
+
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -385,6 +391,7 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
     }
 
 }
