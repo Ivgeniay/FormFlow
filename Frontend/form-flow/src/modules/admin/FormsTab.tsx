@@ -29,12 +29,6 @@ interface ColumnConfig {
 const defaultColumns: ColumnConfig[] = [
 	{ key: "templateName", label: "Template", visible: true, sortable: true },
 	{ key: "userName", label: "Author", visible: true, sortable: true },
-	{
-		key: "templateCreator",
-		label: "Template Creator",
-		visible: true,
-		sortable: true,
-	},
 	{ key: "submittedAt", label: "Submitted", visible: true, sortable: true },
 ];
 
@@ -237,19 +231,17 @@ export const FormsTab: React.FC<FormsTabProps> = ({ accessToken }) => {
 				icon: "📋",
 				onClick: () => handleViewTemplate(form),
 			},
-		];
-
-		actions.push({
-			id: form.id + "Delete",
-			label: t("delete", "Delete"),
-			icon: "🗑️",
-			onClick: () => {
-				setFormToDelete(form);
-				setShowDeleteDialog(true);
+			{
+				id: form.id + "Delete",
+				label: t("delete", "Delete"),
+				icon: "🗑️",
+				onClick: () => {
+					setFormToDelete(form);
+					setShowDeleteDialog(true);
+				},
+				variant: "danger",
 			},
-			variant: "danger",
-		});
-
+		];
 		return actions;
 	};
 

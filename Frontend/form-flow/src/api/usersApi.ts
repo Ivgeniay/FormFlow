@@ -258,6 +258,21 @@ class UsersApi {
 		return response.data;
 	}
 
+	async toggleAdminRoleMyself(
+		userId: string,
+		accessToken: string
+	): Promise<AuthenticationResult> {
+		const response = await axios.post(
+			`${API_BASE_URL}/user/${userId}/toggle-admin`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+
+		return response.data;
+	}
+
 	async toggleAdminRole(userId: string, accessToken: string): Promise<void> {
 		await axios.post(
 			`${API_BASE_URL}/user/${userId}/toggle-admin`,

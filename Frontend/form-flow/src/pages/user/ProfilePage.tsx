@@ -15,7 +15,15 @@ export const ProfilePage: React.FC = () => {
 	const [isLoading, setIsLoading] = useState<boolean>(false);
 
 	const isOwnProfile = useCallback((): boolean => {
-		return !id || id === user?.id;
+		const _id = id?.toLocaleLowerCase();
+		const ownId = user?.id.toLocaleLowerCase();
+		const isEqual = _id === ownId;
+
+		// console.log("ID:", _id);
+		// console.log("user?.id:", ownId);
+		// console.log("isEqual:", isEqual);
+
+		return isEqual || !id;
 	}, [id, user]);
 
 	const fetchUser = useCallback(
@@ -35,8 +43,9 @@ export const ProfilePage: React.FC = () => {
 	);
 
 	useEffect(() => {
-		if (!isOwnProfile && id) {
+		if (!isOwnProfile() && id) {
 			fetchUser(id);
+		} else {
 		}
 	}, [id, isOwnProfile, fetchUser]);
 
@@ -76,7 +85,7 @@ export const ProfilePage: React.FC = () => {
 		);
 	}
 
-	if (isOwnProfile) {
+	if (isOwnProfile()) {
 		return (
 			<ProfileElement
 				user={user}
@@ -93,7 +102,7 @@ export const ProfilePage: React.FC = () => {
 						user={otherUser}
 						roleName={converRoleToStringFroUser(otherUser)}
 						// authType={authType}
-						// isShowPromoteToRole = {isOwnProfile}
+						isShowPromoteToRole={isOwnProfile()}
 					/>
 				)}
 			</>

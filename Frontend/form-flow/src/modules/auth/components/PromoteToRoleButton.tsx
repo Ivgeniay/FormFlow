@@ -4,6 +4,7 @@ import { useAuth } from "../hooks/useAuth";
 import { usersApi } from "../../../api/usersApi";
 import { SimpleButton } from "../../../ui/Button/SimpleButton";
 import { useAuthStore } from "../store/authStore";
+import { useTranslation } from "react-i18next";
 
 interface PromoteToAdminButtonProps {
 	className?: string;
@@ -12,6 +13,7 @@ interface PromoteToAdminButtonProps {
 export const PromoteToRoleButtons: React.FC<PromoteToAdminButtonProps> = ({
 	className = "",
 }) => {
+	const { t } = useTranslation();
 	const { accessToken, isAdmin, user } = useAuth();
 	const [isLoading, setIsLoading] = useState(false);
 	const { updateAuthData } = useAuthStore();
@@ -23,7 +25,7 @@ export const PromoteToRoleButtons: React.FC<PromoteToAdminButtonProps> = ({
 		}
 
 		if (user?.role === role) {
-			toast.error("Already hase this role");
+			toast.error(t("alreadyHasRole") || "Already hase this role");
 			return;
 		}
 
@@ -42,10 +44,10 @@ export const PromoteToRoleButtons: React.FC<PromoteToAdminButtonProps> = ({
 				isAuthenticated: true,
 			});
 
-			toast.success("Successfully promoted!");
+			toast.success(t("succesPromote") || "Successfully promoted!");
 		} catch (error) {
 			console.error("Failed to promote:", error);
-			toast.error("Failed to promote");
+			toast.error(t("failedPromote") || "Failed to promote");
 		} finally {
 			setIsLoading(false);
 		}
@@ -58,7 +60,7 @@ export const PromoteToRoleButtons: React.FC<PromoteToAdminButtonProps> = ({
 					onClick={() => {
 						handlePromoteTo(2);
 					}}
-					localKey={isLoading ? "promoting" : "promoteToAdmin"}
+					localKey={isLoading ? t("promoting") : t("promoteToAdmin")}
 					className={className}
 				/>
 			)}
@@ -67,7 +69,7 @@ export const PromoteToRoleButtons: React.FC<PromoteToAdminButtonProps> = ({
 					onClick={() => {
 						handlePromoteTo(1);
 					}}
-					localKey={isLoading ? "promotingToUser" : "promoteToUser"}
+					localKey={isLoading ? t("promoting") : t("promoteToUser")}
 					className={className}
 				/>
 			)}

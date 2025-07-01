@@ -8,6 +8,8 @@ using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Exceptions;
 using FormFlow.Domain.Models.General;
 using System.Text.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace FormFlow.Application.Services
 {
@@ -265,7 +267,9 @@ namespace FormFlow.Application.Services
             if (!await CanUserEditTemplateAsync(templateId, userId))
                 throw new UnauthorizedAccessException("User cannot publish this template");
 
-            var allVersions = await _templateRepository.GetAllVersionsAsync(templateId);
+            var ownerId = template.Author.Id;
+            //var allVersions = await _templateRepository.GetAllVersionsAsync(templateId);
+            var allVersions = await _templateRepository.GetAllVersionsForUserAsync(templateId, ownerId);
             foreach (var version in allVersions)
             {
                 if (version.Id != templateId && version.IsPublished)
@@ -448,6 +452,19 @@ namespace FormFlow.Application.Services
                 throw new TemplateNotFoundException(id);;
 
             return await MapToTemplateDtoAsync(template, userId);
+        }
+
+        public async Task<List<TemplateDto>> GetTemplateByIdsAsync(IEnumerable<Guid> ids, Guid? userId = null)
+        {
+            var templates = await _templateRepository.GetWithAllDetailsAsync(ids);
+
+            List<TemplateDto> dtos = new List<TemplateDto>();
+            foreach(var t in templates)
+            {
+                dtos.Add(await MapToTemplateDtoAsync(t, userId));
+            }
+
+            return dtos;
         }
 
         public async Task<TemplateDto> GetCurrentVersionAsync(Guid baseTemplateId, Guid? userId = null)
@@ -780,7 +797,12 @@ namespace FormFlow.Application.Services
 
         public async Task<TemplateDto> MapToTemplateDtoAsync(Template template, Guid? userId)
         {
-            var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
+            List<TemplateTag> templateTags = new List<TemplateTag>();
+            if (template.Tags == null)
+                templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
+            else
+                templateTags = template.Tags;
+
 
             var topicName = template.Topic?.Name ??
                 (await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id }))
@@ -845,8 +867,8 @@ namespace FormFlow.Application.Services
         {
             try
             {
-                var template = await _templateRepository.GetWithAllDetailsAsync(templateId);
-                if (template == null)
+                var template = await _templateRepository.GetWithAllDetailsAsync(templateId, true);
+                if (template == null || template.IsDeleted)
                 {
                     await _searchService.RemoveTemplateFromIndexAsync(templateId);
                     return;
@@ -862,16 +884,17 @@ namespace FormFlow.Application.Services
 
         private async Task<TemplateSearchDocument> BuildTemplateSearchDocumentAsync(Template template)
         {
-            var templateTags = await _templateRepository.GetTemplateTagsAsync(template.Id);
-
             var questionsText = template.Questions?
                 .Where(q => !q.IsDeleted)
                 .Select(q =>
                 {
                     try
                     {
-                        var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(q.Data);
-                        return $"{questionDetails?.Title} {questionDetails?.Description}";
+                        var questionDetails = JsonConvert.DeserializeObject<dynamic>(q.Data, new JsonSerializerSettings
+                        {
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        });
+                        return $"{questionDetails?.title} {questionDetails?.description}";
                     }
                     catch
                     {
@@ -901,7 +924,7 @@ namespace FormFlow.Application.Services
                 QuestionsText = questionsText,
                 CommentsText = commentsText,
                 AuthorName = template.Author?.UserName ?? "",
-                Tags = templateTags.Select(tt => tt.Tag.Name).ToList(),
+                Tags = template.Tags == null ? new List<string>() : template.Tags.Select(tt => tt.Tag.Name).ToList(),
                 CreatedAt = template.CreatedAt,
                 UpdatedAt = template.UpdatedAt,
                 FormsCount = template.FormsCount,

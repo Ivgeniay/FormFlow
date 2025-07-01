@@ -606,7 +606,6 @@ namespace FormFlow.Application.Services
             return DTOMapper.MapToUserDto(user);
         }
 
-        [HttpPost("promote-to-admin")]
         public async Task<AuthenticationResult> PromoteToRole(Guid userId, UserRole role)
         {
             try

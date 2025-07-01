@@ -1,4 +1,5 @@
-﻿using FormFlow.Domain.Interfaces.Services;
+﻿using FormFlow.Application.Interfaces;
+using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.SearchService;
 using FormFlow.WebApi.Common.Attributes;
@@ -13,10 +14,12 @@ namespace FormFlow.WebApi.Controllers
     public class SearchController : ControllerBase
     {
         private readonly ISearchService _searchService;
+        private readonly ITemplateService _templateService;
 
-        public SearchController(ISearchService searchService)
+        public SearchController(ISearchService searchService, ITemplateService templateService)
         {
             _searchService = searchService;
+            _templateService = templateService;
         }
 
         [HttpGet("templates")]
@@ -52,10 +55,13 @@ namespace FormFlow.WebApi.Controllers
                 };
 
                 var result = await _searchService.SearchTemplatesAsync(searchQuery);
+                var templateIds = result.Results.Select(r => r.Id).ToList();
+                var fullTemplates = await _templateService.GetTemplateByIdsAsync(templateIds);
 
                 return Ok(new
                 {
-                    templates = result.Results,
+                    //templates = result.Results,
+                    templates = fullTemplates,
                     pagination = new
                     {
                         currentPage = page,
@@ -96,7 +102,7 @@ namespace FormFlow.WebApi.Controllers
                 if (limit < 1) limit = 10;
 
                 var suggestions = await _searchService.GetSearchSuggestionsAsync(q, limit);
-                return Ok(suggestions);
+                return Ok(new SearchSuggestionsResponse { Suggestions = suggestions });
             }
             catch (Exception ex)
             {
@@ -301,7 +307,10 @@ namespace FormFlow.WebApi.Controllers
             }
         }
     }
-
+    public class SearchSuggestionsResponse
+    {
+        public List<string> Suggestions { get; set; } = new List<string>();
+    }
     public class AdvancedSearchRequest
     {
         public string Query { get; set; } = "";

@@ -14,6 +14,8 @@ import {
 } from "../templates/components/editorPageTabs/ActionPanel";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../auth/hooks/useAuth";
+import { useAuthStore } from "../auth/store/authStore";
 
 interface UsersTabProps {
 	accessToken: string;
@@ -40,6 +42,8 @@ const defaultColumns: ColumnConfig[] = [
 export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
+	const { user } = useAuth();
+	const { updateAuthData } = useAuthStore();
 	const [users, setUsers] = useState<UserDto[]>([]);
 	const [sortedUsers, setSortedUsers] = useState<UserDto[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -201,10 +205,26 @@ export const UsersTab: React.FC<UsersTabProps> = ({ accessToken }) => {
 		}
 	};
 
-	const handleToggleAdmin = async (user: UserDto) => {
+	const handleToggleAdmin = async (otherUser: UserDto) => {
 		try {
-			const result = await usersApi.toggleAdminRole(user.id, accessToken);
-			console.log(result);
+			if (user && user.id === otherUser.id) {
+				const result = await usersApi.toggleAdminRoleMyself(
+					otherUser.id,
+					accessToken
+				);
+				updateAuthData({
+					user: result.user,
+					accessToken: result.accessToken,
+					refreshToken: result.refreshToken,
+					accessTokenExpiry: result.accessTokenExpiry,
+					refreshTokenExpiry: result.refreshTokenExpiry,
+					authType: result.authType,
+					isAuthenticated: true,
+				});
+			} else {
+				await usersApi.toggleAdminRole(otherUser.id, accessToken);
+			}
+			toast.success("Successfully promoted!");
 			loadInitialUsers();
 		} catch (error: any) {
 			toast.error(

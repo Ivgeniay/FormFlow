@@ -8,7 +8,6 @@ import {
 } from "../ui/Dropdown/DropdownMenu";
 import { useNavigate } from "react-router-dom";
 import { SimpleButton } from "../ui/Button/SimpleButton";
-import { PromoteToRoleButtons } from "../modules/auth/components/PromoteToRoleButton";
 import { UserAvanar } from "./UserAvatar";
 
 interface HeaderProps {
@@ -33,9 +32,6 @@ export const Header: React.FC<HeaderProps> = ({
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-	const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		onSearch(e.target.value);
-	};
 
 	const handleUserMenuClick = () => {
 		setIsUserMenuOpen(!isUserMenuOpen);
@@ -154,8 +150,8 @@ export const Header: React.FC<HeaderProps> = ({
 					<SearchInput
 						placeholder={t("searchPlaceholder")}
 						placeholderDefault="Search..."
-						handleSearchChange={handleSearchChange}
-						className="relative w-full"
+						onSearch={onSearch}
+						className="w-full"
 					/>
 				</div>
 

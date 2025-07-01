@@ -179,9 +179,15 @@ namespace FormFlow.Persistence.Repositories
 
         public async Task UnDeleteAsync(Guid id)
         {
-            await _context.Templates
-                .Where(t => t.Id == id)
-                .ExecuteUpdateAsync(t => t.SetProperty(p => p.IsDeleted, false));
+            var template = await _context.Templates.FirstOrDefaultAsync(t => t.Id == id);
+            if (template != null)
+            {
+                template.IsDeleted = false;
+                await _context.SaveChangesAsync();
+            }
+            //await _context.Templates
+            //    .Where(t => t.Id == id)
+            //    .ExecuteUpdateAsync(t => t.SetProperty(p => p.IsDeleted, false));
         }
 
         public async Task DeleteAsync(Guid id)
@@ -295,6 +301,10 @@ namespace FormFlow.Persistence.Repositories
         {
             var query = _context.Templates
                 .Include(t => t.Author)
+                .Include(t => t.Questions)
+                .Include(t => t.Comments)
+                .Include(t => t.Tags)
+                    .ThenInclude(tt => tt.Tag)
                 .Where(t => !t.IsDeleted && t.AccessType == TemplateAccess.Public && t.IsPublished)
                 .OrderByDescending(t => t.CreatedAt);
 
@@ -383,21 +393,43 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
         }
 
-        public async Task<Template?> GetWithAllDetailsAsync(Guid id)
+        public async Task<Template?> GetWithAllDetailsAsync(Guid id, bool includeDelete = false)
         {
             return await _context.Templates
                 .Include(t => t.Author)
                 .Include(t => t.Topic)
                 .Include(t => t.Questions.Where(q => !q.IsDeleted))
+                .Include(t => t.Tags)
+                    .ThenInclude(tt => tt.Tag)
+                .Include(t => t.Forms.Where(f => !f.IsDeleted))
+                .   ThenInclude(f => f.User)
+                .Include(t => t.Comments.Where(c => !c.IsDeleted))
+                    .ThenInclude(c => c.User)
+                .Include(t => t.Likes.Where(l => !l.IsDeleted))
+                    .ThenInclude(l => l.User)
+                .Include(t => t.AllowedUsers)
+                    .ThenInclude(au => au.User)
+                .FirstOrDefaultAsync(t => t.Id == id && (includeDelete || !t.IsDeleted));
+        }
+
+        public async Task<List<Template>> GetWithAllDetailsAsync(IEnumerable<Guid> ids)
+        {
+            return await _context.Templates
+                .Include(t => t.Author)
+                .Include(t => t.Topic)
+                .Include(t => t.Questions.Where(q => !q.IsDeleted))
+                .Include(t => t.Tags)
+                    .ThenInclude(tt => tt.Tag)
                 .Include(t => t.Forms.Where(f => !f.IsDeleted))
                 .ThenInclude(f => f.User)
                 .Include(t => t.Comments.Where(c => !c.IsDeleted))
-                .ThenInclude(c => c.User)
+                    .ThenInclude(c => c.User)
                 .Include(t => t.Likes.Where(l => !l.IsDeleted))
-                .ThenInclude(l => l.User)
+                    .ThenInclude(l => l.User)
                 .Include(t => t.AllowedUsers)
-                .ThenInclude(au => au.User)
-                .FirstOrDefaultAsync(t => t.Id == id && !t.IsDeleted);
+                    .ThenInclude(au => au.User)
+                .Where(t => ids.Contains(t.Id) && !t.IsDeleted)
+                .ToListAsync() ?? new List<Template>();
         }
 
         public async Task<List<Template>> GetByTagAsync(Guid tagId)
@@ -663,7 +695,6 @@ namespace FormFlow.Persistence.Repositories
                 .GroupBy(t => t.CreatedAt.ToString("yyyy-MM"))
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }
-
     }
 
 }

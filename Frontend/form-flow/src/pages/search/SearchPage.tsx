@@ -2,17 +2,24 @@ import React, { useEffect, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
-import { TemplateGallery } from "../../modules/templates/components/homepageComponents/TemplateGallery";
 import { TemplateDto } from "../../shared/api_types";
 import { searchApi, SearchSortBy, SearchRequest } from "../../api/searchApi";
 import { AppLoader } from "../../components/AppLoader";
-import { TemplateTable } from "../../modules/templates/components/homepageComponents/TemplateTable";
+import {
+	SortableTable,
+	TableColumn,
+} from "../../modules/templates/components/editorPageTabs/SortableTable";
+import {
+	ActionItem,
+	ActionPanel,
+} from "../../modules/templates/components/editorPageTabs/ActionPanel";
 
 export const SearchPage: React.FC = () => {
 	const { t } = useTranslation();
 	const navigate = useNavigate();
 	const { isAdmin, accessToken } = useAuth();
 	const [searchParams, setSearchParams] = useSearchParams();
+	const [hoveredRowId, setHoveredRowId] = useState<string | null>(null);
 
 	const [templates, setTemplates] = useState<TemplateDto[]>([]);
 	const [loading, setLoading] = useState(false);
@@ -57,12 +64,12 @@ export const SearchPage: React.FC = () => {
 				pageSize: parseInt(searchParams.get("pageSize") || "20"),
 			};
 
-			console.log(request);
-
 			const response =
 				isAdmin && accessToken
 					? await searchApi.adminSearch(request, accessToken)
 					: await searchApi.searchTemplates(request);
+
+			console.log(response);
 
 			setTemplates(response.templates);
 			setPagination(response.pagination);
@@ -74,6 +81,114 @@ export const SearchPage: React.FC = () => {
 			setLoading(false);
 		}
 	};
+
+	const tableColumns: TableColumn<TemplateDto>[] = [
+		{
+			key: "title",
+			label: t("title", "Title"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<div className="flex items-center gap-2">
+					{template.imageUrl && (
+						<img
+							src={template.imageUrl}
+							alt={template.title}
+							className="w-8 h-8 rounded object-cover"
+						/>
+					)}
+					<div>
+						<div className="font-medium text-text">{template.title}</div>
+						<div className="text-sm text-textMuted truncate max-w-xs">
+							{template.description}
+						</div>
+					</div>
+				</div>
+			),
+		},
+		{
+			key: "authorName",
+			label: t("author", "Author"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<span className="text-text">{template.authorName || "Unknown"}</span>
+			),
+		},
+		{
+			key: "topic",
+			label: t("topic", "Topic"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<span className="px-2 py-1 bg-background rounded text-sm">
+					{template.topic || t("noTopic", "No topic")}
+				</span>
+			),
+		},
+		{
+			key: "tags",
+			label: t("tags", "Tags"),
+			sortable: false,
+			render: (template: TemplateDto) => (
+				<div className="flex flex-wrap gap-1">
+					{template.tags.slice(0, 3).map((tag) => (
+						<span
+							key={tag.name}
+							onClick={() => handleTagClick(tag.name)}
+							className="px-2 py-1 bg-primary/10 text-primary text-xs rounded cursor-pointer hover:bg-primary/20"
+						>
+							{tag.name}
+						</span>
+					))}
+					{template.tags.length > 3 && (
+						<span className="text-textMuted text-xs">
+							+{template.tags.length - 3}
+						</span>
+					)}
+				</div>
+			),
+		},
+		{
+			key: "formsCount",
+			label: t("responses", "Responses"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<span className="text-text">{template.formsCount}</span>
+			),
+		},
+		{
+			key: "likesCount",
+			label: t("likes", "Likes"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<span className="text-text">{template.likesCount}</span>
+			),
+		},
+		{
+			key: "createdAt",
+			label: t("created", "Created"),
+			sortable: true,
+			render: (template: TemplateDto) => (
+				<span className="text-textMuted text-sm">
+					{new Date(template.createdAt).toLocaleDateString()}
+				</span>
+			),
+		},
+	];
+	const getTemplateActions = (template: TemplateDto): ActionItem[] => [
+		{
+			id: "view",
+			icon: "👁️",
+			label: t("viewTemplate", "View Template"),
+			onClick: () => handleTemplateClick(template),
+		},
+		{
+			id: "author",
+			icon: "👤",
+			label: t("viewAuthor", "View Author"),
+			onClick: () => {
+				handleAuthorClick(template.authorId);
+			},
+		},
+	];
 
 	const updateSearchParams = (
 		updates: Record<string, string | string[] | null>
@@ -121,7 +236,7 @@ export const SearchPage: React.FC = () => {
 	};
 
 	const handleAuthorClick = (authorId: string) => {
-		console.log("Author clicked:", authorId);
+		navigate(`/profile/${authorId}`);
 	};
 
 	const removeTag = (tagToRemove: string) => {
@@ -274,30 +389,36 @@ export const SearchPage: React.FC = () => {
 							<> ({(searchInfo.searchTime / 1000).toFixed(2)}s)</>
 						)}
 					</span>
-					{pagination && pagination.totalPages > 1 && (
-						<span>
-							{t("page", "Page")} {pagination.currentPage} {t("of", "of")}{" "}
-							{pagination.totalPages}
-						</span>
-					)}
 				</div>
 			)}
 
-			{/* <TemplateGallery
-				templates={templates}
-				mode="detailed"
-				columns={2}
-				showViewMore={false}
-				onTemplateClick={handleTemplateClick}
-				onTagClick={handleTagClick}
-				onAuthorClick={handleAuthorClick}
-			/> */}
-			<TemplateTable
-				templates={templates}
-				onTemplateClick={handleTemplateClick}
-				onTagClick={handleTagClick}
-				onAuthorClick={handleAuthorClick}
-			/>
+			{templates.length > 0 ? (
+				<SortableTable
+					data={templates}
+					columns={tableColumns}
+					onRowHover={setHoveredRowId}
+					emptyMessage={t("noResults", "No found") || "No templates found"}
+					renderRow={(template) => (
+						<>
+							<td className="absolute inset-0 pointer-events-none">
+								<ActionPanel
+									visible={hoveredRowId === template.id}
+									actions={getTemplateActions(template)}
+									position="right"
+									className="pointer-events-auto"
+								/>
+							</td>
+						</>
+					)}
+					getItemId={(template) => template.id}
+				/>
+			) : (
+				!loading && (
+					<div className="text-center py-8 text-textMuted">
+						<p>{t("noResults", "No templates found")}</p>
+					</div>
+				)
+			)}
 
 			{pagination && pagination.totalPages > 1 && (
 				<div className="flex justify-center gap-2">

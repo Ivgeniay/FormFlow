@@ -161,6 +161,22 @@ class SearchApi {
 		);
 		return response.data.templates;
 	}
+
+	async reindexTemplates(accessToken: string): Promise<{
+		message: string;
+		note: string;
+		startedAt: string;
+		startedBy: string;
+	}> {
+		const response = await axios.post(
+			`${API_BASE_URL}/search/reindex`,
+			{},
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
 }
 
 export const searchApi = new SearchApi();

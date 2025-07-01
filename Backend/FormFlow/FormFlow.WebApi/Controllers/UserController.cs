@@ -8,6 +8,7 @@ using FormFlow.WebApi.Common.Attributes;
 using FormFlow.WebApi.Common.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace FormFlow.WebApi.Controllers
 {
@@ -77,8 +78,8 @@ namespace FormFlow.WebApi.Controllers
                 if (currentUserId == null)
                     return Unauthorized(new { message = "Invalid user context" });
 
-                if (currentUserId != id && !this.IsCurrentUserInRole(UserRole.Admin))
-                    return Forbid("You can only view your own profile");
+                //if (currentUserId != id && !this.IsCurrentUserInRole(UserRole.Admin))
+                //    return Forbid("You can only view your own profile");
 
                 var user = await _userService.GetUserByIdAsync(id);
                 return Ok(user);
@@ -190,12 +191,38 @@ namespace FormFlow.WebApi.Controllers
         {
             try
             {
-                var user = await _userService.ToggleAdminUserRole(id);
+                var userId = this.GetCurrentUserId();
+                if (userId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                if (userId.Value != id)
+                {
+                    var user = await _userService.ToggleAdminUserRole(id);
+
+                    return Ok(new
+                    {
+                        message = "Role updated successfully",
+                        data = user,
+                    });
+                }
+
+                var currentUser = this.GetCurrentUser();
+                if (currentUser == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+                var result = await _userService.PromoteToRole(userId.Value, currentUser.HasRole(UserRole.Admin) ? UserRole.User: UserRole.Admin);
+
+                if (!result.IsSuccess)
+                    return BadRequest(new { message = result.ErrorMessage });
 
                 return Ok(new
                 {
-                    message = "Role updated successfully",
-                    data = user,
+                    message = "User promoted to admin successfully",
+                    user = result.User,
+                    accessToken = result.AccessToken,
+                    refreshToken = result.RefreshToken,
+                    accessTokenExpiry = result.AccessTokenExpiry,
+                    refreshTokenExpiry = result.RefreshTokenExpiry,
+                    authType = result.AuthType.ToString()
                 });
 
             }

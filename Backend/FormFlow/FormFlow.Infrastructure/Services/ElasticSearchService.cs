@@ -1,18 +1,25 @@
 ﻿using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.SearchService;
 using Elasticsearch.Net;
+using FormFlow.Domain.Interfaces.Repositories;
+using FormFlow.Domain.Models.General.QuestionDetailsModels;
 using Nest;
+using Newtonsoft.Json;
+using FormFlow.Domain.Models.General;
+using Newtonsoft.Json.Serialization;
 
 namespace FormFlow.Infrastructure.Services
 {
     public class ElasticSearchService : ISearchService
     {
         private readonly IElasticClient _elasticClient;
+        private readonly ITemplateRepository _templateRepository;
         private const string IndexName = "templates";
 
-        public ElasticSearchService(IElasticClient elasticClient)
+        public ElasticSearchService(IElasticClient elasticClient, ITemplateRepository templateRepository)
         {
             _elasticClient = elasticClient;
+            _templateRepository = templateRepository;
         }
 
         public async Task<SearchResult<TemplateSearchDocument>> SearchTemplatesAsync(SearchQuery query)
@@ -47,20 +54,53 @@ namespace FormFlow.Infrastructure.Services
         {
             var searchRequest = new SearchRequest<TemplateSearchDocument>(IndexName)
             {
-                Query = new MultiMatchQuery
+                Query = new BoolQuery
                 {
-                    Query = query,
-                    Fields = new[] { "title^2", "description", "questionsText", "authorName" },
-                    Type = TextQueryType.BoolPrefix
+                    Should = new QueryContainer[]
+                    {
+                        new MultiMatchQuery
+                        {
+                            Query = query,
+                            Fields = new[] { "title^4", "topic^3", "description^2", "questionsText", "authorName" },
+                            Type = TextQueryType.PhrasePrefix
+                        },
+                        new TermsQuery
+                        {
+                            Field = "tags",
+                            Terms = new[] { query.ToLower() }
+                        },
+                        new WildcardQuery
+                        {
+                            Field = "tags",
+                            Value = $"*{query.ToLower()}*"
+                        },
+                        new WildcardQuery
+                        {
+                            Field = "topic",
+                            Value = $"*{query.ToLower()}*"
+                        },
+                        new WildcardQuery
+                        {
+                            Field = "title",
+                            Value = $"*{query.ToLower()}*"
+                        }
+                    },
+                    MinimumShouldMatch = 1
                 },
+
                 Size = limit,
                 Source = new SourceFilter
                 {
-                    Includes = new[] { "title" }
+                    Includes = new[] { "tags", "title", "topic", "description" }
                 }
             };
 
             var response = await _elasticClient.SearchAsync<TemplateSearchDocument>(searchRequest);
+
+            if (response.ApiCall.HttpStatusCode != 200)
+            {
+                throw new Exception(response.ApiCall.OriginalException.Message);
+            }
 
             if (!response.IsValid)
             {
@@ -105,6 +145,37 @@ namespace FormFlow.Infrastructure.Services
             var deleteResponse = await _elasticClient.Indices.DeleteAsync(IndexName);
 
             await CreateIndexAsync();
+
+            int page = 1;
+            int elementOnPage = 5;
+
+            //var templates = await _templateRepository.GetPublicTemplatesPagedAsync(page, elementOnPage);
+            //while(templates.Pagination.HasNext)
+            //{
+            //    foreach(var template in templates.Data)
+            //    {
+            //        var searchDocument = await BuildTemplateSearchDocumentAsync(template);
+            //        await IndexTemplateAsync(searchDocument);
+            //    }
+            //    page++;
+            //    templates = await _templateRepository.GetPublicTemplatesPagedAsync(page, elementOnPage);
+            //}
+
+            do
+            {
+                var templates = await _templateRepository.GetPublicTemplatesPagedAsync(page, elementOnPage);
+
+                foreach (var template in templates.Data)
+                {
+                    var searchDocument = await BuildTemplateSearchDocumentAsync(template);
+                    await IndexTemplateAsync(searchDocument);
+                }
+
+                if (!templates.Pagination.HasNext)
+                    break;
+
+                page++;
+            } while (true);
         }
 
         private async Task CreateIndexAsync()
@@ -283,6 +354,63 @@ namespace FormFlow.Infrastructure.Services
                 SearchSortBy.Title => new List<ISort> { new FieldSort { Field = "title.keyword", Order = SortOrder.Ascending } },
                 SearchSortBy.Relevance => new List<ISort> { new FieldSort { Field = "_score", Order = SortOrder.Descending } },
                 _ => new List<ISort> { new FieldSort { Field = "_score", Order = SortOrder.Descending } }
+            };
+        }
+
+
+
+        private async Task<TemplateSearchDocument> BuildTemplateSearchDocumentAsync(FormFlow.Domain.Models.General.Template template)
+        {
+            var questionsText = template.Questions?
+                .Where(q => !q.IsDeleted)
+                .Select(q =>
+                {
+                    try
+                    {
+                        //var questionDetails = JsonConvert.DeserializeObject<QuestionDetails>(q.Data, new JsonSerializerSettings
+                        var questionDetails = JsonConvert.DeserializeObject<dynamic>(q.Data, new JsonSerializerSettings
+                        {
+                            ContractResolver = new CamelCasePropertyNamesContractResolver()
+                        });
+                        return $"{questionDetails?.title} {questionDetails?.description}";
+                    }
+                    catch
+                    {
+                        return "";
+                    }
+                })
+                .Where(text => !string.IsNullOrWhiteSpace(text))
+                .Aggregate("", (current, text) => current + " " + text)
+                .Trim() ?? "";
+
+            var commentsText = template.Comments?
+                .Where(c => !c.IsDeleted)
+                .Select(c => c.Content)
+                .Where(content => !string.IsNullOrWhiteSpace(content))
+                .Aggregate("", (current, content) => current + " " + content)
+                .Trim() ?? "";
+
+            var topicNames = await _templateRepository.GetTemplateTopicsAsync(new List<Guid> { template.Id });
+            var topicName = topicNames.GetValueOrDefault(template.Id, "Other");
+
+            return new TemplateSearchDocument
+            {
+                Id = template.Id,
+                Title = template.Title,
+                Topic = topicName,
+                Description = template.Description,
+                QuestionsText = questionsText,
+                CommentsText = commentsText,
+                AuthorName = template.Author?.UserName ?? "",
+                Tags = template.Tags == null ? new List<string>() : template.Tags.Select(tt => tt.Tag.Name).ToList(),
+                CreatedAt = template.CreatedAt,
+                UpdatedAt = template.UpdatedAt,
+                FormsCount = template.FormsCount,
+                LikesCount = template.LikesCount,
+                CommentsCount = template.CommentsCount,
+                IsArchived = template.IsArchived,
+                IsPublished = template.IsPublished,
+                IsDeleted = template.IsDeleted
             };
         }
     }

@@ -88,9 +88,11 @@ export const ProfileElement: React.FC<ProfileElementProps> = ({
 							</p>
 						</div>
 
-						<div className="pt-4">
-							<PromoteToRoleButtons className="w-full" />
-						</div>
+						{isShowPromoteToRole && (
+							<div className="pt-4">
+								<PromoteToRoleButtons className="w-full" />
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

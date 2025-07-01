@@ -6,6 +6,7 @@ import { FormsTab } from "../../modules/admin/FormsTab";
 import { TemplatesTab } from "../../modules/admin/TemplatesTab";
 import { UsersTab } from "../../modules/admin/UsersTab";
 import { PromoteToRoleButtons } from "../../modules/auth/components/PromoteToRoleButton";
+import { SystemToolsTab } from "../../modules/admin/SystemToolsTab";
 
 export const AdminPanelPage: React.FC = () => {
 	const { t } = useTranslation();
@@ -41,6 +42,11 @@ export const AdminPanelPage: React.FC = () => {
 			id: "forms",
 			label: t("formsOverview", "Forms Overview"),
 			content: <FormsTab accessToken={accessToken} />,
+		},
+		{
+			id: "SystemTools",
+			label: t("systemTools", "System Tools Overview"),
+			content: <SystemToolsTab accessToken={accessToken} />,
 		},
 	];
 

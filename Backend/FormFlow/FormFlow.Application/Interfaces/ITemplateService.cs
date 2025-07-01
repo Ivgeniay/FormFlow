@@ -21,6 +21,7 @@ namespace FormFlow.Application.Interfaces
         Task DeleteAllVersionsAsync(Guid baseTemplateId, Guid userId);
 
         Task<TemplateDto> GetTemplateByIdAsync(Guid id, Guid? userId = null);
+        Task<List<TemplateDto>> GetTemplateByIdsAsync(IEnumerable<Guid> ids, Guid? userId = null);
         Task<TemplateDto> GetCurrentVersionAsync(Guid baseTemplateId, Guid? userId = null);
         Task<TemplateDto> GetSpecificVersionAsync(Guid baseTemplateId, int version, Guid? userId = null);
         Task<List<TemplateDto>> GetAllVersionsForUserAsync(Guid templateId, Guid askingUserId, Guid forUserId);

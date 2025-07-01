@@ -43,7 +43,8 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<Template?> GetWithQuestionsAsync(Guid id);
         Task<Template?> GetWithFormsAsync(Guid id);
         Task<Template?> GetWithCommentsAsync(Guid id);
-        Task<Template?> GetWithAllDetailsAsync(Guid id);
+        Task<Template?> GetWithAllDetailsAsync(Guid id, bool includeDelete = false);
+        Task<List<Template>> GetWithAllDetailsAsync(IEnumerable<Guid> ids);
 
         Task<List<Template>> GetByTagAsync(Guid tagId);
         Task<List<Template>> SearchByTitleOrDescriptionAsync(string query);
