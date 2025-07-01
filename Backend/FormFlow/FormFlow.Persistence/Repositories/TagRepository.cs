@@ -134,11 +134,23 @@ namespace FormFlow.Persistence.Repositories
 
         public async Task IncrementUsageCountAsync(Guid tagId)
         {
-            var tag = await GetByIdAsync(tagId);
+            var tag = await _context.Tags.FindAsync(tagId);
             if (tag != null)
             {
                 tag.UsageCount++;
                 await UpdateAsync(tag);
+            }
+        }
+        public async Task IncrementUsageCountAsync(List<Guid> tagIds)
+        {
+            var tags = await _context.Tags
+                .Where(t => tagIds.Contains(t.Id))
+                .ToListAsync();
+
+            if (tags != null)
+            {
+                tags.ForEach(t => t.UsageCount++);
+                await _context.SaveChangesAsync();
             }
         }
 
@@ -149,6 +161,19 @@ namespace FormFlow.Persistence.Repositories
             {
                 tag.UsageCount--;
                 await UpdateAsync(tag);
+            }
+        }
+
+        public async Task DecrementUsageCountAsync(List<Guid> tagIds)
+        {
+            var tags = await _context.Tags
+                .Where(t => tagIds.Contains(t.Id))
+                .ToListAsync();
+
+            if (tags != null)
+            {
+                tags.ForEach(t => t.UsageCount--);
+                await _context.SaveChangesAsync();
             }
         }
 

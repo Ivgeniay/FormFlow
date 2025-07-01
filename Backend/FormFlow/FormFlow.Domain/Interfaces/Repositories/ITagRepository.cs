@@ -21,7 +21,9 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<List<Tag>> GetOrCreateByNamesAsync(List<string> names);
 
         Task IncrementUsageCountAsync(Guid tagId);
+        Task IncrementUsageCountAsync(List<Guid> tagIds);
         Task DecrementUsageCountAsync(Guid tagId);
+        Task DecrementUsageCountAsync(List<Guid> tagIds);
         Task RecalculateUsageCountAsync(Guid tagId);
         Task CleanupUnusedTagsAsync();
 

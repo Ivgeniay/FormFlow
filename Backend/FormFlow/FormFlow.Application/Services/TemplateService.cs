@@ -77,6 +77,8 @@ namespace FormFlow.Application.Services
             {
                 var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
                 await _templateRepository.AddTagsToTemplateAsync(createdTemplate.Id, tags.Select(t => t.Id).ToList());
+
+                await _tagRepository.IncrementUsageCountAsync(tags.Select(e => e.Id).ToList());
             }
 
             if (request.AllowedUserIds.Any())
@@ -129,6 +131,8 @@ namespace FormFlow.Application.Services
             {
                 var tags = await _tagRepository.GetOrCreateByNamesAsync(request.Tags);
                 await _templateRepository.AddTagsToTemplateAsync(createdVersion.Id, tags.Select(t => t.Id).ToList());
+
+                await _tagRepository.IncrementUsageCountAsync(tags.Select(e => e.Id).ToList());
             }
 
             if (request.AllowedUserIds.Any())
@@ -215,9 +219,15 @@ namespace FormFlow.Application.Services
             var tagsToAdd = newTagIds.Except(existingTagIds).ToList();
 
             if (tagsToRemove.Any())
+            {
                 await _templateRepository.RemoveTagsFromTemplateAsync(template.Id, tagsToRemove);
+                await _tagRepository.DecrementUsageCountAsync(tagsToRemove);
+            }
             if (tagsToAdd.Any())
+            {
                 await _templateRepository.AddTagsToTemplateAsync(template.Id, tagsToAdd);
+                await _tagRepository.IncrementUsageCountAsync(tagsToAdd);
+            }
 
             var existingAllowedUserIds = await _templateRepository.GetTemplateAllowedUserIdsAsync(template.Id);
             var usersToRemove = existingAllowedUserIds.Except(request.AllowedUserIds).ToList();
@@ -663,11 +673,14 @@ namespace FormFlow.Application.Services
             if (tagsToRemove.Any())
             {
                 await _templateRepository.RemoveTagsFromTemplateAsync(templateId, tagsToRemove);
+                await _tagRepository.DecrementUsageCountAsync(tagsToRemove);
+
             }
 
             if (tagsToAdd.Any())
             {
                 await _templateRepository.AddTagsToTemplateAsync(templateId, tagsToAdd);
+                await _tagRepository.IncrementUsageCountAsync(tagsToAdd);
             }
 
             await IndexTemplateAsync(templateId);
