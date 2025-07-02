@@ -1,0 +1,244 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "anyOf": [
+        {
+            "$ref": "#/definitions/ShortTextDetails"
+        },
+        {
+            "$ref": "#/definitions/LongTextDetails"
+        },
+        {
+            "$ref": "#/definitions/SingleChoiceDetails"
+        },
+        {
+            "$ref": "#/definitions/MultipleChoiceDetails"
+        },
+        {
+            "$ref": "#/definitions/DropdownDetails"
+        },
+        {
+            "$ref": "#/definitions/ScaleDetails"
+        },
+        {
+            "$ref": "#/definitions/RatingDetails"
+        },
+        {
+            "$ref": "#/definitions/DateDetails"
+        },
+        {
+            "$ref": "#/definitions/TimeDetails"
+        }
+    ],
+    "definitions": {
+        "DateDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "pastDate": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "DropdownDetails": {
+            "properties": {
+                "defaultOption": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "LongTextDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "maxLength": {
+                    "type": "number"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "MultipleChoiceDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "maxSelections": {
+                    "type": "number"
+                },
+                "minSelections": {
+                    "type": "number"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "QuestionType": {
+            "enum": [
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9
+            ],
+            "type": "number"
+        },
+        "RatingDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "maxRating": {
+                    "type": "number"
+                },
+                "ratingLabel": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "ScaleDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "maxLabel": {
+                    "type": "string"
+                },
+                "maxValue": {
+                    "type": "number"
+                },
+                "minLabel": {
+                    "type": "string"
+                },
+                "minValue": {
+                    "type": "number"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "ShortTextDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "maxLength": {
+                    "type": "number"
+                },
+                "placeholder": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "SingleChoiceDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "options": {
+                    "items": {
+                        "type": "string"
+                    },
+                    "type": "array"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        },
+        "TimeDetails": {
+            "properties": {
+                "description": {
+                    "type": "string"
+                },
+                "pastDate": {
+                    "type": "string"
+                },
+                "startDate": {
+                    "type": "string"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "type": {
+                    "$ref": "#/definitions/QuestionType"
+                }
+            },
+            "type": "object"
+        }
+    }
+}
+

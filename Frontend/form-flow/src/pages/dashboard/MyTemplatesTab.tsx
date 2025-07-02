@@ -369,11 +369,11 @@ export const MyTemplatesTab: React.FC<MyTemplatesTabProps> = ({
 						{t("createTemplate", "Create Template")}
 					</button>
 
-					{selectedTemplates.size > 0 && (
+					{/* {selectedTemplates.size > 0 && (
 						<span className="text-textMuted">
 							{t("selectedTemplates", "Selected")}: {selectedTemplates.size}
 						</span>
-					)}
+					)} */}
 				</div>
 
 				<div className="relative">

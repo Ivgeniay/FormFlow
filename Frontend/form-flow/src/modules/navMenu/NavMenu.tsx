@@ -206,12 +206,12 @@ export const NavMenu: React.FC<NavMenuProps> = ({
 							onClick={() => handleNavigate("/search")}
 						/>
 
-						<NavMenuButton
+						{/* <NavMenuButton
 							icon={profileIcon}
 							label={t("profile") || "Profile"}
 							onClick={() => handleNavigate("/profile")}
 							isVisible={isAuthenticated}
-						/>
+						/> */}
 
 						<NavMenuButton
 							icon={templatesIcon}

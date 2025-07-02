@@ -221,11 +221,11 @@ export const MyFormsTab: React.FC<MyFormsTabProps> = ({ accessToken }) => {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-4">
-					{selectedForms.size > 0 && (
+					{/* {selectedForms.size > 0 && (
 						<span className="text-textMuted">
 							{t("selectedForms") || "Selected"}: {selectedForms.size}
 						</span>
-					)}
+					)} */}
 				</div>
 
 				<div className="relative">
