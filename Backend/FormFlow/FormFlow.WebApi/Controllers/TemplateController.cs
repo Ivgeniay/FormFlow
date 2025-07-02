@@ -1,6 +1,6 @@
 ﻿using FormFlow.Application.DTOs.Templates;
 using FormFlow.Application.Interfaces;
-using FormFlow.Application.Services;
+using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
 using FormFlow.WebApi.Common.Attributes;
 using FormFlow.WebApi.Common.Extensions;
@@ -14,10 +14,12 @@ namespace FormFlow.WebApi.Controllers
     public class TemplateController : ControllerBase
     {
         private readonly ITemplateService _templateService;
+        private readonly IAiTemplateService _aiTemplateService;
 
-        public TemplateController(ITemplateService templateService)
+        public TemplateController(ITemplateService templateService, IAiTemplateService aiTemplateService)
         {
             _templateService = templateService;
+            _aiTemplateService = aiTemplateService;
         }
 
         [HttpPost]
@@ -450,8 +452,27 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new { message = ex.Message });
             }
         }
+
+        [HttpPost("generate-ai")]
+        [Authorize]
+        public async Task<IActionResult> GenerateTemplateFromAI([FromBody] GenerateTemplateRequest request)
+        {
+            try
+            {
+                var result = await _aiTemplateService.GenerateFromPromptAsync(request.Promt);
+                return Ok(result);
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 
+    public class GenerateTemplateRequest
+    {
+        public string Promt { get; set; } = string.Empty;
+    }
     public class UnDeleteTemplateRequest
     {
         public Guid TemplateId { get; set; }

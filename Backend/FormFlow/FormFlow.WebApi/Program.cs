@@ -76,6 +76,8 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<IColorThemeService, ColorThemeService>();
             builder.Services.AddScoped<ILanguageService, LanguageService>();
             builder.Services.AddScoped<IUserSettingsService, UserSettingsService>();
+            builder.Services.AddHttpClient<AiTemplateService>();
+            builder.Services.AddScoped<IAiTemplateService, AiTemplateService>();
             builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
