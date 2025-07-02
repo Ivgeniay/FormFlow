@@ -20,7 +20,7 @@ namespace FormFlow.Infrastructure.Services
             _httpClient.Timeout = TimeSpan.FromMilliseconds(_timeoutMs);
         }
 
-        public async Task<string> GenerateFromPromptAsync(string prompt)
+        public async Task<AiTemplateDto> GenerateFromPromptAsync(string prompt)
         {
             var request = new { prompt = prompt };
             var json = JsonConvert.SerializeObject(request);
@@ -33,7 +33,11 @@ namespace FormFlow.Infrastructure.Services
                 throw new HttpRequestException($"AI service returned {response.StatusCode}: {await response.Content.ReadAsStringAsync()}");
             }
 
-            return await response.Content.ReadAsStringAsync();
+            var str = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(str);
+            AiTemplateDto dto = JsonConvert.DeserializeObject<AiTemplateDto>(str) ?? new AiTemplateDto();
+
+            return dto;
         }
     }
 }

@@ -1,6 +1,7 @@
 import axios from "axios";
 import { ENV } from "../config/env";
 import { TemplateDto, PaginatedResponse } from "../shared/api_types";
+import { QuestionType } from "../shared/domain_types";
 
 const API_BASE_URL = ENV.API_URL;
 
@@ -70,6 +71,40 @@ export interface TemplateVersionInfo {
 	updatedAt: string;
 }
 
+export interface GenerateTemplateRequest {
+	promt: string;
+}
+
+export interface AiQuestionData {
+	type: QuestionType;
+	title: string;
+	description: string;
+	maxLength?: number;
+	placeholder?: string;
+	options?: string[];
+	maxSelections?: number;
+	minSelections?: number;
+	minValue?: number;
+	maxValue?: number;
+	minLabel?: string;
+	maxLabel?: string;
+}
+
+export interface AiQuestionsDto {
+	order: number;
+	showInResults: boolean;
+	isRequired: boolean;
+	data: AiQuestionData;
+}
+
+export interface AiTemplateDto {
+	title: string;
+	description: string;
+	topic: string;
+	suggestedTags: string[];
+	questions: AiQuestionsDto[];
+}
+
 class TemplateApi {
 	async createTemplate(
 		request: CreateTemplateRequest,
@@ -103,6 +138,20 @@ class TemplateApi {
 			);
 			return response.data;
 		}
+	}
+
+	async generateTemplateFromAI(
+		request: GenerateTemplateRequest,
+		accessToken: string
+	): Promise<AiTemplateDto> {
+		const response = await axios.post<AiTemplateDto>(
+			`${API_BASE_URL}/template/generate-ai`,
+			request,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
 	}
 
 	async updateTemplate(

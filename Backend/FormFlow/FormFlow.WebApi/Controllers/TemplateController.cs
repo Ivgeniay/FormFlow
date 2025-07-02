@@ -454,7 +454,7 @@ namespace FormFlow.WebApi.Controllers
         }
 
         [HttpPost("generate-ai")]
-        [Authorize]
+        //[Authorize]
         public async Task<IActionResult> GenerateTemplateFromAI([FromBody] GenerateTemplateRequest request)
         {
             try

@@ -3,13 +3,17 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../../modules/auth/hooks/useAuth";
 import { TemplateEditor } from "./TemplateEditor";
-import { FormTemplate } from "../../modules/templates/types/types";
+import {
+	FormTemplate,
+	QuestionData,
+} from "../../modules/templates/types/types";
 import { QuestionType, TemplateAccess } from "../../shared/domain_types";
 import {
 	templateApi,
 	CreateTemplateRequest,
 	QuestionCreateRequest,
 	CreateNewVersionRequest,
+	AiTemplateDto,
 } from "../../api/templateApi";
 import toast from "react-hot-toast";
 import { imageApi } from "../../api/imageApi";
@@ -18,6 +22,7 @@ import {
 	convertQuestionDtoToQuestionData,
 	downloadImageFromUrl,
 } from "../../modules/templates/components/editorPageTabs/QuestionsTab";
+import { AiPromptForm } from "../../modules/templates/components/AiPromptForm";
 
 interface TemplateCreatorProp {
 	sourceTemplate?: TemplateDto;
@@ -86,6 +91,76 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 
 	const handleFormTemplateChange = (updatedTemplate: FormTemplate) => {
 		setFormTemplate(updatedTemplate);
+	};
+
+	const handleAiGenerated = (aiTemplate: AiTemplateDto) => {
+		const convertedQuestions: QuestionData[] = aiTemplate.questions.map(
+			(aiQuestion, index) => {
+				const aiData = aiQuestion.data;
+
+				let typeSpecificData: Record<string, any> = {};
+
+				switch (aiData.type) {
+					case QuestionType.ShortText:
+						typeSpecificData = {
+							maxLength: aiData.maxLength || 100,
+							placeholder: aiData.placeholder || "",
+						};
+						break;
+					case QuestionType.LongText:
+						typeSpecificData = {
+							maxLength: aiData.maxLength || 500,
+							placeholder: aiData.placeholder || "",
+						};
+						break;
+					case QuestionType.SingleChoice:
+					case QuestionType.Dropdown:
+						typeSpecificData = {
+							options: aiData.options || [],
+						};
+						break;
+					case QuestionType.MultipleChoice:
+						typeSpecificData = {
+							options: aiData.options || [],
+							maxSelections: aiData.maxSelections,
+							minSelections: aiData.minSelections || 1,
+						};
+						break;
+					case QuestionType.Scale:
+						typeSpecificData = {
+							minValue: aiData.minValue || 1,
+							maxValue: aiData.maxValue || 5,
+							minLabel: aiData.minLabel || "",
+							maxLabel: aiData.maxLabel || "",
+						};
+						break;
+					default:
+						typeSpecificData = {};
+				}
+
+				return {
+					id: `ai-${index}`,
+					order: aiQuestion.order,
+					title: aiData.title || "",
+					description: aiData.description || "",
+					isDeleted: false,
+					type: aiData.type,
+					isRequired: aiQuestion.isRequired,
+					showInResults: aiQuestion.showInResults,
+					typeSpecificData,
+				};
+			}
+		);
+
+		setFormTemplate((prev) => ({
+			...prev,
+			title: aiTemplate.title || "",
+			description: aiTemplate.description || "",
+			tags: aiTemplate.suggestedTags || [],
+			questions: convertedQuestions,
+		}));
+
+		toast.success(t("aiTemplateApplied", "AI template applied successfully!"));
 	};
 
 	const validateTemplate = (): string | null => {
@@ -236,6 +311,8 @@ export const TemplateCreatorPage: React.FC<TemplateCreatorProp> = ({
 					{t("createTemplateDescription", "Design your custom form template")}
 				</p>
 			</div>
+
+			<AiPromptForm onGenerated={handleAiGenerated} accessToken={accessToken} />
 
 			<TemplateEditor
 				formTemplate={formTemplate}
