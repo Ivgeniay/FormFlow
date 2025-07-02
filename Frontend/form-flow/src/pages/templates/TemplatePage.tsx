@@ -187,7 +187,7 @@ export const TemplatePage: React.FC = () => {
 						</h2>
 						<TemplateHeader template={template}></TemplateHeader>
 						<FormRenderer template={template} mode="readonly" />
-						<div className="flex justify-between">
+						<div className="flex justify-between pt-4">
 							<div></div>
 							<div className="flex items-center gap-3">
 								<LikeButton

@@ -54,6 +54,9 @@
 	"selectedTemplates": "Selected",
 	"errorLoadingMoreTemplates": "Error loading more templates",
 	"dashboardDescription": "Manage your templates and submitted forms",
+	"templatePreview": "Template Preview",
+	"noTemplatesYet": "No templates yet",
+	"createFirstTemplate": "Create your first template to get started",
 
 	"home": "Home",
 	"profile": "Profile",

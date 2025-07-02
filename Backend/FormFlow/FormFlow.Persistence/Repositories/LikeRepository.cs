@@ -16,7 +16,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<Like?> GetByIdAsync(Guid id)
         {
             return await _context.Likes
-                .FirstOrDefaultAsync(l => l.Id == id && !l.IsDeleted);
+                .FirstOrDefaultAsync(l => l.Id == id);
         }
 
         public async Task<Like> CreateAsync(Like like)
@@ -31,7 +31,7 @@ namespace FormFlow.Persistence.Repositories
             var like = await _context.Likes.FindAsync(id);
             if (like != null)
             {
-                like.IsDeleted = true;
+                _context.Likes.Remove(like);
                 await _context.SaveChangesAsync();
             }
         }
@@ -39,20 +39,20 @@ namespace FormFlow.Persistence.Repositories
         public async Task<bool> ExistsAsync(Guid id)
         {
             return await _context.Likes
-                .AnyAsync(l => l.Id == id && !l.IsDeleted);
+                .AnyAsync(l => l.Id == id);
         }
 
         public async Task<Like?> GetByTemplateAndUserAsync(Guid templateId, Guid userId)
         {
             return await _context.Likes
-                .FirstOrDefaultAsync(l => l.TemplateId == templateId && l.UserId == userId && !l.IsDeleted);
+                .FirstOrDefaultAsync(l => l.TemplateId == templateId && l.UserId == userId);
         }
 
         public async Task<PagedResult<Like>> GetLikesByTemplatePagedAsync(Guid templateId, int page, int pageSize)
         {
             var query = _context.Likes
                 .Include(l => l.User)
-                .Where(l => l.TemplateId == templateId && !l.IsDeleted)
+                .Where(l => l.TemplateId == templateId)
                 .OrderByDescending(l => l.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -71,7 +71,7 @@ namespace FormFlow.Persistence.Repositories
                 .ThenInclude(t => t.Author)
                 .Include(l => l.Template.Tags)
                 .ThenInclude(tt => tt.Tag)
-                .Where(l => l.UserId == userId && !l.IsDeleted)
+                .Where(l => l.UserId == userId)
                 .OrderByDescending(l => l.CreatedAt);
 
             var totalCount = await query.CountAsync();
@@ -86,19 +86,19 @@ namespace FormFlow.Persistence.Repositories
         public async Task<bool> HasUserLikedAsync(Guid templateId, Guid userId)
         {
             return await _context.Likes
-                .AnyAsync(l => l.TemplateId == templateId && l.UserId == userId && !l.IsDeleted);
+                .AnyAsync(l => l.TemplateId == templateId && l.UserId == userId);
         }
 
         public async Task<int> GetCountByTemplateAsync(Guid templateId)
         {
             return await _context.Likes
-                .CountAsync(l => l.TemplateId == templateId && !l.IsDeleted);
+                .CountAsync(l => l.TemplateId == templateId);
         }
 
         public async Task<int> GetCountByUserAsync(Guid userId)
         {
             return await _context.Likes
-                .CountAsync(l => l.UserId == userId && !l.IsDeleted);
+                .CountAsync(l => l.UserId == userId);
         }
 
         public async Task<Like> ToggleLikeAsync(Guid templateId, Guid userId)
@@ -149,7 +149,6 @@ namespace FormFlow.Persistence.Repositories
         public async Task<List<Template>> GetMostLikedTemplatesAsync(int count = 10)
         {
             var templateIds = await _context.Likes
-                .Where(l => !l.IsDeleted)
                 .GroupBy(l => l.TemplateId)
                 .OrderByDescending(g => g.Count())
                 .Take(count)
@@ -165,7 +164,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<Dictionary<Guid, int>> GetLikesCountByTemplatesAsync(List<Guid> templateIds)
         {
             return await _context.Likes
-                .Where(l => templateIds.Contains(l.TemplateId) && !l.IsDeleted)
+                .Where(l => templateIds.Contains(l.TemplateId))
                 .GroupBy(l => l.TemplateId)
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }
@@ -173,13 +172,12 @@ namespace FormFlow.Persistence.Repositories
         public async Task<int> GetTotalLikesCountAsync()
         {
             return await _context.Likes
-                .CountAsync(l => !l.IsDeleted);
+                .CountAsync();
         }
 
         public async Task<Dictionary<string, int>> GetLikesCountByMonthAsync()
         {
             return await _context.Likes
-                .Where(l => !l.IsDeleted)
                 .GroupBy(l => l.CreatedAt.ToString("yyyy-MM"))
                 .ToDictionaryAsync(g => g.Key, g => g.Count());
         }

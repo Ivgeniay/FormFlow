@@ -61,6 +61,9 @@
 	"selectedTemplates": "Выбрано",
 	"errorLoadingMoreTemplates": "Ошибка загрузки дополнительных шаблонов",
 	"dashboardDescription": "Управляйте шаблонами и отправленными формами",
+	"templatePreview": "Предпросмотр шаблона",
+	"noTemplatesYet": "Пока нет шаблонов",
+	"createFirstTemplate": "Создайте свой первый шаблон",
 
 	"authMethods": "Методы авторизации",
 	"emailAuth": "Email и пароль",

@@ -7,6 +7,7 @@ interface LikeButtonProps {
 	isAuthenticated: boolean;
 	onLikeToggle: () => void;
 	className?: string;
+	size?: number;
 }
 
 export const LikeButton: React.FC<LikeButtonProps> = ({
@@ -15,6 +16,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
 	isAuthenticated,
 	onLikeToggle,
 	className = "",
+	size = 6,
 }) => {
 	const { t } = useTranslation();
 
@@ -22,11 +24,11 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
 		<button
 			onClick={onLikeToggle}
 			disabled={!isAuthenticated}
-			className={`flex items-center gap-2 px-4 py-3 rounded-lg border transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
+			className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
 				isUserLiked
-					? "bg-red-50 border-red-200 text-red-600 hover:bg-red-100"
-					: "bg-gray-50 border-border text-textMuted hover:bg-primary hover:text-white"
-			} ${className}`}
+					? "text-error hover:text-error/80"
+					: "text-textMuted hover:text-text"
+			} hover:bg-surface ${className}`}
 			title={
 				!isAuthenticated
 					? t("logInToLike", "Log in to like") || "Log in to like"
@@ -36,7 +38,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
 			}
 		>
 			<svg
-				className="w-5 h-5"
+				className={`w-${size} h-${size}`}
 				fill={isUserLiked ? "currentColor" : "none"}
 				stroke="currentColor"
 				viewBox="0 0 24 24"
@@ -48,7 +50,7 @@ export const LikeButton: React.FC<LikeButtonProps> = ({
 					d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
 				/>
 			</svg>
-			<span className="font-medium">{likesCount}</span>
+			<span>{likesCount}</span>
 		</button>
 	);
 };
