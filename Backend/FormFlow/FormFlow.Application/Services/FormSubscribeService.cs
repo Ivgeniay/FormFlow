@@ -137,7 +137,7 @@ namespace FormFlow.Application.Services
             var form = await _formRepository.GetWithTemplateAsync(formId);
             if (form == null)
                 throw new FormNotFoundException(formId);
-            var user = await _userRepository.GetByIdAsync(userId);
+            var user = await _userRepository.GetByIdWithContactsAsync(userId);
             if (user == null)
                 throw new UserNotFoundException(userId);
             if (user.IsBlocked)
@@ -146,7 +146,8 @@ namespace FormFlow.Application.Services
             var contact = user.Contacts?.FirstOrDefault(e => e.Type == ContactType.Email && e.IsPrimary);
             if (contact != null)
             {
-                await _emailService.SendFormAnswersAsync(contact.Value, formId);
+                if (!contact.Value.EndsWith("@testmail.com"))
+                    await _emailService.SendFormAnswersAsync(contact.Value, formId);
             }
         }
     }

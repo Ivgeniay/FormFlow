@@ -10,6 +10,7 @@ import {
 	QuestionsTabRef,
 } from "../../modules/templates/components/editorPageTabs/QuestionsTab";
 import { Tab, TabbedContainer } from "../../ui/TabbedContainer";
+import { SubscriptionsTab } from "../../modules/templates/components/editorPageTabs/SubscriptionsTab";
 
 interface TemplateEditorPageProps {
 	template: TemplateDto;
@@ -57,6 +58,13 @@ export const TemplateEditorPage: React.FC<TemplateEditorPageProps> = ({
 			id: "analytics",
 			label: t("analytics", "Analytics"),
 			content: <AnalyticsTab template={template} accessToken={accessToken} />,
+		},
+		{
+			id: "subscribe",
+			label: t("subscribes", "Subscribes"),
+			content: (
+				<SubscriptionsTab template={template} accessToken={accessToken} />
+			),
 		},
 	];
 

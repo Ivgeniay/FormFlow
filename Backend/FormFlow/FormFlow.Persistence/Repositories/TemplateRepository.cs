@@ -270,7 +270,7 @@ namespace FormFlow.Persistence.Repositories
             var query = _context.Templates
                 .Include(t => t.Author)
                 .Where(t => !t.IsDeleted && t.IsPublished)
-                .OrderByDescending(t => t.Likes.Count(l => !l.IsDeleted));
+                .OrderByDescending(t => t.Likes.Count());
             var totalCount = await query.CountAsync();
             var templates = await query
                 .Skip((page - 1) * pageSize)
@@ -405,7 +405,7 @@ namespace FormFlow.Persistence.Repositories
                 .   ThenInclude(f => f.User)
                 .Include(t => t.Comments.Where(c => !c.IsDeleted))
                     .ThenInclude(c => c.User)
-                .Include(t => t.Likes.Where(l => !l.IsDeleted))
+                .Include(t => t.Likes)
                     .ThenInclude(l => l.User)
                 .Include(t => t.AllowedUsers)
                     .ThenInclude(au => au.User)
@@ -424,7 +424,7 @@ namespace FormFlow.Persistence.Repositories
                 .ThenInclude(f => f.User)
                 .Include(t => t.Comments.Where(c => !c.IsDeleted))
                     .ThenInclude(c => c.User)
-                .Include(t => t.Likes.Where(l => !l.IsDeleted))
+                .Include(t => t.Likes)
                     .ThenInclude(l => l.User)
                 .Include(t => t.AllowedUsers)
                     .ThenInclude(au => au.User)
@@ -536,7 +536,7 @@ namespace FormFlow.Persistence.Repositories
         public async Task<int> GetLikesCountAsync(Guid templateId)
         {
             return await _context.Likes
-                .CountAsync(l => l.TemplateId == templateId && !l.IsDeleted);
+                .CountAsync(l => l.TemplateId == templateId);
         }
 
         public async Task<int> GetCommentsCountAsync(Guid templateId)

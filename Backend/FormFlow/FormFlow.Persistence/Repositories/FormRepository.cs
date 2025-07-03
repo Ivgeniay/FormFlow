@@ -46,8 +46,9 @@ namespace FormFlow.Persistence.Repositories
             var form = await _context.Forms.FindAsync(id);
             if (form != null)
             {
-                form.IsDeleted = true;
-                form.UpdatedAt = DateTime.UtcNow;
+                _context.Forms.Remove(form);
+                //form.IsDeleted = true;
+                //form.UpdatedAt = DateTime.UtcNow;
                 await _context.SaveChangesAsync();
             }
         }

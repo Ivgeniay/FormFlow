@@ -20,7 +20,7 @@
         public Guid? PreviousVersionId { get; set; }
 
 
-        public int LikesCount => Likes?.Count(l => !l.IsDeleted) ?? 0;
+        public int LikesCount => Likes?.Count() ?? 0;
         public int FormsCount => Forms?.Count(f => !f.IsDeleted) ?? 0;
         public int CommentsCount => Comments?.Count(c => !c.IsDeleted) ?? 0;
 

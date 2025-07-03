@@ -6,6 +6,7 @@ namespace FormFlow.Domain.Interfaces.Repositories
     public interface IUserRepository
     {
         Task<User?> GetByIdAsync(Guid id);
+        Task<User?> GetByIdWithContactsAsync(Guid id);
         Task<User?> GetByIdWithAuthAsync(Guid id);
         Task<User?> GetByEmailAsync(string email);
         Task<User?> GetByUserNameAsync(string userName);

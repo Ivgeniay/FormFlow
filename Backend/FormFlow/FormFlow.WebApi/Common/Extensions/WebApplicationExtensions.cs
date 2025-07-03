@@ -55,7 +55,12 @@ namespace FormFlow.WebApi.Common.Extensions
             "Please provide additional comments", "When would you like to schedule?", "How did you hear about us?",
             "What is your experience level?", "Which features are most important?", "Rate your satisfaction",
             "Select all that apply", "Describe your requirements", "What is your budget range?" };
-        private static readonly string[] defaultTopics = { "Education", "Quiz", "Survey", "Poll", "Feedback", "Registration", "Application", "Other" };
+        private static readonly string[] defaultTopics = {
+            "Education", "Quiz", "Survey", "Poll", "Feedback", "Registration", "Application", "Other",
+            "Assessment", "Evaluation", "Research", "Event", "Interview", "Review", "Contact",
+            "Booking", "Order", "Subscription", "Health", "Employment", "Customer Service",
+            "Marketing", "Training", "Certification", "Volunteer", "Membership", "Contest"
+        };
 
         public static async Task<bool> ExecuteTestData(WebApplication app, int userCount = 10, int templateCount = 15, float likeProbability = 0.5f)
         {
@@ -66,8 +71,8 @@ namespace FormFlow.WebApi.Common.Extensions
                     CreateDefaultColorThemes,
                     CreateDefaultLanguages,
                     CreateDefaultTopics,
-                    (scope) => CreateUsers(scope, userCount),
-                    (scope) => CreateTemplates(scope, templateCount),
+                    //(scope) => CreateUsers(scope, userCount),
+                    //(scope) => CreateTemplates(scope, templateCount),
                     //(scope) => CreateLikes(scope, likeProbability)
                 };
 

@@ -57,6 +57,7 @@ namespace FormFlow.Persistence.Repositories
                     u => u.Id,
                     (fs, u) => u)
                 .Where(u => !u.IsDeleted && !u.IsBlocked)
+                .Include(u => u.Contacts)
                 .ToListAsync();
         }
 

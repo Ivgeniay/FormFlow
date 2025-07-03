@@ -49,7 +49,7 @@ namespace FormFlow.WebApi.Controllers
                 return BadRequest(new
                 {
                     message = ex.Message,
-                    isFormSubmitted = isFormSubmitted,
+                    isFormSubmitted,
                 });
             }
         }
@@ -123,7 +123,7 @@ namespace FormFlow.WebApi.Controllers
 
         [HttpDelete("{id}")]
         [Authorize]
-        public async Task<IActionResult> DeleteForm(Guid formId)
+        public async Task<IActionResult> DeleteForm(Guid id)
         {
             try
             {
@@ -131,10 +131,10 @@ namespace FormFlow.WebApi.Controllers
                 if (userId == null)
                     return Unauthorized(new { message = "Invalid user context" });
 
-                if (!await _formService.CanUserEditFormAsync(formId, userId.Value))
+                if (!await _formService.CanUserEditFormAsync(id, userId.Value))
                     return Forbid("You don't have permission to delete this form");
 
-                await _formService.DeleteFormAsync(formId, userId.Value);
+                await _formService.DeleteFormAsync(id, userId.Value);
                 return Ok(new { message = "Form deleted successfully" });
             }
             catch (Exception ex)

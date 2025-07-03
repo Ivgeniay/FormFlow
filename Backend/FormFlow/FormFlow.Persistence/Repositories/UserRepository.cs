@@ -20,6 +20,13 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
+        public async Task<User?> GetByIdWithContactsAsync(Guid id)
+        {
+            return await _context.Users
+                .Include(u => u.Contacts)
+                .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
+        }
+
         public async Task<User?> GetByIdWithAuthAsync(Guid id)
         {
             return await _context.Users
@@ -220,7 +227,7 @@ namespace FormFlow.Persistence.Repositories
                     TemplatesCount = u.Templates.Count(t => !t.IsDeleted && t.IsPublished),
                     FormsCount = u.Forms.Count(f => !f.IsDeleted),
                     CommentsCount = u.Comments.Count(c => !c.IsDeleted),
-                    LikesGivenCount = u.Likes.Count(l => !l.IsDeleted)
+                    LikesGivenCount = u.Likes.Count()
                 })
                 .ToListAsync();
 

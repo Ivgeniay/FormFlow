@@ -1,13 +1,13 @@
-﻿using FormFlow.Domain.Interfaces.Repositories;
+﻿using FormFlow.Domain.Models.General.QuestionDetailsModels;
+using FormFlow.Domain.Interfaces.Repositories;
 using FormFlow.Domain.Interfaces.Services;
 using FormFlow.Domain.Models.General;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System.Net.Mail;
-using System.Net;
 using System.Text;
-using System.Text.Json;
-using FormFlow.Domain.Models.General.QuestionDetailsModels;
+using System.Net;
 
 namespace FormFlow.Infrastructure.Services
 {
@@ -91,7 +91,7 @@ namespace FormFlow.Infrastructure.Services
                 var emailTemplate = new EmailTemplate
                 {
                     ToEmail = toEmail,
-                    Subject = $"Ответы на форму: {template.Title}",
+                    Subject = $"Form answers: {template.Title}",
                     HtmlBody = htmlBody,
                     TextBody = string.Empty
                 };
@@ -117,66 +117,116 @@ namespace FormFlow.Infrastructure.Services
 
         private async Task<string> GenerateFormAnswersHtmlAsync(Form form, Template template)
         {
-            var answers = JsonSerializer.Deserialize<Dictionary<Guid, object>>(form.AnswersData) ?? new Dictionary<Guid, object>();
+            var answers = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(form.AnswersData) ?? new Dictionary<Guid, object>();
             var html = new StringBuilder();
 
             html.AppendLine("<!DOCTYPE html>");
             html.AppendLine("<html><head><meta charset='utf-8'>");
             html.AppendLine("<style>");
-            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; color: #333; }");
-            html.AppendLine(".header { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; }");
-            html.AppendLine(".question { margin-bottom: 15px; padding: 15px; border-left: 4px solid #007bff; background-color: #f8f9fa; }");
-            html.AppendLine(".question-title { font-weight: bold; color: #495057; margin-bottom: 5px; }");
-            html.AppendLine(".answer { color: #212529; }");
-            html.AppendLine(".footer { margin-top: 30px; padding: 15px; background-color: #e9ecef; border-radius: 8px; font-size: 14px; color: #6c757d; }");
+            html.AppendLine("body { font-family: Arial, sans-serif; margin: 20px; color: #333; line-height: 1.6; }");
+            html.AppendLine(".header { background-color: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #dee2e6; }");
+            html.AppendLine(".header h2 { margin: 0 0 15px 0; color: #495057; }");
+            html.AppendLine(".header p { margin: 5px 0; color: #6c757d; }");
+            html.AppendLine(".question-block { margin-bottom: 25px; padding: 20px; border-left: 4px solid #007bff; background-color: #f8f9fa; border-radius: 0 8px 8px 0; }");
+            html.AppendLine(".question-title { font-weight: bold; color: #495057; margin-bottom: 8px; font-size: 16px; }");
+            html.AppendLine(".question-description { font-size: 14px; color: #6c757d; margin-bottom: 12px; font-style: italic; }");
+            html.AppendLine(".answer { color: #212529; background-color: #ffffff; padding: 12px; border-radius: 4px; border: 1px solid #dee2e6; margin-top: 8px; }");
+            html.AppendLine(".answer-label { font-weight: 600; color: #495057; margin-bottom: 4px; }");
+            html.AppendLine(".no-answer { color: #6c757d; font-style: italic; }");
+            html.AppendLine(".footer { margin-top: 40px; padding: 15px; background-color: #e9ecef; border-radius: 8px; font-size: 14px; color: #6c757d; text-align: center; }");
             html.AppendLine("</style></head><body>");
 
             html.AppendLine("<div class='header'>");
-            html.AppendLine($"<h2>Ответы на форму: {template.Title}</h2>");
-            html.AppendLine($"<p><strong>Описание:</strong> {template.Description}</p>");
-            html.AppendLine($"<p><strong>Автор:</strong> {template.Author?.UserName}</p>");
-            html.AppendLine($"<p><strong>Отправлено:</strong> {form.SubmittedAt:dd.MM.yyyy HH:mm}</p>");
-            html.AppendLine($"<p><strong>Пользователь:</strong> {form.User?.UserName}</p>");
+            html.AppendLine($"<h2>Form Responses: {template.Title}</h2>");
+            html.AppendLine($"<p><strong>Description:</strong> {template.Description}</p>");
+            html.AppendLine($"<p><strong>Author:</strong> {template.Author?.UserName}</p>");
+            html.AppendLine($"<p><strong>Submitted:</strong> {form.SubmittedAt:dd/MM/yyyy HH:mm}</p>");
+            html.AppendLine($"<p><strong>Respondent:</strong> {form.User?.UserName}</p>");
             html.AppendLine("</div>");
 
             foreach (var question in template.Questions.Where(q => !q.IsDeleted).OrderBy(q => q.Order))
             {
-                var questionDetails = JsonSerializer.Deserialize<QuestionDetails>(question.Data);
+                var questionDetails = JsonConvert.DeserializeObject<QuestionDetails>(question.Data);
                 var answerValue = answers.ContainsKey(question.Id) ? answers[question.Id] : null;
-                var displayAnswer = FormatAnswerForEmail(answerValue, questionDetails?.Type ?? QuestionType.ShortText);
+                var displayAnswer = FormatAnswerForEmail(answerValue, questionDetails);
 
-                html.AppendLine("<div class='question'>");
-                html.AppendLine($"<div class='question-title'>{questionDetails?.Title ?? "Вопрос"}</div>");
+                html.AppendLine("<div class='question-block'>");
+                html.AppendLine($"<div class='question-title'>Question: {questionDetails?.Title ?? "Untitled Question"}</div>");
+
                 if (!string.IsNullOrEmpty(questionDetails?.Description))
                 {
-                    html.AppendLine($"<div style='font-size: 14px; color: #6c757d; margin-bottom: 8px;'>{questionDetails.Description}</div>");
+                    html.AppendLine($"<div class='question-description'>{questionDetails.Description}</div>");
                 }
+
+                html.AppendLine("<div class='answer-label'>Answer:</div>");
                 html.AppendLine($"<div class='answer'>{displayAnswer}</div>");
                 html.AppendLine("</div>");
             }
 
             html.AppendLine("<div class='footer'>");
-            html.AppendLine("<p>Это автоматическое уведомление от системы FormFlow.</p>");
+            html.AppendLine("<p>This is an automatic notification from the FormFlow system.</p>");
+            html.AppendLine("<p>Please do not reply to this email.</p>");
             html.AppendLine("</div>");
             html.AppendLine("</body></html>");
 
             return html.ToString();
         }
 
-        private string FormatAnswerForEmail(object? answer, QuestionType questionType)
+        private string FormatAnswerForEmail(object? answer, QuestionDetails? questionDetails)
         {
-            if (answer == null) return "<em>Не отвечено</em>";
+            if (answer == null) return "<span class='no-answer'>No answer provided</span>";
 
-            return questionType switch
+            return questionDetails?.Type switch
             {
-                QuestionType.ShortText or QuestionType.LongText => answer.ToString() ?? "",
-                QuestionType.SingleChoice or QuestionType.Dropdown => answer.ToString() ?? "",
-                QuestionType.MultipleChoice => answer.ToString() ?? "",
-                QuestionType.Scale or QuestionType.Rating => $"{answer} из 5",
-                QuestionType.Date => DateTime.TryParse(answer.ToString(), out var date) ? date.ToString("dd.MM.yyyy") : answer.ToString() ?? "",
+                QuestionType.ShortText => answer.ToString() ?? "",
+                QuestionType.LongText => $"<div style='white-space: pre-wrap;'>{answer}</div>",
+                QuestionType.SingleChoice => answer.ToString() ?? "",
+                QuestionType.MultipleChoice => FormatMultipleChoiceAnswer(answer),
+                QuestionType.Dropdown => answer.ToString() ?? "",
+                QuestionType.Scale => FormatScaleAnswer(answer, questionDetails),
+                QuestionType.Rating => FormatRatingAnswer(answer, questionDetails),
+                QuestionType.Date => DateTime.TryParse(answer.ToString(), out var date) ? date.ToString("dd/MM/yyyy") : answer.ToString() ?? "",
                 QuestionType.Time => answer.ToString() ?? "",
                 _ => answer.ToString() ?? ""
             };
+        }
+
+        private string FormatScaleAnswer(object? answer, QuestionDetails? questionDetails)
+        {
+            if (answer == null) return "";
+
+            var scaleData = questionDetails as dynamic;
+            var maxValue = scaleData?.maxValue ?? 5;
+            return $"{answer}/{maxValue}";
+        }
+
+        private string FormatRatingAnswer(object? answer, QuestionDetails? questionDetails)
+        {
+            if (answer == null) return "";
+
+            var ratingData = questionDetails as dynamic;
+            var maxRating = ratingData?.maxRating ?? 5;
+            return $"{answer}/{maxRating} star{(answer.ToString() != "1" ? "s" : "")}";
+        }
+
+        private string FormatMultipleChoiceAnswer(object? answer)
+        {
+            if (answer == null) return "";
+
+            try
+            {
+                var answerString = answer.ToString();
+                if (answerString?.StartsWith("[") == true && answerString.EndsWith("]"))
+                {
+                    var options = JsonConvert.DeserializeObject<string[]>(answerString);
+                    return string.Join(", ", options ?? Array.Empty<string>());
+                }
+                return answerString ?? "";
+            }
+            catch
+            {
+                return answer.ToString() ?? "";
+            }
         }
     }
 }

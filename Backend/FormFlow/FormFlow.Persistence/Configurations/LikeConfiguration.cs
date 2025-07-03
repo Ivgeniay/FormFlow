@@ -27,11 +27,6 @@ namespace FormFlow.Persistence.Configurations
                 .IsRequired()
                 .HasColumnName(ColumnNames.CreatedAt);
 
-            builder.Property(l => l.IsDeleted)
-                .IsRequired()
-                .HasColumnName(ColumnNames.IsDeleted)
-                .HasDefaultValue(DefaultValues.IsDeletedDefault);
-
             builder.HasIndex(l => new { l.TemplateId, l.UserId })
                 .IsUnique()
                 .HasDatabaseName(IndexNames.LikesTemplateUserIndex);

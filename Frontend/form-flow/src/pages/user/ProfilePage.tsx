@@ -28,6 +28,7 @@ export const ProfilePage: React.FC = () => {
 				if (accessToken) {
 					setIsLoading(true);
 					const response = await usersApi.getUserById(userId, accessToken);
+					console.log(response);
 					setOtherUser(response);
 				}
 			} catch (error: any) {
