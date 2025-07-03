@@ -4,6 +4,8 @@ import toast from "react-hot-toast";
 import { usersApi } from "../../api/usersApi";
 import { tagsApi, TagStatsResponse } from "../../api/tagsApi";
 import { searchApi } from "../../api/searchApi";
+import { StatCard } from "../../ui/StatCard";
+import { ActionButton } from "../../ui/Button/ActionButton";
 
 interface SystemToolsTabProps {
 	accessToken: string;
@@ -98,51 +100,6 @@ export const SystemToolsTab: React.FC<SystemToolsTabProps> = ({
 		}
 	};
 
-	const StatCard: React.FC<{
-		title: string;
-		value: string | number;
-		subtitle?: string;
-		variant?: "default" | "success" | "warning" | "error";
-	}> = ({ title, value, subtitle, variant = "default" }) => {
-		const variantClasses = {
-			default: "bg-surface border-border",
-			success: "bg-success/10 border-success/30",
-			warning: "bg-warning/10 border-warning/30",
-			error: "bg-error/10 border-error/30",
-		};
-
-		return (
-			<div className={`border rounded-lg p-4 ${variantClasses[variant]}`}>
-				<div className="text-2xl font-bold text-text">{value}</div>
-				<div className="text-sm font-medium text-text mb-1">{title}</div>
-				{subtitle && <div className="text-xs text-textMuted">{subtitle}</div>}
-			</div>
-		);
-	};
-
-	const ActionButton: React.FC<{
-		onClick: () => void;
-		loading: boolean;
-		variant?: "default" | "danger" | "warning";
-		children: React.ReactNode;
-	}> = ({ onClick, loading, variant = "default", children }) => {
-		const variantClasses = {
-			default: "bg-primary hover:bg-primary/90 text-white",
-			danger: "bg-error hover:bg-error/90 text-white",
-			warning: "bg-warning hover:bg-warning/90 text-white",
-		};
-
-		return (
-			<button
-				onClick={onClick}
-				disabled={loading}
-				className={`px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50 ${variantClasses[variant]}`}
-			>
-				{loading ? t("processing", "Processing...") : children}
-			</button>
-		);
-	};
-
 	return (
 		<div className="space-y-6">
 			<div className="bg-surface border border-border rounded-lg p-6">
@@ -182,17 +139,14 @@ export const SystemToolsTab: React.FC<SystemToolsTabProps> = ({
 						<StatCard
 							title={t("activeUsers", "Active Users")}
 							value={userStats.activeUsers}
-							variant="success"
 						/>
 						<StatCard
 							title={t("blockedUsers", "Blocked Users")}
 							value={userStats.blockedUsers}
-							variant="error"
 						/>
 						<StatCard
 							title={t("adminUsers", "Admin Users")}
 							value={userStats.adminUsers}
-							variant="warning"
 						/>
 						<StatCard
 							title={t("newUsersThisWeek", "New This Week")}
@@ -238,7 +192,6 @@ export const SystemToolsTab: React.FC<SystemToolsTabProps> = ({
 							<StatCard
 								title={t("unusedTags", "Unused Tags")}
 								value={tagStats.unusedTags}
-								variant={tagStats.unusedTags > 0 ? "warning" : "success"}
 							/>
 							<StatCard
 								title={t("averageUsage", "Average Usage")}

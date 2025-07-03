@@ -10,6 +10,7 @@ import {
 import toast from "react-hot-toast";
 import { RangeInput } from "../../../../ui/Input/RangeInput";
 import { ChartContainer } from "../../../../ui/ChartContainer";
+import { StatCard } from "../../../../ui/StatCard";
 
 export interface TabProps {
 	template: TemplateDto;
@@ -93,36 +94,26 @@ export const AnalyticsTab: React.FC<TabProps> = ({ template, accessToken }) => {
 	return (
 		<div className="space-y-6">
 			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<div className="bg-surface border border-border rounded-lg p-4">
-					<h3 className="text-sm font-medium text-textMuted mb-2">
-						{t("totalSubmissions")}
-					</h3>
-					<p className="text-2xl font-bold text-text">
-						{basicStats?.totalSubmissions || 0}
-					</p>
-				</div>
-
-				<div className="bg-surface border border-border rounded-lg p-4">
-					<h3 className="text-sm font-medium text-textMuted mb-2">
-						{t("firstSubmission")}
-					</h3>
-					<p className="text-sm text-text">
-						{basicStats?.firstSubmission
+				<StatCard
+					title={t("totalSubmissions", "Total Submissions")}
+					value={basicStats?.totalSubmissions || 0}
+				/>
+				<StatCard
+					title={t("firstSubmission")}
+					value={
+						basicStats?.firstSubmission
 							? new Date(basicStats.firstSubmission).toLocaleDateString()
-							: t("noSubmissions")}
-					</p>
-				</div>
-
-				<div className="bg-surface border border-border rounded-lg p-4">
-					<h3 className="text-sm font-medium text-textMuted mb-2">
-						{t("lastSubmission")}
-					</h3>
-					<p className="text-sm text-text">
-						{basicStats?.lastSubmission
+							: t("noSubmissions") || "No Submissions"
+					}
+				/>
+				<StatCard
+					title={t("lastSubmission")}
+					value={
+						basicStats?.lastSubmission
 							? new Date(basicStats.lastSubmission).toLocaleDateString()
-							: t("noSubmissions")}
-					</p>
-				</div>
+							: t("noSubmissions") || "No Submissions"
+					}
+				/>
 			</div>
 
 			<div className="bg-surface border border-border rounded-lg p-4">
