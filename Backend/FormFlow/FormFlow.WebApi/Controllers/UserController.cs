@@ -96,6 +96,27 @@ namespace FormFlow.WebApi.Controllers
             }
         }
 
+        [HttpGet("many")]
+        public async Task<IActionResult> GetUsers([FromQuery] Guid[] ids)
+        {
+            try
+            {
+                var currentUserId = this.GetCurrentUserId();
+                if (currentUserId == null)
+                    return Unauthorized(new { message = "Invalid user context" });
+
+                //if (currentUserId != id && !this.IsCurrentUserInRole(UserRole.Admin))
+                //    return Forbid("You can only view your own profile");
+
+                var user = await _userService.GetUsersByIdAsync(ids);
+                return Ok(user);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
+            }
+        }
+
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateUserProfile(Guid id, [FromBody] UpdateUserProfileRequest request)
         {

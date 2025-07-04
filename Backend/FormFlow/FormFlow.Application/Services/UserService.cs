@@ -393,6 +393,18 @@ namespace FormFlow.Application.Services
             return await Task.FromResult<List<UserContactDto>>(new List<UserContactDto>()); 
         }
 
+        public async Task<List<UserDto>> GetUsersByIdAsync(Guid[] ids)
+        {
+            var users = await _userRepository.GetUsersWithContactsAsync(ids);
+
+            List<UserDto> dtos = new List<UserDto>();
+            foreach(var user in users)
+            {
+                dtos.Add(DTOMapper.MapToUserDto(user));
+            }
+            return dtos;
+        }
+
         public async Task<UserDto> GetUserByIdAsync(Guid id)
         {
             var user = await _userRepository.GetWithContactsAsync(id);

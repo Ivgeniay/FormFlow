@@ -8,16 +8,11 @@ import { FormattedTextInput } from "../../../../ui/Input/FormattedTextInput";
 import { usersApi } from "../../../../api/usersApi";
 import { TemplateAccess } from "../../../../shared/domain_types";
 import { mode } from "../../../../pages/templates/TemplateEditor";
+import { UserSearchDto } from "../../../../shared/api_types";
 
 interface Topic {
 	id: string;
 	name: string;
-}
-
-interface User {
-	id: string;
-	userName: string;
-	primaryEmail: string;
 }
 
 export interface TemplateHeaderData {
@@ -49,7 +44,10 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 	const [userSearchInput, setUserSearchInput] = useState("");
 	const [showUserSearch, setShowUserSearch] = useState(false);
 	const [availableTags, setAvailableTags] = useState<string[]>([]);
-	const [availableUsers, setAvailableUsers] = useState<User[]>([]);
+	const [availableUsers, setAvailableUsers] = useState<UserSearchDto[]>([]);
+	const [addedAvailableUsers, setAaddedAvailableUsers] = useState<
+		UserSearchDto[]
+	>([]);
 	const [loadingTopics, setLoadingTopics] = useState(false);
 	const [loadingUsers, setLoadingUsers] = useState(false);
 
@@ -71,6 +69,31 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 
 		loadTopics();
 	}, [data.image]);
+
+	useEffect(() => {
+		const loadAllowedUsers = async () => {
+			if (data.allowedUserIds.length > 0 && accessToken) {
+				try {
+					const users = await usersApi.getUsersByIds(
+						data.allowedUserIds,
+						accessToken
+					);
+					const mappedUsers: UserSearchDto[] = users.map((user) => ({
+						id: user.id,
+						userName: user.userName,
+						primaryEmail:
+							user.contacts?.find((c) => c.isPrimary && c.type === 1)?.value ||
+							"",
+					}));
+					setAvailableUsers(mappedUsers);
+					setAaddedAvailableUsers(mappedUsers);
+				} catch (error) {
+					console.error("Error loading allowed users:", error);
+				}
+			}
+		};
+		loadAllowedUsers();
+	}, [data.allowedUserIds, accessToken]);
 
 	const updateData = (updates: Partial<TemplateHeaderData>) => {
 		onDataChange({ ...data, ...updates });
@@ -157,9 +180,10 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 			setLoadingUsers(true);
 			try {
 				const users = await usersApi.searchUsers(value, 5, accessToken);
-				setAvailableUsers(
-					users.filter((user) => !data.allowedUserIds.includes(user.id))
+				const filteredUsers = users.filter(
+					(user) => !data.allowedUserIds.includes(user.id)
 				);
+				setAvailableUsers(filteredUsers);
 			} catch (error) {
 				console.error("Error loading users:", error);
 				setAvailableUsers([]);
@@ -172,8 +196,10 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 	};
 
 	const handleAddUser = (userId: string) => {
-		if (!data.allowedUserIds.includes(userId)) {
+		const userToAdd = availableUsers.find((user) => user.id === userId);
+		if (userToAdd && !data.allowedUserIds.includes(userId)) {
 			updateData({ allowedUserIds: [...data.allowedUserIds, userId] });
+			setAaddedAvailableUsers((prev) => [...prev, userToAdd]);
 		}
 		setUserSearchInput("");
 		setShowUserSearch(false);
@@ -184,23 +210,21 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 		updateData({
 			allowedUserIds: data.allowedUserIds.filter((id) => id !== userIdToRemove),
 		});
+		setAaddedAvailableUsers((prev) =>
+			prev.filter((user) => user.id !== userIdToRemove)
+		);
 	};
 
-	const selectedUsers =
-		availableUsers.length > 0
-			? availableUsers.filter((user) => data.allowedUserIds.includes(user.id))
-			: data.allowedUserIds.map((id) => ({
-					id,
-					userName: `User ${id}`,
-					primaryEmail: "",
-			  }));
-
+	const selectedUsers = addedAvailableUsers.filter((user) =>
+		data.allowedUserIds.includes(user.id)
+	);
 	const filteredUsers = availableUsers.filter(
 		(user) =>
 			(user.userName.toLowerCase().includes(userSearchInput.toLowerCase()) ||
-				user.primaryEmail
-					.toLowerCase()
-					.includes(userSearchInput.toLowerCase())) &&
+				(user.primaryEmail &&
+					user.primaryEmail
+						.toLowerCase()
+						.includes(userSearchInput.toLowerCase()))) &&
 			!data.allowedUserIds.includes(user.id)
 	);
 
@@ -368,7 +392,7 @@ export const TemplateEditorHeader: React.FC<TemplateEditorHeaderProps> = ({
 								{selectedUsers.map((user) => (
 									<span
 										key={user.id}
-										className="inline-flex items-center gap-1 px-2 py-1 bg-surface border border-border text-sm rounded-full"
+										className="inline-flex items-center gap-1 px-2 py-1 bg-background text-text border border-border text-sm rounded-full"
 									>
 										{user.userName}
 										<button

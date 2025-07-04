@@ -20,6 +20,14 @@ namespace FormFlow.Persistence.Repositories
                 .FirstOrDefaultAsync(u => u.Id == id && !u.IsDeleted);
         }
 
+        public async Task<List<User>> GetUsersWithContactsAsync(Guid[] ids)
+        {
+            return await _context.Users
+                .Include(u => u.Contacts)
+                .Where(u => ids.Contains(u.Id))
+                .ToListAsync();
+        }
+
         public async Task<User?> GetByIdWithContactsAsync(Guid id)
         {
             return await _context.Users

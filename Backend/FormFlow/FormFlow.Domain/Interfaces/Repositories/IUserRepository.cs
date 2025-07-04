@@ -30,5 +30,6 @@ namespace FormFlow.Domain.Interfaces.Repositories
         Task<User> CreateUserWithAuthAsync(User user);
         Task<Dictionary<string, int>> GetUsersCountByMonthAsync();
         Task<List<UserAnalyticsStatsDto>> GetUserAnalyticsStatsAsync(List<Guid> userIds);
+        Task<List<User>> GetUsersWithContactsAsync(Guid[] ids);
     }
 }

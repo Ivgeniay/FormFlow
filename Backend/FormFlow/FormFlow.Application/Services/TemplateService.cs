@@ -859,11 +859,16 @@ namespace FormFlow.Application.Services
                     UsageCount = tt.Tag.UsageCount,
                     CreatedAt = tt.Tag.CreatedAt
                 }).ToList(),
-                AllowedUsers = template.AllowedUsers?.Select(au => new UserSearchDto
+                AllowedUsers = template.AllowedUsers?.Select(au =>
                 {
-                    Id = au.User.Id,
-                    UserName = au.User.UserName,
-                    PrimaryEmail = au.User.Contacts?.FirstOrDefault(c => c.IsPrimary && c.Type == ContactType.Email)?.Value ?? string.Empty
+                    if (au.User == null) return new UserSearchDto();
+                    
+                    return new UserSearchDto
+                    {
+                        Id = au.User?.Id ?? Guid.Empty,
+                        UserName = au.User.UserName,
+                        PrimaryEmail = au.User.Contacts?.FirstOrDefault(c => c.IsPrimary && c.Type == ContactType.Email)?.Value ?? string.Empty
+                    };
                 }).ToList() ?? new List<UserSearchDto>(),
                 FormsCount = template.FormsCount,
                 LikesCount = template.LikesCount,

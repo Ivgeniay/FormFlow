@@ -36,6 +36,7 @@ namespace FormFlow.Application.Interfaces
         Task<UserDto> UpdateUserContactAsync(Guid userId, UpdateContactRequest request);
 
         Task<AuthenticationResult> PromoteToRole(Guid userId, UserRole role);
+        Task<List<UserDto>> GetUsersByIdAsync(Guid[] ids);
     }
 
     

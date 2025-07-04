@@ -114,6 +114,19 @@ class UsersApi {
 		return response.data;
 	}
 
+	async getUsersByIds(ids: string[], accessToken: string): Promise<UserDto[]> {
+		const queryString = ids
+			.map((id) => `ids=${encodeURIComponent(id)}`)
+			.join("&");
+		const response = await axios.get<UserDto[]>(
+			`${API_BASE_URL}/user/many?${queryString}`,
+			{
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}
+		);
+		return response.data;
+	}
+
 	async getCurrentUserProfile(accessToken: string): Promise<UserDto> {
 		const response = await axios.get<UserDto>(`${API_BASE_URL}/user/me`, {
 			headers: { Authorization: `Bearer ${accessToken}` },
