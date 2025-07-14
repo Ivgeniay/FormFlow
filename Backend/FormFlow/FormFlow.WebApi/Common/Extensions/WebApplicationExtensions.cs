@@ -4,6 +4,7 @@ using FormFlow.Application.Interfaces;
 using FormFlow.Domain.Models.General;
 using FormFlow.Domain.Models.General.QuestionDetailsModels;
 using FormFlow.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -19,8 +20,8 @@ namespace FormFlow.WebApi.Common.Extensions
                 try
                 {
                     Console.WriteLine("Ensuring database is created and up to date...");
-                    //await dbContext.Database.EnsureDeletedAsync();
-                    await dbContext.Database.EnsureCreatedAsync();
+                    // await dbContext.Database.EnsureCreatedAsync();
+                    await dbContext.Database.MigrateAsync();
                 }
                 catch (Exception ex)
                 {
