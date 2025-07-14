@@ -41,6 +41,15 @@
 	"authenticationSuccessful": "Авторизация успешна",
 	"redirectingToHome": "Перенаправление на главную...",
 
+	"apiIntegration": "API интеграция",
+	"generateApiKey": "Сгенерировать API ключ",
+	"apiKeyGenerated": "API ключ успешно сгенерирован",
+	"apiKeyExists": "API ключ уже существует",
+	"generatingApiKey": "Генерация ключа...",
+	"copyApiKey": "Скопировать ключ",
+	"apiKeyCopied": "API ключ скопирован в буфер обмена",
+	"apiKeyDescription": "Используйте API ключ для интеграции с внешними системами",
+
 	"home": "Главная",
 	"profile": "Профиль",
 	"settings": "Настройки",

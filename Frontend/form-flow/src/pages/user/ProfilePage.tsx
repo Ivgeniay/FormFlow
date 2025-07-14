@@ -6,6 +6,7 @@ import { UserDto } from "../../shared/api_types";
 import { usersApi } from "../../api/usersApi";
 import { LittleSpinner } from "../../ui/Spinner/LittleSpinner";
 import { ProfileElement } from "../../modules/auth/profile/ProfileElement";
+import { ApiKeySection } from "../../modules/auth/ApiKeySection";
 
 export const ProfilePage: React.FC = () => {
 	const { t } = useTranslation();
@@ -84,12 +85,15 @@ export const ProfilePage: React.FC = () => {
 
 	if (isOwnProfile()) {
 		return (
-			<ProfileElement
-				user={user}
-				roleName={converRoleToStringFroUser(user)}
-				authType={authType}
-				isShowPromoteToRole={isOwnProfile()}
-			/>
+			<>
+				<ProfileElement
+					user={user}
+					roleName={converRoleToStringFroUser(user)}
+					authType={authType}
+					isShowPromoteToRole={isOwnProfile()}
+					/>
+				<ApiKeySection />
+			</>
 		);
 	} else {
 		return (

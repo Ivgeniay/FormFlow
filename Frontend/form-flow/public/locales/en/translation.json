@@ -41,6 +41,15 @@
 	"authenticationSuccessful": "Authentication Successful",
 	"redirectingToHome": "Redirecting to home...",
 
+	"apiIntegration": "API integration",
+	"generateApiKey": "Generate API key",
+	"apiKeyGenerated": "AAPI key successfully generated",
+	"apiKeyExists": "API key already exists",
+	"generatingApiKey": "Generating key...",
+	"copyApiKey": "Copy key",
+	"apiKeyCopied": "AAPI key copied to clipboard",
+	"apiKeyDescription": "Use the API key for integration with external systems",
+
 	"noEditPermission": "You don't have permission to edit this form",
 	"failedToLoadForm": "Failed to load form",
 	"formSaved": "Form saved successfully",
