@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <menuitem id="menu_formflow_root" name="FormFlow" sequence="100"/>
+    
+    <menuitem id="menu_formflow_templates" name="Templates" parent="menu_formflow_root" action="action_formflow_template" sequence="10"/>
+    
+    <menuitem id="menu_formflow_import" name="Import Data" parent="menu_formflow_root" action="action_formflow_import_wizard" sequence="20"/>
+    
+    <menuitem id="menu_formflow_config" name="Configuration" parent="menu_formflow_root" sequence="100"/>
+
+</odoo>

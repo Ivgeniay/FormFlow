@@ -24,6 +24,7 @@ namespace FormFlow.Persistence
         public DbSet<Form> Forms { get; set; }
         public DbSet<Like> Likes { get; set; }
         public DbSet<Tag> Tags { get; set; }
+        public DbSet<ApiToken> ApiTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

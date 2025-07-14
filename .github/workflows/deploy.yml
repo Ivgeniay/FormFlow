@@ -41,6 +41,13 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/formflow-frontend:latest
 
+      - name: Build and push Odoo
+        uses: docker/build-push-action@v5
+        with:
+          context: ./OdooFormFlow
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/formflow-odoo:latest
+
       - name: Deploy to server
         uses: appleboy/ssh-action@v1.0.0
         with:

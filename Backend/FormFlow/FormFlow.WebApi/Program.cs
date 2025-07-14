@@ -62,6 +62,7 @@ namespace FormFlow.WebApi
             builder.Services.AddScoped<IGoogleAuthRepository, GoogleAuthRepository>();
             builder.Services.AddScoped<IUserContactRepository, UserContactRepository>();
             builder.Services.AddScoped<IEmailAuthRepository, EmailAuthRepository>();
+            builder.Services.AddScoped<IApiTokenRepository, ApiTokenRepository>();
 
 
             builder.Services.AddScoped<IUserService, UserService>();
@@ -79,6 +80,7 @@ namespace FormFlow.WebApi
             builder.Services.AddHttpClient<AiTemplateService>();
             builder.Services.AddScoped<IAiTemplateService, AiTemplateService>();
             builder.Services.AddSingleton<ITokenBlacklistService, TokenBlacklistService>();
+            builder.Services.AddScoped<IApiTokenService, ApiTokenService>();
 
             builder.Services.AddScoped<IImageStorageService, GoogleCloudImageStorageService>();
 

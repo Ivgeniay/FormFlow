@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_formflow_import_wizard_form" model="ir.ui.view">
+        <field name="name">formflow.import.wizard.form</field>
+        <field name="model">formflow.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Import FormFlow Data">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Import Templates from FormFlow</h1>
+                        <p>Enter your API credentials to import template data and aggregated results.</p>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="api_url" placeholder="https://your-formflow-api.com"/>
+                        </group>
+                        <group>
+                            <field name="api_token" password="True" placeholder="Enter your API token"/>
+                        </group>
+                    </group>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <strong>How to get your API token:</strong>
+                        <ol>
+                            <li>Log in to your FormFlow account</li>
+                            <li>Go to your profile settings</li>
+                            <li>Click "Generate API Token"</li>
+                            <li>Copy the generated token and paste it above</li>
+                        </ol>
+                    </div>
+                    
+                </sheet>
+                <footer>
+                    <button name="action_test_connection" string="Test Connection" type="object" class="btn-secondary"/>
+                    <button name="action_import" string="Import Data" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_formflow_import_wizard" model="ir.actions.act_window">
+        <field name="name">Import FormFlow Data</field>
+        <field name="res_model">formflow.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="view_id" ref="view_formflow_import_wizard_form"/>
+    </record>
+
+</odoo>

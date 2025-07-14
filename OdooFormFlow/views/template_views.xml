@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <record id="view_formflow_template_tree" model="ir.ui.view">
+        <field name="name">formflow.template.tree</field>
+        <field name="model">formflow.template</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+                <field name="author_name"/>
+                <field name="is_published"/>
+                <field name="total_responses"/>
+                <field name="created_at"/>
+                <field name="last_import_date"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_formflow_template_form" model="ir.ui.view">
+        <field name="name">formflow.template.form</field>
+        <field name="model">formflow.template</field>
+        <field name="arch" type="xml">
+            <form string="FormFlow Template" create="false" edit="false">
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_refresh_data" type="object" class="oe_stat_button" icon="fa-refresh">
+                            <div class="o_stat_info">
+                                <span class="o_stat_text">Refresh Data</span>
+                            </div>
+                        </button>
+                    </div>
+                    
+                    <group>
+                        <group>
+                            <field name="name" readonly="1"/>
+                            <field name="author_name" readonly="1"/>
+                            <field name="is_published" readonly="1"/>
+                            <field name="total_responses" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="template_id" readonly="1"/>
+                            <field name="created_at" readonly="1"/>
+                            <field name="last_import_date" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <field name="description" readonly="1"/>
+                    
+                    <notebook>
+                        <page string="Questions">
+                            <field name="question_ids" readonly="1">
+                                <tree>
+                                    <field name="order"/>
+                                    <field name="title"/>
+                                    <field name="question_type"/>
+                                    <field name="is_required"/>
+                                    <field name="description"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Aggregated Results">
+                            <field name="aggregated_result_ids" readonly="1">
+                                <tree>
+                                    <field name="question_title"/>
+                                    <field name="question_type"/>
+                                    <field name="total_answers"/>
+                                    <field name="average_value"/>
+                                    <field name="most_popular_answer"/>
+                                </tree>
+                                <form>
+                                    <group>
+                                        <field name="question_title" readonly="1"/>
+                                        <field name="question_type" readonly="1"/>
+                                        <field name="total_answers" readonly="1"/>
+                                    </group>
+                                    <group>
+                                        <field name="average_value" readonly="1"/>
+                                        <field name="min_value" readonly="1"/>
+                                        <field name="max_value" readonly="1"/>
+                                        <field name="most_popular_answer" readonly="1"/>
+                                    </group>
+                                    <field name="aggregated_data" readonly="1"/>
+                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_formflow_template" model="ir.actions.act_window">
+        <field name="name">Templates</field>
+        <field name="res_model">formflow.template</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                No templates imported yet!
+            </p>
+            <p>
+                Click on "Import Templates" to import data from FormFlow API.
+            </p>
+        </field>
+    </record>
+
+</odoo>

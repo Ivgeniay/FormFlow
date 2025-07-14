@@ -1,0 +1,20 @@
+{
+    'name': 'OdooFormFlow',
+    'version': '1.0.0',
+    'category': 'Tools',
+    'summary': 'Integration with FormFlow API for template and form data',
+    'description': "Description",
+    'author': 'FormFlow',
+    'website': 'https://www.form-flow.com',
+    'depends': ['base', 'web'],
+    'data': [
+        'security/ir.model.access.csv',
+        'views/template_views.xml',
+        'views/import_wizard_views.xml',
+        'views/menu_views.xml',
+    ],
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+    'license': 'LGPL-3',
+}

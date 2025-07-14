@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_formflow_template_user,formflow.template.user,model_formflow_template,base.group_user,1,0,0,0
+access_formflow_template_manager,formflow.template.manager,model_formflow_template,base.group_system,1,1,1,1
+access_formflow_question_user,formflow.question.user,model_formflow_question,base.group_user,1,0,0,0
+access_formflow_question_manager,formflow.question.manager,model_formflow_question,base.group_system,1,1,1,1
+access_formflow_aggregated_result_user,formflow.aggregated.result.user,model_formflow_aggregated_result,base.group_user,1,0,0,0
+access_formflow_aggregated_result_manager,formflow.aggregated.result.manager,model_formflow_aggregated_result,base.group_system,1,1,1,1
+access_formflow_import_wizard_user,formflow.import.wizard.user,model_formflow_import_wizard,base.group_user,1,1,1,1
