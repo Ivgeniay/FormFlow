@@ -20,6 +20,10 @@ class FormFlowTemplate(models.Model):
     api_token = fields.Char(string='API Token')
     last_import_date = fields.Datetime(string='Last Import Date')
     
+    def action_refresh_data(self):
+        self._import_aggregated_data(self.api_token, "https://www.form-flow.xyz")
+        return {'type': 'ir.actions.client', 'tag': 'reload'}
+
     @api.model
     def import_from_api(self, api_token, api_url):
         import requests
