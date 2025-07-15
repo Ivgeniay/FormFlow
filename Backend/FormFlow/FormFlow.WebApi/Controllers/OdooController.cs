@@ -88,7 +88,7 @@ namespace FormFlow.WebApi.Controllers
                     title = t.Title,
                     description = t.Description,
                     author = t.AuthorName,
-                    createdAt = t.CreatedAt,
+                    createdAt = t.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fff"),
                     isPublished = t.IsPublished,
                     totalResponses = totalResponses.Pagination.TotalCount,
                     questions = questions
