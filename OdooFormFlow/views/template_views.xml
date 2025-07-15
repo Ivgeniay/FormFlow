@@ -5,11 +5,11 @@
         <field name="name">formflow.template.tree</field>
         <field name="model">formflow.template</field>
         <field name="arch" type="xml">
-            <tree>
+            <tree string="FormFlow Templates">
                 <field name="name"/>
                 <field name="author_name"/>
-                <field name="is_published"/>
                 <field name="total_responses"/>
+                <field name="is_published"/>
                 <field name="created_at"/>
                 <field name="last_import_date"/>
             </tree>
@@ -20,16 +20,12 @@
         <field name="name">formflow.template.form</field>
         <field name="model">formflow.template</field>
         <field name="arch" type="xml">
-            <form string="FormFlow Template" create="false" edit="false">
+            <form string="FormFlow Template">
+                <header>
+                    <button name="action_refresh_data" string="Refresh Data" type="object" class="oe_highlight" 
+                            attrs="{'invisible': [('api_token', '=', False)]}"/>
+                </header>
                 <sheet>
-                    <div class="oe_button_box" name="button_box">
-                        <button name="action_refresh_data" type="object" class="oe_stat_button" icon="fa-refresh">
-                            <div class="o_stat_info">
-                                <span class="o_stat_text">Refresh Data</span>
-                            </div>
-                        </button>
-                    </div>
-                    
                     <group>
                         <group>
                             <field name="name" readonly="1"/>
@@ -65,23 +61,68 @@
                                     <field name="question_title"/>
                                     <field name="question_type"/>
                                     <field name="total_answers"/>
-                                    <field name="average_value"/>
-                                    <field name="most_popular_answer"/>
+                                    <field name="average_value" attrs="{'invisible': [('question_type', 'not in', ['Scale', 'Rating'])]}"/>
+                                    <field name="min_value" attrs="{'invisible': [('question_type', 'not in', ['Scale', 'Rating'])]}"/>
+                                    <field name="max_value" attrs="{'invisible': [('question_type', 'not in', ['Scale', 'Rating'])]}"/>
+                                    <field name="most_popular_answer" attrs="{'invisible': [('question_type', 'in', ['Scale', 'Rating', 'Date'])]}"/>
+                                    <field name="earliest_date" attrs="{'invisible': [('question_type', '!=', 'Date')]}"/>
+                                    <field name="latest_date" attrs="{'invisible': [('question_type', '!=', 'Date')]}"/>
                                 </tree>
-                                <form>
-                                    <group>
-                                        <field name="question_title" readonly="1"/>
-                                        <field name="question_type" readonly="1"/>
-                                        <field name="total_answers" readonly="1"/>
-                                    </group>
-                                    <group>
-                                        <field name="average_value" readonly="1"/>
-                                        <field name="min_value" readonly="1"/>
-                                        <field name="max_value" readonly="1"/>
-                                        <field name="most_popular_answer" readonly="1"/>
-                                    </group>
-                                    <field name="aggregated_data" readonly="1"/>
-                                </form>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_formflow_aggregated_result_form" model="ir.ui.view">
+        <field name="name">formflow.aggregated.result.form</field>
+        <field name="model">formflow.aggregated.result</field>
+        <field name="arch" type="xml">
+            <form string="Aggregated Result">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="question_title" readonly="1"/>
+                            <field name="question_type" readonly="1"/>
+                            <field name="total_answers" readonly="1"/>
+                        </group>
+                        <group attrs="{'invisible': [('question_type', 'not in', ['Scale', 'Rating'])]}">
+                            <field name="average_value" readonly="1"/>
+                            <field name="min_value" readonly="1"/>
+                            <field name="max_value" readonly="1"/>
+                        </group>
+                        <group attrs="{'invisible': [('question_type', 'in', ['Scale', 'Rating', 'Date', 'Time'])]}">
+                            <field name="most_popular_answer" readonly="1"/>
+                            <field name="most_popular_count" readonly="1"/>
+                        </group>
+                        <group attrs="{'invisible': [('question_type', '!=', 'Date')]}">
+                            <field name="earliest_date" readonly="1"/>
+                            <field name="latest_date" readonly="1"/>
+                        </group>
+                        <group attrs="{'invisible': [('question_type', '!=', 'Time')]}">
+                            <field name="most_popular_time" readonly="1"/>
+                            <field name="most_popular_time_count" readonly="1"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Option Counts" attrs="{'invisible': [('question_type', 'not in', ['SingleChoice', 'MultipleChoice', 'Dropdown'])]}">
+                            <field name="option_counts" readonly="1">
+                                <tree>
+                                    <field name="option"/>
+                                    <field name="count"/>
+                                </tree>
+                            </field>
+                        </page>
+                        
+                        <page string="Popular Answers" attrs="{'invisible': [('question_type', 'not in', ['ShortText', 'LongText', 'Time'])]}">
+                            <field name="popular_answers" readonly="1">
+                                <tree>
+                                    <field name="answer"/>
+                                    <field name="count"/>
+                                </tree>
                             </field>
                         </page>
                     </notebook>
@@ -91,17 +132,21 @@
     </record>
 
     <record id="action_formflow_template" model="ir.actions.act_window">
-        <field name="name">Templates</field>
+        <field name="name">FormFlow Templates</field>
         <field name="res_model">formflow.template</field>
         <field name="view_mode">tree,form</field>
         <field name="help" type="html">
             <p class="o_view_nocontent_smiling_face">
-                No templates imported yet!
+                No templates found
             </p>
             <p>
-                Click on "Import Templates" to import data from FormFlow API.
+                Use the import wizard to import templates from FormFlow API.
             </p>
         </field>
     </record>
+
+    <menuitem id="menu_formflow_root" name="FormFlow" sequence="10"/>
+    <menuitem id="menu_formflow_templates" name="Templates" parent="menu_formflow_root" action="action_formflow_template" sequence="10"/>
+    <menuitem id="menu_formflow_import" name="Import Data" parent="menu_formflow_root" action="action_formflow_import_wizard" sequence="20"/>
 
 </odoo>

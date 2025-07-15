@@ -78,6 +78,7 @@ class FormFlowTemplate(models.Model):
         except Exception as e:
             raise Exception(f"Failed to import templates: {str(e)}")
     
+    
     def _import_aggregated_data(self, api_token, api_url):
         import requests
         
@@ -93,14 +94,7 @@ class FormFlowTemplate(models.Model):
                 self.aggregated_result_ids.unlink()
                 
                 for question_data in data.get('questions', []):
-                    self.env['formflow.aggregated.result'].create({
-                        'template_id': self.id,
-                        'question_id': question_data['questionId'],
-                        'question_title': question_data['title'],
-                        'question_type': question_data['type'],
-                        'aggregated_data': str(question_data.get('aggregatedResults', {})),
-                        'total_answers': question_data.get('aggregatedResults', {}).get('totalAnswers', 0),
-                    })
+                    self.env['formflow.aggregated.result'].create_from_api_data(self.id, question_data)
                     
         except Exception:
             pass

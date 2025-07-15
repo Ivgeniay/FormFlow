@@ -325,6 +325,7 @@ namespace FormFlow.Persistence.Repositories
                 .Include(t => t.Forms)
                 .Include(t => t.AllowedUsers)
                     .ThenInclude(au => au.User)
+                .Include(t => t.Questions)
                 .Where(t => t.AuthorId == authorId && !t.IsDeleted)
                 .OrderByDescending(t => t.CreatedAt);
 
