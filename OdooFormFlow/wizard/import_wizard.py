@@ -7,7 +7,7 @@ class FormFlowImportWizard(models.TransientModel):
     _description = 'FormFlow Import Wizard'
 
     api_token = fields.Char(string='API Token', required=True, help='Enter your FormFlow API token')
-    api_url = fields.Char(string='API URL', required=True, default='https://your-formflow-api.com', 
+    api_url = fields.Char(string='API URL', required=True, default='http://147.45.66.49:8080', 
                          help='FormFlow API base URL')
     
     def action_import(self):

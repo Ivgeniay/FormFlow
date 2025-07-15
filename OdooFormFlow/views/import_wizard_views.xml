@@ -14,7 +14,7 @@
                     
                     <group>
                         <group>
-                            <field name="api_url" placeholder="https://your-formflow-api.com"/>
+                            <field name="api_url" placeholder="http://147.45.66.49:8080"/>
                         </group>
                         <group>
                             <field name="api_token" password="True" placeholder="Enter your API token"/>

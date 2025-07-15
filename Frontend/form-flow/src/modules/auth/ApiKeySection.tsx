@@ -10,25 +10,27 @@ export const ApiKeySection: React.FC = () => {
 	const [currentToken, setCurrentToken] = useState<ApiTokenDto | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isGenerating, setIsGenerating] = useState(false);
+	const [showToken, setShowToken] = useState(false);
 
-	useEffect(() => {
-		if (accessToken) {
-			loadCurrentToken();
-		}
-	}, [accessToken]);
+	
+	// useEffect(() => {
+	// 	if (accessToken) {
+	// 		loadCurrentToken();
+	// 	}
+	// }, [accessToken]);
 
-	const loadCurrentToken = async () => {
-		if (!accessToken) return;
+	// const loadCurrentToken = async () => {
+	// 	if (!accessToken) return;
 
-		try {
-			const token = await apiTokenApi.getCurrentToken(accessToken);
-			setCurrentToken(token);
-		} catch (error) {
-			console.error("Failed to load current token:", error);
-		} finally {
-			setIsLoading(false);
-		}
-	};
+	// 	try {
+	// 		const token = await apiTokenApi.getCurrentToken(accessToken);
+	// 		setCurrentToken(token);
+	// 	} catch (error) {
+	// 		console.error("Failed to load current token:", error);
+	// 	} finally {
+	// 		setIsLoading(false);
+	// 	}
+	// };
 
 	const handleGenerateApiKey = async () => {
 		if (!accessToken) return;
@@ -51,18 +53,18 @@ export const ApiKeySection: React.FC = () => {
 		toast.success(t("apiKeyCopied") || "API key copied to clipboard");
 	};
 
-	if (isLoading) {
-		return (
-			<div className="max-w-4xl mx-auto p-6">
-				<div className="bg-surface border border-border rounded-lg p-6">
-					<div className="animate-pulse">
-						<div className="h-6 bg-border rounded w-1/4 mb-4"></div>
-						<div className="h-4 bg-border rounded w-3/4"></div>
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// if (isLoading) {
+	// 	return (
+	// 		<div className="max-w-4xl mx-auto p-6">
+	// 			<div className="bg-surface border border-border rounded-lg p-6">
+	// 				<div className="animate-pulse">
+	// 					<div className="h-6 bg-border rounded w-1/4 mb-4"></div>
+	// 					<div className="h-4 bg-border rounded w-3/4"></div>
+	// 				</div>
+	// 			</div>
+	// 		</div>
+	// 	);
+	// }
 
 	return (
 		<div className="max-w-4xl mx-auto p-6">
@@ -82,12 +84,27 @@ export const ApiKeySection: React.FC = () => {
 									Created: {new Date(currentToken.createdAt).toLocaleDateString()}
 								</p>
 							</div>
-							<button
-								onClick={() => copyToClipboard(currentToken.token)}
-								className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
-							>
-								{t("copyApiKey") || "Copy API Key"}
-							</button>
+							<div className="">
+								<button
+									onClick={() => copyToClipboard(currentToken.token)}
+									className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+									>
+									{t("copyApiKey") || "Copy API Key"}
+								</button> 
+								{/* {showToken &&
+									<p className="text-sm font-medium text-text">
+										{currentToken.token}
+									</p>
+								} 
+								{showToken === false &&
+									<button
+									onClick={() => setShowToken(true)}
+									className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+									>
+										{t("showApiKey") || "Show API Key"}
+									</button>
+								}  */}
+							</div>
 						</div>
 					</div>
 				) : (

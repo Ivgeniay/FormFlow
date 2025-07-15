@@ -5,7 +5,7 @@
     'summary': 'Integration with FormFlow API for template and form data',
     'description': "Description",
     'author': 'FormFlow',
-    'website': 'https://www.form-flow.com',
+    'website': 'https://www.form-flow.xyz',
     'depends': ['base', 'web'],
     'data': [
         'security/ir.model.access.csv',
