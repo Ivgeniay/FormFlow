@@ -37,6 +37,7 @@
                             <field name="template_id" readonly="1"/>
                             <field name="created_at" readonly="1"/>
                             <field name="last_import_date" readonly="1"/>
+                            <field name="api_token" readonly="1"/>
                         </group>
                     </group>
                     
