@@ -1,0 +1,126 @@
+services:
+
+  postgres-odoo:
+    image: postgres:13
+    container_name: formflow-postgres-odoo
+    env_file:
+      - .env.odoo
+    environment:
+      - POSTGRES_DB=formflow_odoo
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo_secure_password
+    volumes:
+      - postgres_odoo_data:/var/lib/postgresql/data
+    networks:
+      - formflow_network
+
+  odoo:
+    image: motleycrue/formflow-odoo:latest
+    container_name: formflow-odoo
+    env_file:
+      - .env.odoo
+    command: ["odoo", "-d", "formflow_odoo", "-i", "base"]
+    ports:
+      - "8069:8069"
+    depends_on:
+      - postgres-odoo
+      - backend
+    networks:
+      - formflow_network
+
+  ai-template-service:
+    image: motleycrue/ai-template-service:latest
+    container_name: ai-template-service
+    env_file:
+      - .env.aitemplate
+    ports:
+      - "3001:3001"
+    networks:
+      - formflow_network
+
+  backend:
+    image: motleycrue/formflow-backend:latest
+    container_name: formflow-backend
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    ports:
+      - "8080:8080"
+    depends_on:
+      - sqlserver
+      - elasticsearch
+      - ai-template-service
+    networks:
+      - formflow_network
+
+  frontend:
+    image: motleycrue/formflow-frontend:latest
+    container_name: formflow-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - formflow_network
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: formflow-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=FormFlow123!
+      - MSSQL_PID=Express
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - formflow_network
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
+    container_name: formflow-elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - cluster.name=formflow-cluster
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms1g -Xmx1g"
+      - xpack.security.enabled=false
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    networks:
+      - formflow_network
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.4
+    container_name: formflow-kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - xpack.security.enabled=false
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    networks:
+      - formflow_network
+
+volumes:
+  sqlserver_data:
+    driver: local
+  elasticsearch_data:
+    driver: local
+  postgres_odoo_data:
+    driver: local
+
+networks:
+  formflow_network:
+    driver: bridge
